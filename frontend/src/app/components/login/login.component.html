@@ -1,0 +1,234 @@
+<!-- <div id="loginContainer">
+  <div id="loginGreeting">LOGIN</div>
+  <div id="loginGroup">
+    <p-floatLabel>
+      <input id="username" type="text" pInputText [(ngModel)]="username" />
+      <label for="username">Username</label>
+    </p-floatLabel>
+    <p-card styleClass="user-form" class="flex justify-content-center">
+      <form
+        [formGroup]="userLoginForm"
+        (ngSubmit)="printLoginAttempt()"
+        novalidate
+      >
+        <div class="field">
+          <label for="Username" class="block">Username</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="Username"
+            formControlName="username"
+          />
+          <small
+            class="p-error block"
+            *ngIf="
+              userLoginForm.get('username')?.invalid &&
+              userLoginForm.get('username')?.dirty
+            "
+          >
+            username is required</small
+          >
+        </div>
+        <div class="field">
+          <label for="password" class="block">password</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="password"
+            formControlName="password"
+          />
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Submit"
+          [disabled]="userLoginForm.invalid"
+        ></button>
+      </form>
+    </p-card>
+  </div>
+</div> -->
+<!-- 
+<div id="loginContainer">
+  <div id="loginGreeting">LOGIN</div>
+  <div id="loginGroup">
+    <p-card styleClass="user-form" class="flex justify-content-center">
+      <form
+        [formGroup]="userLoginForm"
+        (ngSubmit)="printLoginAttempt()"
+        novalidate
+      >
+        <div class="field">
+          <label for="Username" class="block">Username</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="Username"
+            formControlName="username"
+          />
+          <small
+            class="p-error block"
+            *ngIf="
+              userLoginForm.get('username')?.invalid &&
+              userLoginForm.get('username')?.dirty
+            "
+          >
+            username is required</small
+          >
+        </div>
+        <div class="field">
+          <label for="password" class="block">password</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="password"
+            formControlName="password"
+          />
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Submit"
+          [disabled]="userLoginForm.invalid"
+        ></button>
+      </form>
+    </p-card>
+  </div>
+</div> -->
+
+<!-- <div class="card flex justify-content-center">
+  <p-card header="Simple Card">
+    <p class="m-0">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed
+      consequuntur error repudiandae numquam deserunt quisquam repellat libero
+      asperiores earum nam nobis, culpa ratione quam perferendis esse,
+      cupiditate neque quas!
+    </p> 
+  </p-card>
+</div> -->
+
+<!-- <div id="loginContainer">
+  <div id="loginGreeting">LOGIN</div>
+  <div id="loginGroup">
+    <p-card styleClass="user-form" class="flex justify-content-center">
+      <form
+        [formGroup]="userLoginForm"
+        (ngSubmit)="printLoginAttempt()"
+        novalidate
+      >
+        <div class="field">
+          <label for="Username" class="block">Username</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="Username"
+            formControlName="username"
+          />
+          <small
+            class="p-error block"
+            *ngIf="
+              userLoginForm.get('username')?.invalid &&
+              userLoginForm.get('username')?.dirty
+            "
+          >
+            username is required</small
+          >
+        </div>
+        <div class="field">
+          <label for="password" class="block">password</label>
+          <input
+            type="text"
+            pInputText
+            placeholder="password"
+            formControlName="password"
+          />
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Submit"
+          [disabled]="userLoginForm.invalid"
+        ></button>
+      </form>
+    </p-card>
+  </div>
+</div> -->
+<div class="surface-card p-4 shadow-2 border-round w-4 m-auto mt-8 min-w-min">
+  <!-- w-full h-auto lg:w-4 justify-content-center align-items-center -->
+  <div class="text-center mb-5">
+    <!-- <img
+      src="../assets/images/icons/noun-bunny-6904803_purple.png"
+      alt="Hopper Logo"
+      height="50"
+      class="mb-3"
+    /> -->
+    <p-image
+      src="assets/images/icons/noun-bunny_purple.png"
+      alt="Hopper Logo"
+      height="50"
+      class="mb-3"
+    />
+    <div class="text-900 text-3xl font-medium mb-3">HoppeR</div>
+    <!-- <span class="text-600 font-medium line-height-3"
+        >Don't have an account?</span
+        >
+        <a class="font-medium no-underline ml-2 text-blue-500 cursor-pointer"
+        >Create today!</a
+        > -->
+  </div>
+
+  <div>
+    <label for="username" class="block text-900 font-medium mb-2"
+      >Username</label
+    >
+    <input
+      id="username"
+      type="text"
+      placeholder="Username"
+      pInputText
+      class="w-full mb-3"
+      [(ngModel)]="username"
+      (keyup.enter)="onEnterButtonPress()"
+    />
+
+    <label for="password" class="block text-900 font-medium mb-2"
+      >Password</label
+    >
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      pInputText
+      class="w-full mb-3"
+      [(ngModel)]="password"
+      (keyup.enter)="onEnterButtonPress()"
+    />
+
+    <!-- <div id="rememberMeAndForgotPassord" class="flex align-items-center justify-content-between mb-6">
+      <div class="flex align-items-center">
+        <p-checkbox
+          id="rememberme1"
+          [binary]="true"
+          styleClass="mr-2"
+        ></p-checkbox>
+        <label for="rememberme1" class="text-900">Remember me</label>
+      </div>
+      <a
+        class="font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer"
+        >Forgot password?</a
+      >
+    </div> -->
+
+    <button
+      pButton
+      pRipple
+      label="Sign In"
+      icon="pi pi-user"
+      class="w-full min-w-min"
+      (click)="onLoginAttempt()"
+    ></button>
+  </div>
+</div>
