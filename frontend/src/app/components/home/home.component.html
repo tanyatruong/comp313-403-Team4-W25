@@ -1,0 +1,155 @@
+<div
+  class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
+  style="min-height: 92vh;"
+>
+  <!-- Header Section -->
+  <div id="Header">
+    <div
+      id="buttonContainer"
+      class="surface-card shadow-2 flex justify-content-end flex-wrap m-2"
+    >
+      <!-- Settings Button -->
+      <button
+        style="
+          background-color: rgb(59, 130, 246);
+          color: white;
+          border: 1px solid rgb(255, 255, 255);
+          padding: 10px 20px;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;
+        "
+        (click)="openSettings()"
+      >
+        <i class="pi pi-cog" style="font-size: 20px; margin-right: 5px;"></i>
+        Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Ticket List Section -->
+  <div id="ticketListContainer" class="shadow-2 text-center mt-4">
+    <h2 style="color: black; font-size: 24px;">Ticket List</h2>
+
+    <!-- No Tickets Found -->
+    <div
+      *ngIf="filteredTickets.length === 0"
+      style="
+        color: #6c757d;
+        margin-top: 20px;
+        font-size: 18px;
+      "
+    >
+      <p>No tickets available to display.</p>
+    </div>
+
+    <!-- Tickets Loop -->
+    <div
+      *ngFor="let ticket of filteredTickets"
+      style="
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #f8f9fa;
+        text-align: left;
+      "
+    >
+      <!-- Ticket Title -->
+      <h4
+        style="
+          color: #34495e;
+          font-size: 20px;
+          display: flex;
+          align-items: center;
+        "
+      >
+        <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px;"></i>
+        {{ ticket.title }}
+      </h4>
+
+      <!-- Ticket Description -->
+      <p style="color: #6c757d; font-size: 16px;">{{ ticket.description }}</p>
+
+      <!-- Ticket Status -->
+      <p
+        [ngStyle]="{
+          color:
+            ticket.status === 'open'
+              ? 'blue'
+              : ticket.status === 'closed'
+              ? 'red'
+              : ticket.status === 'attention required'
+              ? 'green'
+              : 'black'
+        }"
+        style="font-size: 16px; font-weight: bold; margin-top: 10px;"
+      >
+        Status: {{ ticket.status }}
+      </p>
+
+      <!-- Edit and Delete Buttons -->
+      <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+        <button
+          style="
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+          "
+          (click)="editTicket(ticket)"
+        >
+          <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
+        </button>
+        <button
+          style="
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+          "
+          (click)="deleteTicket(ticket.id)"
+        >
+          <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Section with Add Button -->
+  <div
+    id="bottomButtonControlBar"
+    style="display: flex; justify-content: center; margin-top: 20px;"
+  >
+    <button
+      style="
+        background-color: #6C63FF;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      "
+      (click)="addTicket()"
+    >
+      <i class="pi pi-plus" style="margin-right: 5px;"></i> Create New Ticket
+    </button>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div *ngIf="showDeleteModal" class="modal">
+  <div class="modal-content">
+    <h3>Confirm Deletion</h3>
+    <p>Are you sure you want to delete this ticket?</p>
+    <button (click)="confirmDelete()">Yes</button>
+    <button (click)="cancelDelete()">No</button>
+  </div>
+</div>
