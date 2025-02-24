@@ -1,36 +1,37 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
-import { TicketEditComponent } from './ticket-edit/ticket-edit.component';
-import { TicketEscalationComponent } from './ticket-escalation/ticket-escalation.component';
-import { MainComponent } from './main/main.component';
-import { TicketCreateComponent } from './ticket-create/ticket-create.component';
-import { SettingsComponent } from './settings/settings.component';
-import { TicketClosureComponent } from './ticket-closure/ticket-closure.component';
+import { LoginComponent } from './components/login/login.component';
+// import { TicketEditComponent } from './ticket-edit/ticket-edit.component';
+// import { TicketEscalationComponent } from './ticket-escalation/ticket-escalation.component';
+import { HomeComponent } from './components/home/home.component';
+// import { TicketCreateComponent } from './ticket-create/ticket-create.component';
+// import { SettingsComponent } from './settings/settings.component';
+// import { TicketClosureComponent } from './ticket-closure/ticket-closure.component';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  // { path: '**', redirectTo: 'login' },
   {
     path: 'login',
     component: LoginComponent,
   },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  // { path: '**', redirectTo: 'login' },
-  {
-    path: 'home',
-    component: MainComponent,
-  },
-   {
-     path: 'settings',
-     component: SettingsComponent,
-  },
 
   {
-    path: 'ticketcreate',
-    component: TicketCreateComponent,
+    path: 'home',
+    component: HomeComponent,
   },
-  {
-    path: 'ticketedit',
-    component: TicketEditComponent,
-  },
+  // {
+  //   path: 'settings',
+  //   component: SettingsComponent,
+  // },
+
+  // {
+  //   path: 'ticketcreate',
+  //   component: TicketCreateComponent,
+  // },
+  // {
+  //   path: 'ticketedit',
+  //   component: TicketEditComponent,
+  // },
   // {
   //   path: 'ticketedit',
   //   component: TicketEditComponent,
@@ -40,20 +41,19 @@ export const routes: Routes = [
   //   component: MessageCreationComponent,
   // },
 
-   {
-    path: 'ticketClosure',
-    component: TicketClosureComponent,
-   },
-  {
-    path: 'ticketEscalation',
-    component: TicketEscalationComponent,
-  },
+  // {
+  //   path: 'ticketClosure',
+  //   component: TicketClosureComponent,
+  // },
+  // {
+  //   path: 'ticketEscalation',
+  //   component: TicketEscalationComponent,
+  // },
 
-  {
-    path: 'dashboard',
-    component: MainComponent,
-  },
-  
+  // {
+  //   path: 'dashboard',
+  //   component: MainComponent,
+  // },
 ];
 
 // Not going to use Modules(for routing)
