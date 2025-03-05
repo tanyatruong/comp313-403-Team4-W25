@@ -140,4 +140,33 @@ export class TicketService {
   //   private saveTasks() {
   //     localStorage.setItem('tasks', JSON.stringify(this.tasks));
   //   }
+
+  createTicket(ticketData: Partial<Ticket>) {
+    const dateObj = new Date();
+    const formattedDate = 
+      dateObj.getFullYear() +
+      '/' +
+      dateObj.getMonth() +
+      '/' +
+      dateObj.getDate() +
+      ' @ ' +
+      dateObj.getHours() +
+      ':' +
+      dateObj.getMinutes() +
+      ':' +
+      dateObj.getSeconds();
+  
+    const newTicket = {
+      id: this.tickets.length + 1, // Simple ID generation for demo
+      userId: ticketData.userId || 0,
+      // Fix: Ensure status is a StatusEnum value
+      status: ticketData.status || StatusEnum.Open,
+      title: ticketData.title || '',
+      description: ticketData.description || '',
+      dateAndTimeOfCreation: formattedDate
+    };
+  
+    this.tickets.unshift(newTicket); // Add to beginning of array
+    return newTicket;
+  }
 }
