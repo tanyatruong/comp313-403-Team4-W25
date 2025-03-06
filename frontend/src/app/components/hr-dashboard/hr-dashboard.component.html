@@ -5,6 +5,44 @@
         <button pButton icon="pi pi-home" label="Home" (click)="goToHome()"></button>
     </div>
 
+    <!-- Filters and Sorting -->
+    <div class="surface-card p-3 shadow-1 border-round mb-4">
+        <div class="grid align-items-center">
+            <div class="col-12 md:col-3">
+                <span class="p-input-icon-left w-full">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Search tickets..." class="w-full"
+                        [(ngModel)]="filterText" (keyup.enter)="loadTickets()">
+                </span>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="priorityOptions" [(ngModel)]="filterPriority" placeholder="Filter by priority"
+                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="categoryOptions" [(ngModel)]="filterCategory" placeholder="Filter by category"
+                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="[
+                                {label: 'Date (Newest)', value: 'dateAndTimeOfCreation'},
+                                {label: 'Title', value: 'title'},
+                                {label: 'Priority', value: 'priority'}
+                             ]" [(ngModel)]="sortBy" placeholder="Sort by" class="w-full"
+                    (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-1">
+                <button pButton icon="pi pi-sort-alt"
+                    (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; loadTickets()"
+                    pTooltip="Change sort order" class="w-full"></button>
+            </div>
+            <div class="col-12 md:col-2">
+                <button pButton icon="pi pi-filter-slash" label="Reset" (click)="resetFilters()"
+                    class="p-button-outlined w-full"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Dashboard Layout -->
     <div class="grid">
         <!-- Ticket Columns -->
@@ -21,8 +59,8 @@
                                 <h4 class="m-0">{{ticket.title}}</h4>
                                 <div class="flex justify-content-between mt-2">
                                     <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority?.toLowerCase()">
-                                        {{ticket.priority || 'Medium'}}
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
                                     </span>
                                     <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
                                         (click)="updateStatus(ticket, StatusEnum.InProgress); $event.stopPropagation();"
@@ -47,8 +85,8 @@
                                 <h4 class="m-0">{{ticket.title}}</h4>
                                 <div class="flex justify-content-between mt-2">
                                     <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority?.toLowerCase()">
-                                        {{ticket.priority || 'Medium'}}
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
                                     </span>
                                     <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
                                         (click)="updateStatus(ticket, StatusEnum.Resolved); $event.stopPropagation();"
@@ -73,8 +111,8 @@
                                 <h4 class="m-0">{{ticket.title}}</h4>
                                 <div class="flex justify-content-between mt-2">
                                     <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority?.toLowerCase()">
-                                        {{ticket.priority || 'Medium'}}
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
                                     </span>
                                     <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
                                         (click)="updateStatus(ticket, StatusEnum.Closed); $event.stopPropagation();"
@@ -99,8 +137,8 @@
                                 <h4 class="m-0">{{ticket.title}}</h4>
                                 <div class="flex justify-content-between mt-2">
                                     <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority?.toLowerCase()">
-                                        {{ticket.priority || 'Medium'}}
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
                                     </span>
                                 </div>
                             </div>
@@ -145,6 +183,11 @@
                     </div>
 
                     <div class="field mb-3">
+                        <label class="font-bold block mb-1">Category</label>
+                        <div>{{selectedTicket.category}}</div>
+                    </div>
+
+                    <div class="field mb-3">
                         <label class="font-bold block mb-1">Assign To</label>
                         <p-dropdown [options]="hrUsers" [(ngModel)]="selectedHrId" optionLabel="username"
                             optionValue="id" placeholder="Select HR Representative" styleClass="w-full"
@@ -156,13 +199,10 @@
                         <div>{{selectedTicket.dateAndTimeOfCreation}}</div>
                     </div>
                 </div>
-
                 <ng-template #noTicketSelected>
-                    <div class="flex align-items-center justify-content-center" style="height: 300px;">
-                        <div class="text-center">
-                            <i class="pi pi-ticket text-4xl text-500 mb-3"></i>
-                            <p class="text-700">Select a ticket to view details</p>
-                        </div>
+                    <div class="text-center p-5">
+                        <i class="pi pi-ticket text-500" style="font-size: 3rem"></i>
+                        <h3 class="text-500 mt-3">Select a ticket to view details</h3>
                     </div>
                 </ng-template>
             </div>
