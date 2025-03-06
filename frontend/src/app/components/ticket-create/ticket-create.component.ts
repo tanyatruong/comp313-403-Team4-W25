@@ -1,75 +1,69 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { NgStyle } from '@angular/common';
+import { NgClass } from '@angular/common';
+
+//primeNG imports
 import { PrimengModule } from '../../../primeng.module';
-import { RouterService } from '../../services/router.service';
-import { TicketService } from '../../services/ticket.service';
+
+//My imports
 import { UserService } from '../../services/user.service';
+import { RouterService } from '../../services/router.service';
 import { StatusEnum } from '../../data/enums/StatusEnum';
+import { TicketService } from '../../services/ticket.service';
+import { Ticket } from '../../data/models/ticket.model';
 
 @Component({
   selector: 'app-ticket-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, PrimengModule],
+  imports: [PrimengModule, NgStyle, NgClass],
   templateUrl: './ticket-create.component.html',
-  styleUrls: ['./ticket-create.component.css']
+  styleUrl: './ticket-create.component.css',
 })
 export class TicketCreateComponent {
-  routerService = inject(RouterService);
-  ticketService = inject(TicketService);
-  userService = inject(UserService);
+  private userService = inject(UserService);
+  private routerService = inject(RouterService);
+  private ticketService = inject(TicketService);
 
-  // Form Fields
-  title: string = '';
-  description: string = '';
-  category: string = '';
-  priority: string = 'Medium'; // Default priority
+  user = this.userService.getLoggedInUser;
+  private dateObj = new Date();
+  ticket = {
+    id: '100',
+    userId: '0',
+    status: StatusEnum.Open,
+    title: 'title100',
+    description: 'description100',
+    dateAndTimeOfCreation:
+      this.dateObj.getFullYear() +
+      '/' +
+      this.dateObj.getMonth() +
+      '/' +
+      this.dateObj.getDate() +
+      ' @ ' +
+      this.dateObj.getHours() +
+      ':' +
+      this.dateObj.getMinutes() +
+      ':' +
+      this.dateObj.getSeconds(),
+  };
 
-  // Options for dropdowns
-  priorityOptions = [
-    { label: 'Low', value: 'Low' },
-    { label: 'Medium', value: 'Medium' },
-    { label: 'High', value: 'High' }
-  ];
+  targetEmployeeID!: number;
 
-  categoryOptions = [
-    { label: 'IT Support', value: 'IT Support' },
-    { label: 'HR', value: 'HR' },
-    { label: 'Facilities', value: 'Facilities' },
-    { label: 'Finance', value: 'Finance' },
-    { label: 'Other', value: 'Other' }
-  ];
-
-  submitTicket() {
-    if (!this.title || !this.description || !this.category) {
-      // Show error message
-      return;
-    }
-
-    const currentUser = this.userService.getLoggedInUser();
-    if (!currentUser) {
-      // Handle not logged in
-      return;
-    }
-
-    // Create new ticket
-    const newTicket = {
-      id: new Date().getTime(), // Generate a unique ID
-      userId: parseInt(currentUser.id),
-      status: StatusEnum.Open,
-      title: this.title,
-      description: this.description,
-      dateAndTimeOfCreation: new Date().toISOString()
-    };
-
-    // Add to tickets array (this is for frontend demo, will be replaced with API call)
-    this.ticketService['tickets'].push(newTicket);
-    
-    // Navigate back to home
+  onReturnButtonClick() {
+    // This currently discards/does not save in progress ticket
+    console.log('event: onReturnButtonClick');
     this.routerService.navigateToHome();
   }
 
-  cancel() {
-    this.routerService.navigateToHome();
+  onDiscardButtonClick() {
+    // This currently discards/does not save in progress ticket
+    console.log('event: onDiscardButtonClick');
+    this.onReturnButtonClick();
   }
-} 
+
+  onCompleteTicketCreationButtonClick() {
+    // This currently discards/does not save in progress ticket
+    // this.onReturnButtonClick();
+    console.log('event: onCompleteTicketCreationButtonClick');
+  }
+}
