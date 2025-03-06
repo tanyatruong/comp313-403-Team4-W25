@@ -1,0 +1,41 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.mypcard .p-card-body {
+  padding: 0;
+  /* background-color: red; */
+}
+
+.mypcard .p-card-content {
+  /* background-color: aqua; */
+}
+
+.red-background {
+  background-color: red;
+  color: white;
+}
+
+.yellow-background {
+  background-color: rgb(226, 250, 6);
+  color: rgb(0, 0, 0);
+}
+
+.green-background {
+  background-color: green;
+  color: white;
+}
+
+.blue-background {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.min-height-30-screen {
+  min-height: 30%;
+}
+/* 
+.chatContainer {
+  flex-grow: 1;
+} */
