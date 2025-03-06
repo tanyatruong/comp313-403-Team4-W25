@@ -1,0 +1,39 @@
+.ticket-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ticket-card {
+  transition: background-color 0.2s;
+}
+
+.ticket-card:hover {
+  background-color: #f0f0f0;
+}
+
+.ticket-card.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196F3;
+}
+
+.ticket-priority {
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.priority-high {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.priority-medium {
+  background-color: #fff8e1;
+  color: #ffa000;
+}
+
+.priority-low {
+  background-color: #e8f5e9;
+  color: #388e3c;
+} 
