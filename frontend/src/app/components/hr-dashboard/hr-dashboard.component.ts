@@ -48,6 +48,23 @@ export class HrDashboardComponent implements OnInit {
     { label: 'High', value: 'High' }
   ];
   
+  // Filter and Sort options
+  filterText: string = '';
+  filterPriority: string = '';
+  filterCategory: string = '';
+  sortBy: string = 'dateAndTimeOfCreation';
+  sortOrder: 'asc' | 'desc' = 'desc';
+  
+  // Category options
+  categoryOptions = [
+    { label: 'IT Support', value: 'IT Support' },
+    { label: 'HR', value: 'HR' },
+    { label: 'Facilities', value: 'Facilities' },
+    { label: 'Finance', value: 'Finance' },
+    { label: 'General', value: 'General' },
+    { label: 'Other', value: 'Other' }
+  ];
+  
   constructor(
     private ticketService: TicketService,
     private userService: UserService,
@@ -60,14 +77,91 @@ export class HrDashboardComponent implements OnInit {
   }
   
   loadTickets(): void {
-    this.openTickets = this.ticketService.getTicketsByStatus(StatusEnum.Open)
-      .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
-    this.inProgressTickets = this.ticketService.getTicketsByStatus(StatusEnum.InProgress)
-      .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
-    this.resolvedTickets = this.ticketService.getTicketsByStatus(StatusEnum.Resolved)
-      .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
-    this.closedTickets = this.ticketService.getTicketsByStatus(StatusEnum.Closed)
-      .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
+    // Get all tickets first
+    const allTickets = this.ticketService.getAllTickets()
+      .map(ticket => {
+        // Create a new ticket object with default values for missing properties
+        return {
+          id: ticket.id,
+          userId: ticket.userId,
+          status: ticket.status,
+          title: ticket.title,
+          description: ticket.description,
+          dateAndTimeOfCreation: ticket.dateAndTimeOfCreation,
+          priority: 'Medium' as 'Low' | 'Medium' | 'High', // Default priority
+          category: 'General' // Default category
+        };
+      });
+    
+    // Filter and sort the tickets
+    const filteredTickets = this.applyFilters(allTickets);
+    
+    // Distribute tickets by status
+    this.openTickets = filteredTickets.filter(ticket => ticket.status === StatusEnum.Open);
+    this.inProgressTickets = filteredTickets.filter(ticket => ticket.status === StatusEnum.InProgress);
+    this.resolvedTickets = filteredTickets.filter(ticket => ticket.status === StatusEnum.Resolved);
+    this.closedTickets = filteredTickets.filter(ticket => ticket.status === StatusEnum.Closed);
+  }
+  
+  applyFilters(tickets: Ticket[]): Ticket[] {
+    let result = [...tickets];
+    
+    // Text search (searches in title and description)
+    if (this.filterText) {
+      const searchText = this.filterText.toLowerCase();
+      result = result.filter(ticket => 
+        ticket.title.toLowerCase().includes(searchText) || 
+        ticket.description.toLowerCase().includes(searchText)
+      );
+    }
+    
+    // Priority filter
+    if (this.filterPriority) {
+      result = result.filter(ticket => ticket.priority === this.filterPriority);
+    }
+    
+    // Category filter
+    if (this.filterCategory) {
+      result = result.filter(ticket => ticket.category === this.filterCategory);
+    }
+    
+    // Sorting
+    result = this.sortTickets(result);
+    
+    return result;
+  }
+  
+  sortTickets(tickets: Ticket[]): Ticket[] {
+    return tickets.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (this.sortBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'priority':
+          const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+          comparison = (priorityOrder[a.priority as keyof typeof priorityOrder] ?? 1) - 
+                      (priorityOrder[b.priority as keyof typeof priorityOrder] ?? 1);
+          break;
+        case 'dateAndTimeOfCreation':
+        default:
+          // Assuming newer dates should be first
+          comparison = new Date(b.dateAndTimeOfCreation).getTime() - 
+                      new Date(a.dateAndTimeOfCreation).getTime();
+          break;
+      }
+      
+      // Reverse for ascending order
+      return this.sortOrder === 'desc' ? comparison : -comparison;
+    });
+  }
+  
+  resetFilters(): void {
+    this.filterText = '';
+    this.filterPriority = '';
+    this.filterCategory = '';
+    this.loadTickets();
   }
   
   selectTicket(ticket: Ticket): void {
@@ -101,6 +195,8 @@ export class HrDashboardComponent implements OnInit {
       const foundTicket = this.ticketService.getAllTickets().find(t => t.id === ticket.id);
       this.selectedTicket = foundTicket ? {...foundTicket, priority, category: 'General'} : null;
     }
+    
+    this.loadTickets();
   }
   
   closeDetails(): void {
