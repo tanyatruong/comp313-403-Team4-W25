@@ -5,6 +5,7 @@ import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
 import { TicketCreateComponent } from './components/ticket-create/ticket-create.component';
 import { HrDashboardComponent } from './components/hr-dashboard/hr-dashboard.component';
+import { HrAuthGuard } from './guards/hr-auth.guard';
 // import { SettingsComponent } from './settings/settings.component';
 // import { TicketClosureComponent } from './ticket-closure/ticket-closure.component';
 
@@ -54,6 +55,7 @@ export const routes: Routes = [
   {
     path: 'hr-dashboard',
     component: HrDashboardComponent,
+    canActivate: [HrAuthGuard]
   },
 ];
 
