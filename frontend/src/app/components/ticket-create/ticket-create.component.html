@@ -1,43 +1,77 @@
-<div class="surface-card shadow-2 border-round my-5 mx-6 p-4" style="min-height: 80vh;">
-    <div class="text-center mb-5">
-        <h2>Create New Ticket</h2>
+<div
+  class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
+  style="min-height: 92vh"
+>
+  <!-- surface-card p-4 shadow-2 border-round w-4 m-auto mt-8 min-w-min -->
+  <!-- w-full h-auto lg:w-4 justify-content-center align-items-center -->
+  <div id="Header">
+    <div
+      id="buttonContainer"
+      class="surface-card shadow-2 flex justify-content-end flex-wrap m-2"
+    >
+      <button
+        pButton
+        pRipple
+        label="Return"
+        icon="pi pi-home"
+        class="w-full min-w-min max-w-min"
+        (click)="onReturnButtonClick()"
+      ></button>
+    </div>
+    <div
+      id="ticketContainer"
+      class="surface-card shadow-2 border-round flex justify-content-around align-content-end"
+    >
+      <div id="topFunctions">
+        <div id="employeeIDInput">
+          <p-floatLabel>
+            <input id="employeeIDInput" type="text" pInputText />
+            <label for="employeeIDInput">employeeID</label>
+          </p-floatLabel>
+        </div>
+      </div>
+      <!-- <div
+        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2"
+        [ngClass]="
+          ticket.status == 'open' ? 'green-background' : 'red-background'
+        "
+      >
+        Ticket Status: {{ ticket.status }}
+      </div>
+      <div
+        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2 blue-background"
+      >
+        Date of Ticket Creation {{ ticket.dateAndTimeOfCreation }} -->
+      <!-- <p-card styleClass="mypcard">Other Related information</p-card>
+    <p-card styleClass="mypcard">Date of Ticket Creation</p-card> -->
+      <!-- </div>
+    </div> -->
     </div>
 
-    <div class="p-fluid">
-        <!-- Subject/Title -->
-        <div class="field mb-4">
-            <label for="title" class="font-bold mb-2">Subject *</label>
-            <input id="title" type="text" pInputText [(ngModel)]="title" required class="p-inputtext">
-            <small *ngIf="!title" class="p-error">Subject is required</small>
-        </div>
-
-        <!-- Description -->
-        <div class="field mb-4">
-            <label for="description" class="font-bold mb-2">Description *</label>
-            <textarea id="description" pInputTextarea [(ngModel)]="description" rows="5" required
-                class="p-inputtextarea"></textarea>
-            <small *ngIf="!description" class="p-error">Description is required</small>
-        </div>
-
-        <!-- Category -->
-        <div class="field mb-4">
-            <label for="category" class="font-bold mb-2">Category *</label>
-            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="category" placeholder="Select a Category"
-                [required]="true" class="p-inputtext w-full"></p-dropdown>
-            <small *ngIf="!category" class="p-error">Category is required</small>
-        </div>
-
-        <!-- Priority -->
-        <div class="field mb-4">
-            <label for="priority" class="font-bold mb-2">Priority *</label>
-            <p-dropdown id="priority" [options]="priorityOptions" [(ngModel)]="priority" placeholder="Select Priority"
-                [required]="true" class="p-inputtext w-full"></p-dropdown>
-        </div>
-
-        <!-- Buttons -->
-        <div class="flex justify-content-between mt-5">
-            <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined" (click)="cancel()"></button>
-            <button pButton label="Submit" icon="pi pi-check" (click)="submitTicket()"></button>
-        </div>
+    <div id="chatContainer" class="shadow-2 text-center mb-4">
+      <p>ticket-create works!</p>
+      <div>This is Where ticket creation controls go</div>
     </div>
+    <div
+      id="bottomButtonControlBar"
+      class="flex flex-row justify-content-between"
+    >
+      <button
+        pButton
+        pRipple
+        label="Discard Ticket"
+        icon="pi pi-times-circle"
+        class="w-full min-w-min max-w-min"
+        (click)="onDiscardButtonClick()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Complete Ticket Creation"
+        icon="pi pi-file-export"
+        class="w-full min-w-min max-w-min"
+        (click)="onCompleteTicketCreationButtonClick()"
+      ></button>
+    </div>
+  </div>
 </div>
