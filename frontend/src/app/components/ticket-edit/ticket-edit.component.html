@@ -1,0 +1,77 @@
+<div
+  class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
+  style="min-height: 92vh"
+>
+  <!-- surface-card p-4 shadow-2 border-round w-4 m-auto mt-8 min-w-min -->
+  <!-- w-full h-auto lg:w-4 justify-content-center align-items-center -->
+  <div id="Header">
+    <div
+      id="buttonContainer"
+      class="surface-card flex justify-content-end flex-wrap m-2"
+    >
+      <button
+        pButton
+        pRipple
+        label="Return"
+        icon="pi pi-home"
+        class="w-full min-w-min max-w-min"
+        (click)="onReturnButtonClick()"
+      ></button>
+    </div>
+    <div
+      id="ticketInfoHeaderContainer"
+      class="surface-card border-round flex justify-content-around align-content-end"
+    >
+      <div
+        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2"
+        [ngClass]="
+          ticket.status == 'open' ? 'green-background' : 'yellow-background'
+        "
+        (click)="onStatusLabelClick()"
+      >
+        Ticket Status: {{ ticket.status }}
+      </div>
+      <div
+        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2 blue-background"
+      >
+        Date of Ticket Creation {{ ticket.dateAndTimeOfCreation }}
+        <!-- <p-card styleClass="mypcard">Other Related information</p-card>
+    <p-card styleClass="mypcard">Date of Ticket Creation</p-card> -->
+      </div>
+    </div>
+  </div>
+
+  <div id="chatContainer" class="shadow-2 text-center">
+    <p>ticket-edit works!</p>
+    <div>This is Where the chat goes</div>
+  </div>
+  <div
+    id="bottomButtonControlBar"
+    class="flex flex-row justify-content-between"
+  >
+    <button
+      pButton
+      pRipple
+      label="Escalate to Upper Managment"
+      icon="pi pi-sort-amount-up-alt"
+      class="w-full min-w-min max-w-min"
+      (click)="onEscalateClick()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Close Ticket"
+      icon="pi pi-times-circle"
+      class="w-full min-w-min max-w-min"
+      (click)="onCloseTicketClick()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Write new message"
+      icon="pi pi-plus-circle"
+      class="w-full min-w-min max-w-min"
+      (click)="onCreateButtonClick()"
+    ></button>
+  </div>
+</div>
