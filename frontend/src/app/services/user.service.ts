@@ -1,32 +1,39 @@
 import { Injectable } from '@angular/core';
 import { type User } from '../data/models/user.model';
+import { UserRoleEnum } from '../data/enums/UserRoleEnum';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   users = [
     {
-      id: '0',
-      userType: 'admin',
-      username: 'admin',
+      employeeId: '0',
+      name: 'admin',
+      email: 'admin@admin.com',
+      phonenumber: '0',
       password: 'admin',
+      role: UserRoleEnum.Admin,
+      department: 'admin',
+      createdAt: new Date(),
     },
     {
-      id: '1',
-      userType: 'user',
-      username: 'u1',
-      password: 'u1',
+      employeeId: '1',
+      name: '1',
+      email: '1@1.com',
+      phonenumber: '1',
+      password: '1',
+      role: UserRoleEnum.Employee,
+      department: 'engineering',
+      createdAt: new Date(),
     },
     {
-      id: '2',
-      userType: 'user',
-      username: 'u2',
-      password: 'u2',
-    },
-    {
-      id: '3',
-      userType: 'user',
-      username: 'u3',
-      password: 'u3',
+      employeeId: '2',
+      name: '2',
+      email: '2@2.com',
+      phonenumber: '2',
+      password: '2',
+      role: UserRoleEnum.HR,
+      department: 'engineering',
+      createdAt: new Date(),
     },
   ];
 
