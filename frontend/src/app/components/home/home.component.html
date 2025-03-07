@@ -1,6 +1,6 @@
 <div
   class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
-  style="min-height: 92vh;"
+  style="min-height: 92vh"
 >
   <!-- Header Section -->
   <div id="Header">
@@ -21,7 +21,7 @@
         "
         (click)="openSettings()"
       >
-        <i class="pi pi-cog" style="font-size: 20px; margin-right: 5px;"></i>
+        <i class="pi pi-cog" style="font-size: 20px; margin-right: 5px"></i>
         Settings
       </button>
     </div>
@@ -29,16 +29,12 @@
 
   <!-- Ticket List Section -->
   <div id="ticketListContainer" class="shadow-2 text-center mt-4">
-    <h2 style="color: black; font-size: 24px;">Ticket List</h2>
+    <h2 style="color: black; font-size: 24px">Ticket List</h2>
 
     <!-- No Tickets Found -->
     <div
       *ngIf="filteredTickets.length === 0"
-      style="
-        color: #6c757d;
-        margin-top: 20px;
-        font-size: 18px;
-      "
+      style="color: #6c757d; margin-top: 20px; font-size: 18px"
     >
       <p>No tickets available to display.</p>
     </div>
@@ -64,12 +60,12 @@
           align-items: center;
         "
       >
-        <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px;"></i>
+        <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px"></i>
         {{ ticket.title }}
       </h4>
 
       <!-- Ticket Description -->
-      <p style="color: #6c757d; font-size: 16px;">{{ ticket.description }}</p>
+      <p style="color: #6c757d; font-size: 16px">{{ ticket.description }}</p>
 
       <!-- Ticket Status -->
       <p
@@ -83,13 +79,15 @@
               ? 'green'
               : 'black'
         }"
-        style="font-size: 16px; font-weight: bold; margin-top: 10px;"
+        style="font-size: 16px; font-weight: bold; margin-top: 10px"
       >
         Status: {{ ticket.status }}
       </p>
 
       <!-- Edit and Delete Buttons -->
-      <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+      <div
+        style="margin-top: 15px; display: flex; justify-content: space-between"
+      >
         <button
           style="
             background-color: #007bff;
@@ -102,7 +100,7 @@
           "
           (click)="editTicket(ticket)"
         >
-          <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
+          <i class="pi pi-pencil" style="margin-right: 5px"></i> Update
         </button>
         <button
           style="
@@ -116,7 +114,7 @@
           "
           (click)="deleteTicket(ticket.id)"
         >
-          <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
+          <i class="pi pi-trash" style="margin-right: 5px"></i> Delete
         </button>
       </div>
     </div>
@@ -125,11 +123,11 @@
   <!-- Footer Section with Add Button -->
   <div
     id="bottomButtonControlBar"
-    style="display: flex; justify-content: center; margin-top: 20px;"
+    style="display: flex; justify-content: center; margin-top: 20px"
   >
     <button
       style="
-        background-color: #6C63FF;
+        background-color: #6c63ff;
         color: white;
         border: none;
         padding: 12px 24px;
@@ -139,7 +137,7 @@
       "
       (click)="addTicket()"
     >
-      <i class="pi pi-plus" style="margin-right: 5px;"></i> Create New Ticket
+      <i class="pi pi-plus" style="margin-right: 5px"></i> Create New Ticket
     </button>
   </div>
 </div>
