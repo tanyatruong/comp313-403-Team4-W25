@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
     employeeNumber: { type: String, required: true, unique: true }, // Example: "EMP001"
-    employeeId: { type: mongoose.Schema.Types.ObjectId }, // Holds MongoDB _id reference
+    employeeId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() }, // Holds MongoDB _id reference
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
