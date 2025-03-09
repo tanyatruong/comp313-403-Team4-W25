@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 
 import { StatusEnum } from '../data/enums/StatusEnum';
 import { type Ticket } from '../data/models/ticket.model';
+import { PriorityEnum } from '../data/enums/PriorityEnum';
+import { SentimentEnum } from '../data/enums/SentimentEnum';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
@@ -9,100 +11,165 @@ export class TicketService {
 
   private tickets = [
     {
-      id: 1,
-      userId: 1,
+      title: '0',
+      description: '0',
+      employee: '0', //mongoose.Schema.Types.ObjectId of (User) employee
+      assignedTo: '0', //mongoose.Schema.Types.ObjectId of (User) HR Employee
+      status: StatusEnum.Open, //enum: ['Open', 'In Progress', 'Resolved', 'Closed'], default: 'Open'
+      pritority: PriorityEnum.Medium, //enum: ['Low', 'Medium', 'High'], default: 'Medium'
+      category: '?',
+      sentiment: SentimentEnum.Neutral, // enum: ['positive', 'neutral', 'negative'], default: 'neutral'
+      comments: [
+        {
+          user: 'string', //user who wrote message in chat
+          message: 'string', //text of message
+          timestamp: Date, //when message was sent
+        },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      title: 't0',
+      description: 'd0',
+      employee: '1',
+      assignedTo: '2',
       status: StatusEnum.Open,
-      title: 'title1', //Complete Onboarding
-      description: 'description1', //Have meeting with team lead and HR personnel to complete onboarding process. \nWelcome To the company! :D
-      dateAndTimeOfCreation:
-        this.dateObj.getFullYear() +
-        '/' +
-        this.dateObj.getMonth() +
-        '/' +
-        this.dateObj.getDate() +
-        ' @ ' +
-        this.dateObj.getHours() +
-        ':' +
-        this.dateObj.getMinutes() +
-        ':' +
-        this.dateObj.getSeconds(),
+      pritority: PriorityEnum.Medium,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      id: 2,
-      userId: 2,
+      title: 't1',
+      description: 'd1',
+      employee: '1',
+      assignedTo: '2',
+      status: StatusEnum.Open,
+      pritority: PriorityEnum.High,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      title: 't2',
+      description: 'd2',
+      employee: '1',
+      assignedTo: '2',
+      status: StatusEnum.Open,
+      pritority: PriorityEnum.Low,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      title: 't3',
+      description: 'd3',
+      employee: '1',
+      assignedTo: '2',
       status: StatusEnum.InProgress,
-      title: 'title2', //Filing for Disability
-      description: 'description2', //Filing for Disability
-      dateAndTimeOfCreation:
-        this.dateObj.getFullYear() +
-        '/' +
-        this.dateObj.getMonth() +
-        '/' +
-        this.dateObj.getDate() +
-        ' @ ' +
-        this.dateObj.getHours() +
-        ':' +
-        this.dateObj.getMinutes() +
-        ':' +
-        this.dateObj.getSeconds(),
+      pritority: PriorityEnum.Medium,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      id: 3,
-      userId: 2,
+      title: 't4',
+      description: 'd4',
+      employee: '1',
+      assignedTo: '2',
+      status: StatusEnum.Resolved,
+      pritority: PriorityEnum.Medium,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      title: 't5',
+      description: 'd5',
+      employee: '1',
+      assignedTo: '2',
       status: StatusEnum.Closed,
-      title: 'title3',
-      description: 'description3',
-      dateAndTimeOfCreation:
-        this.dateObj.getFullYear() +
-        '/' +
-        this.dateObj.getMonth() +
-        '/' +
-        this.dateObj.getDate() +
-        ' @ ' +
-        this.dateObj.getHours() +
-        ':' +
-        this.dateObj.getMinutes() +
-        ':' +
-        this.dateObj.getSeconds(),
+      pritority: PriorityEnum.Medium,
+      category: '?',
+      sentiment: SentimentEnum.Neutral,
+      comments: [
+        // {
+        //   user: 'string',
+        //   message: 'string',
+        //   timestamp: new Date(),
+        // },
+      ],
+      attachments: ['attachment0', 'attachment1', 'attachment2'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
-    {
-      id: 4,
-      userId: 3,
-      status: StatusEnum.InProgress,
-      title: 'title4', //PTO request for mid February
-      description: 'description4', // I am requesting PTO for mid February
-      dateAndTimeOfCreation:
-        this.dateObj.getFullYear() +
-        '/' +
-        this.dateObj.getMonth() +
-        '/' +
-        this.dateObj.getDate() +
-        ' @ ' +
-        this.dateObj.getHours() +
-        ':' +
-        this.dateObj.getMinutes() +
-        ':' +
-        this.dateObj.getSeconds(),
-    },
-    {
-      id: 5,
-      userId: 3,
-      status: StatusEnum.Open,
-      title: 'title5',
-      description: 'description5',
-      dateAndTimeOfCreation:
-        this.dateObj.getFullYear() +
-        '/' +
-        this.dateObj.getMonth() +
-        '/' +
-        this.dateObj.getDate() +
-        ' @ ' +
-        this.dateObj.getHours() +
-        ':' +
-        this.dateObj.getMinutes() +
-        ':' +
-        this.dateObj.getSeconds(),
-    },
+
+    // {
+    //   id: 8,
+    //   userId: 3,
+    //   status: StatusEnum.Closed,
+    //   title: 'title8',
+    //   description: 'description8',
+    //   dateAndTimeOfCreation:
+    //     this.dateObj.getFullYear() +
+    //     '/' +
+    //     this.dateObj.getMonth() +
+    //     '/' +
+    //     this.dateObj.getDate() +
+    //     ' @ ' +
+    //     this.dateObj.getHours() +
+    //     ':' +
+    //     this.dateObj.getMinutes() +
+    //     ':' +
+    //     this.dateObj.getSeconds(),
+    // },
   ];
 
   public currentTicket: Ticket | undefined;
@@ -143,7 +210,7 @@ export class TicketService {
 
   createTicket(ticketData: Partial<Ticket>) {
     const dateObj = new Date();
-    const formattedDate = 
+    const formattedDate =
       dateObj.getFullYear() +
       '/' +
       dateObj.getMonth() +
@@ -155,7 +222,7 @@ export class TicketService {
       dateObj.getMinutes() +
       ':' +
       dateObj.getSeconds();
-  
+
     const newTicket = {
       id: this.tickets.length + 1, // Simple ID generation for demo
       userId: ticketData.userId || 0,
@@ -163,9 +230,9 @@ export class TicketService {
       status: ticketData.status || StatusEnum.Open,
       title: ticketData.title || '',
       description: ticketData.description || '',
-      dateAndTimeOfCreation: formattedDate
+      dateAndTimeOfCreation: formattedDate,
     };
-  
+
     this.tickets.unshift(newTicket); // Add to beginning of array
     return newTicket;
   }
