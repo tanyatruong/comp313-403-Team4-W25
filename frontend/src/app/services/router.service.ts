@@ -42,6 +42,10 @@ export class RouterService {
     this.router.navigate(['/ticketEscalation']);
   }
 
+  navigateToHRDashboard() {
+    this.router.navigate(['/hr-dashboard']);
+  }
+
   //   navigateToError(errorCode: number) {
   //     this.router.navigate(['/error'], { queryParams: { code: errorCode } });
   //   }

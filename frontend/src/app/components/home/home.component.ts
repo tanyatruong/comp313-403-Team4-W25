@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
+import { StatusEnum } from '../../data/enums/StatusEnum';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,8 @@ export class HomeComponent implements OnInit {
   // Modal State
   showDeleteModal: boolean = false;
   ticketToDelete: number | null = null;
+
+  StatusEnum = StatusEnum;
 
   constructor(private router: Router) {}
 
@@ -67,6 +70,15 @@ export class HomeComponent implements OnInit {
     //   const userId = parseInt(this.currentUser.id, 10);
     //   this.tickets = this.ticketService.getOpenTicketsByUserId(userId);
     // }
+    if (this.currentUser.userType === 'admin') {
+      this.filteredTickets = [...this.ticketService['tickets']].map(ticket => ({
+        ...ticket, priority: 'Medium', category: 'General'
+      }));
+    } else {
+      const userId = parseInt(this.currentUser.id, 10);
+      this.filteredTickets = this.ticketService.getOpenTicketsByUserId(userId)
+        .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
+    }
   }
 
   openSettings(): void {
@@ -122,5 +134,9 @@ export class HomeComponent implements OnInit {
 
   addTicket(): void {
     this.routerService.navigateToTicketCreation();
+  }
+
+  navigateToHRDashboard(): void {
+    this.routerService.navigateToHRDashboard();
   }
 }

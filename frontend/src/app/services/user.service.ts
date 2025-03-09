@@ -35,6 +35,12 @@ export class UserService {
       department: 'engineering',
       createdAt: new Date(),
     },
+    {
+      id: '4',
+      userType: 'hr',
+      username: 'hr1',
+      password: 'hr1',
+    },
   ];
 
   loggedInUser!: User;
@@ -65,5 +71,10 @@ export class UserService {
 
   getLoggedInUser() {
     return this.loggedInUser;
+  }
+  
+  // Get all HR users for assignment
+  getHRUsers() {
+    return this.users.filter(user => user.userType === 'hr');
   }
 }

@@ -3,14 +3,14 @@
 
 // export const createUser = async (req, res) => {
 //     try {
-//         const { employeeId, name, email, phone, password, role, department } = req.body;
+//         const { employeeNumber, name, email, phone, password, role, department } = req.body;
 
 //         if (!password) {
 //             return res.status(400).json({ message: 'Password is required' });
 //         }
 
 //         // Check if user already exists
-//         const userExists = await User.findOne({ $or: [{ email }, { employeeId }] });
+//         const userExists = await User.findOne({ $or: [{ email }, { employeeNumber }] });
 
 //         if (userExists) {
 //             return res.status(400).json({
@@ -25,7 +25,7 @@
 
 //         // Create new user
 //         const user = await User.create({
-//             employeeId,
+//             employeeNumber,
 //             name,
 //             email,
 //             phone,

@@ -236,4 +236,54 @@ export class TicketService {
     this.tickets.unshift(newTicket); // Add to beginning of array
     return newTicket;
   }
+
+  // Method to get all tickets for HR dashboard
+  getAllTickets() {
+    return this.tickets;
+  }
+  
+  // Get tickets filtered by status
+  getTicketsByStatus(status: StatusEnum) {
+    return this.tickets.filter(ticket => ticket.status === status);
+  }
+  
+  // Assign ticket to HR representative
+  assignTicket(ticketId: number, hrUserId: string) {
+    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
+    
+    if (ticketIndex !== -1) {
+      // Use type assertion to tell TypeScript this is a Ticket
+      this.tickets[ticketIndex] = {
+        ...(this.tickets[ticketIndex] as Ticket),
+        assignedToId: hrUserId
+      } as Ticket;
+      return true;
+    }
+    return false;
+  }
+  
+  // Update ticket status
+  updateTicketStatus(ticketId: number, newStatus: StatusEnum) {
+    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
+    
+    if (ticketIndex !== -1) {
+      this.tickets[ticketIndex].status = newStatus;
+      return true;
+    }
+    return false;
+  }
+  
+  // Update ticket priority
+  updateTicketPriority(ticketId: number, priority: 'Low' | 'Medium' | 'High') {
+    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
+    
+    if (ticketIndex !== -1) {
+      this.tickets[ticketIndex] = {
+        ...(this.tickets[ticketIndex] as Ticket),
+        priority: priority
+      } as Ticket;
+      return true;
+    }
+    return false;
+  }
 }
