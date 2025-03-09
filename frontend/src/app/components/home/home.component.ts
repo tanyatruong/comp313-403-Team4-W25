@@ -21,6 +21,7 @@ export class HomeComponent implements OnInit {
   ticketService = inject(TicketService);
   userService = inject(UserService);
 
+  tickets: Ticket[] = [];
   filteredTickets: Ticket[] = [];
   currentUser: User | null = null;
 
@@ -33,17 +34,42 @@ export class HomeComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.loadUserAndTickets();
+    // this.loadUserAndTickets();
+    this.loadUser();
+    this.loadTickets();
   }
 
-  loadUserAndTickets(): void {
-    this.currentUser = this.userService.getLoggedInUser();
+  // loadUserAndTickets(): void {
+  //   this.currentUser = this.userService.getLoggedInUser();
 
+  //   if (!this.currentUser) {
+  //     console.error('No user is logged in.');
+  //     return;
+  //   }
+
+  //   if (this.currentUser.userType === 'admin') {
+  //     this.filteredTickets = [...this.ticketService['tickets']];
+  //   } else {
+  //     const userId = parseInt(this.currentUser.id, 10);
+  //     this.filteredTickets = this.ticketService.getOpenTicketsByUserId(userId);
+  //   }
+  // }
+
+  loadUser() {
+    this.currentUser = this.userService.getLoggedInUser();
+  }
+  loadTickets() {
     if (!this.currentUser) {
       console.error('No user is logged in.');
       return;
     }
 
+    // if (this.currentUser.userType === 'admin') {
+    //   this.tickets = [...this.ticketService['tickets']];
+    // } else {
+    //   const userId = parseInt(this.currentUser.id, 10);
+    //   this.tickets = this.ticketService.getOpenTicketsByUserId(userId);
+    // }
     if (this.currentUser.userType === 'admin') {
       this.filteredTickets = [...this.ticketService['tickets']].map(ticket => ({
         ...ticket, priority: 'Medium', category: 'General'
@@ -85,6 +111,14 @@ export class HomeComponent implements OnInit {
 
       console.log(`Ticket with ID ${this.ticketToDelete} deleted.`);
     }
+
+    this.closeModal();
+  }
+
+  confirmDeleteV2(): void {
+    // Rest POST delete ticket
+    //  Rest Response returns Boolean based on success of fail
+    // based on response delete locally too
 
     this.closeModal();
   }
