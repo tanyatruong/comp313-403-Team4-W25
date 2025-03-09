@@ -8,13 +8,13 @@ import Ticket from '../models/Ticket.js';
 
 export const createTicket = async (req, res) => {
     try {
-        const { title, description, employee, assignedTo, status, priority, category } = req.body;
+        const { title, description, assignedTo, status, priority, category } = req.body;
 
-        // Create a new ticket
+        // Create a new ticket using the authenticated employee's information
         const newTicket = new Ticket({
             title,
             description,
-            employee,
+            employeeNumber: req.user.employeeNumber, // Get from authenticated user
             assignedTo,
             status,
             priority,
