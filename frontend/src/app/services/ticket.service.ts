@@ -13,18 +13,18 @@ export class TicketService {
     {
       title: '0',
       description: '0',
-      employee: '0', //mongoose.Schema.Types.ObjectId of (User) employee
+      employeeNumber: '0', //mongoose.Schema.Types.ObjectId of (User) employee
       assignedTo: '0', //mongoose.Schema.Types.ObjectId of (User) HR Employee
       status: StatusEnum.Open, //enum: ['Open', 'In Progress', 'Resolved', 'Closed'], default: 'Open'
       pritority: PriorityEnum.Medium, //enum: ['Low', 'Medium', 'High'], default: 'Medium'
       category: '?',
       sentiment: SentimentEnum.Neutral, // enum: ['positive', 'neutral', 'negative'], default: 'neutral'
       comments: [
-        {
-          user: 'string', //user who wrote message in chat
-          message: 'string', //text of message
-          timestamp: Date, //when message was sent
-        },
+        // {
+        //   user: 'string', //user who wrote message in chat
+        //   message: 'string', //text of message
+        //   timestamp: Date, //when message was sent
+        // },
       ],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
@@ -33,7 +33,7 @@ export class TicketService {
     {
       title: 't0',
       description: 'd0',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
       pritority: PriorityEnum.Medium,
@@ -53,7 +53,7 @@ export class TicketService {
     {
       title: 't1',
       description: 'd1',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
       pritority: PriorityEnum.High,
@@ -73,7 +73,7 @@ export class TicketService {
     {
       title: 't2',
       description: 'd2',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
       pritority: PriorityEnum.Low,
@@ -93,7 +93,7 @@ export class TicketService {
     {
       title: 't3',
       description: 'd3',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.InProgress,
       pritority: PriorityEnum.Medium,
@@ -113,7 +113,7 @@ export class TicketService {
     {
       title: 't4',
       description: 'd4',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Resolved,
       pritority: PriorityEnum.Medium,
@@ -133,7 +133,7 @@ export class TicketService {
     {
       title: 't5',
       description: 'd5',
-      employee: '1',
+      employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Closed,
       pritority: PriorityEnum.Medium,
@@ -241,46 +241,52 @@ export class TicketService {
   getAllTickets() {
     return this.tickets;
   }
-  
+
   // Get tickets filtered by status
   getTicketsByStatus(status: StatusEnum) {
-    return this.tickets.filter(ticket => ticket.status === status);
+    return this.tickets.filter((ticket) => ticket.status === status);
   }
-  
+
   // Assign ticket to HR representative
   assignTicket(ticketId: number, hrUserId: string) {
-    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
-    
+    const ticketIndex = this.tickets.findIndex(
+      (ticket) => ticket.id === ticketId
+    );
+
     if (ticketIndex !== -1) {
       // Use type assertion to tell TypeScript this is a Ticket
       this.tickets[ticketIndex] = {
         ...(this.tickets[ticketIndex] as Ticket),
-        assignedToId: hrUserId
+        assignedToId: hrUserId,
       } as Ticket;
       return true;
     }
     return false;
   }
-  
+
   // Update ticket status
   updateTicketStatus(ticketId: number, newStatus: StatusEnum) {
-    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
-    
+    const ticketIndex = this.tickets.findIndex(
+      (ticket) => ticket.id === ticketId
+    );
+
     if (ticketIndex !== -1) {
       this.tickets[ticketIndex].status = newStatus;
       return true;
     }
     return false;
   }
-  
+
   // Update ticket priority
   updateTicketPriority(ticketId: number, priority: 'Low' | 'Medium' | 'High') {
-    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === ticketId);
-    
+    const ticketIndex = this.tickets.findIndex(
+      (ticket) => ticket.id === ticketId
+    );
+
     if (ticketIndex !== -1) {
       this.tickets[ticketIndex] = {
         ...(this.tickets[ticketIndex] as Ticket),
-        priority: priority
+        priority: priority,
       } as Ticket;
       return true;
     }
