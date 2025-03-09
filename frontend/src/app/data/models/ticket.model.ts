@@ -1,4 +1,5 @@
 export interface Ticket {
+// updated Version
   title: string;
   description: string;
   employee: string; //mongoose.Schema.Types.ObjectId of (User) employee
@@ -17,6 +18,17 @@ export interface Ticket {
   attachments: string[];
   createdAt: Date;
   updatedAt: Date;
+// Old version
+//   id: number;
+//   userId: number; // user who created the ticket
+//   assignedToId?: string; // HR representative assigned to ticket
+//   status: StatusEnum;
+//   title: string;
+//   description: string;
+//   dateAndTimeOfCreation: string;
+//   priority: 'Low' | 'Medium' | 'High';
+//   category: string;
+
 }
 // export interface Ticket {
 //   id: number;
