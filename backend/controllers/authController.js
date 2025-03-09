@@ -4,17 +4,17 @@ import jwt from 'jsonwebtoken';
 
 export const login = async (req, res) => {
     try {
-        const { employeeId, password } = req.body;
+        const { employeeNumber, password } = req.body;
 
         // Validate input
-        if (!employeeId || !password) {
+        if (!employeeNumber || !password) {
             return res.status(400).json({
                 message: 'Employee ID and password are required'
             });
         }
 
         // Find user by employeeId 
-        const user = await User.findOne({ employeeId });
+        const user = await User.findOne({ employeeNumber });
         if (!user) {
             return res.status(401).json({
                 message: 'Invalid credentials'

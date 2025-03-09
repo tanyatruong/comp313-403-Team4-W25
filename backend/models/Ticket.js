@@ -2,16 +2,19 @@ import mongoose from 'mongoose';
 
 const TicketSchema = new mongoose.Schema({
     title: { type: String, required: true },
+
     description: { type: String, required: true },
-    employee: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+
+    employeeNumber: {
+        type: String,
         required: true
     },
+
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+
     status: {
         type: String,
         enum: ['Open', 'In Progress', 'Resolved', 'Closed'],
