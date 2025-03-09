@@ -6,7 +6,8 @@ import { UserRoleEnum } from '../data/enums/UserRoleEnum';
 export class UserService {
   users = [
     {
-      employeeId: '0',
+      employeeNumber: 'EMP000',
+      employeeId: 'mongoid0',
       name: 'admin',
       email: 'admin@admin.com',
       phonenumber: '0',
@@ -16,7 +17,8 @@ export class UserService {
       createdAt: new Date(),
     },
     {
-      employeeId: '1',
+      employeeNumber: 'EMP001',
+      employeeId: 'mongoid1',
       name: '1',
       email: '1@1.com',
       phonenumber: '1',
@@ -26,13 +28,14 @@ export class UserService {
       createdAt: new Date(),
     },
     {
-      employeeId: '2',
+      employeeNumber: 'EMP002',
+      employeeId: 'mongoid2',
       name: '2',
       email: '2@2.com',
       phonenumber: '2',
       password: '2',
       role: UserRoleEnum.HR,
-      department: 'engineering',
+      department: 'HR',
       createdAt: new Date(),
     },
     {
@@ -72,9 +75,9 @@ export class UserService {
   getLoggedInUser() {
     return this.loggedInUser;
   }
-  
+
   // Get all HR users for assignment
   getHRUsers() {
-    return this.users.filter(user => user.userType === 'hr');
+    return this.users.filter((user) => user.userType === 'hr');
   }
 }
