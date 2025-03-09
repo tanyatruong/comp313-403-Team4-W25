@@ -1,5 +1,6 @@
 export interface User {
-  employeeId: string;
+  employeeNumber: string; //{ type: String, required: true, unique: true }, // Example: "EMP001"
+  employeeId: string; // Holds MongoDB _id reference
   name: string;
   email: string;
   phonenumber: string;
