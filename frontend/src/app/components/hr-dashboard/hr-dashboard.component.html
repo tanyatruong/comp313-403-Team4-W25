@@ -1,0 +1,211 @@
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4" style="min-height: 92vh;">
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center mb-5">
+        <h2 class="m-0">HR Ticket Management Dashboard</h2>
+        <button pButton icon="pi pi-home" label="Home" (click)="goToHome()"></button>
+    </div>
+
+    <!-- Filters and Sorting -->
+    <div class="surface-card p-3 shadow-1 border-round mb-4">
+        <div class="grid align-items-center">
+            <div class="col-12 md:col-3">
+                <span class="p-input-icon-left w-full">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Search tickets..." class="w-full"
+                        [(ngModel)]="filterText" (keyup.enter)="loadTickets()">
+                </span>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="priorityOptions" [(ngModel)]="filterPriority" placeholder="Filter by priority"
+                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="categoryOptions" [(ngModel)]="filterCategory" placeholder="Filter by category"
+                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-2">
+                <p-dropdown [options]="[
+                                {label: 'Date (Newest)', value: 'dateAndTimeOfCreation'},
+                                {label: 'Title', value: 'title'},
+                                {label: 'Priority', value: 'priority'}
+                             ]" [(ngModel)]="sortBy" placeholder="Sort by" class="w-full"
+                    (onChange)="loadTickets()"></p-dropdown>
+            </div>
+            <div class="col-12 md:col-1">
+                <button pButton icon="pi pi-sort-alt"
+                    (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; loadTickets()"
+                    pTooltip="Change sort order" class="w-full"></button>
+            </div>
+            <div class="col-12 md:col-2">
+                <button pButton icon="pi pi-filter-slash" label="Reset" (click)="resetFilters()"
+                    class="p-button-outlined w-full"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Layout -->
+    <div class="grid">
+        <!-- Ticket Columns -->
+        <div class="col-12 md:col-8">
+            <div class="grid">
+                <!-- Open Tickets -->
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-3 shadow-2 border-round">
+                        <h3 class="text-center text-primary">Open ({{openTickets.length}})</h3>
+                        <div class="ticket-list">
+                            <div *ngFor="let ticket of openTickets"
+                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
+                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
+                                <h4 class="m-0">{{ticket.title}}</h4>
+                                <div class="flex justify-content-between mt-2">
+                                    <span class="ticket-priority"
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
+                                    </span>
+                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
+                                        (click)="updateStatus(ticket, StatusEnum.InProgress); $event.stopPropagation();"
+                                        pTooltip="Move to In Progress"></button>
+                                </div>
+                            </div>
+                            <div *ngIf="openTickets.length === 0" class="text-center p-3 text-500">
+                                No open tickets
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In Progress Tickets -->
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-3 shadow-2 border-round">
+                        <h3 class="text-center text-primary">In Progress ({{inProgressTickets.length}})</h3>
+                        <div class="ticket-list">
+                            <div *ngFor="let ticket of inProgressTickets"
+                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
+                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
+                                <h4 class="m-0">{{ticket.title}}</h4>
+                                <div class="flex justify-content-between mt-2">
+                                    <span class="ticket-priority"
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
+                                    </span>
+                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
+                                        (click)="updateStatus(ticket, StatusEnum.Resolved); $event.stopPropagation();"
+                                        pTooltip="Move to Resolved"></button>
+                                </div>
+                            </div>
+                            <div *ngIf="inProgressTickets.length === 0" class="text-center p-3 text-500">
+                                No tickets in progress
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resolved Tickets -->
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-3 shadow-2 border-round">
+                        <h3 class="text-center text-primary">Resolved ({{resolvedTickets.length}})</h3>
+                        <div class="ticket-list">
+                            <div *ngFor="let ticket of resolvedTickets"
+                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
+                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
+                                <h4 class="m-0">{{ticket.title}}</h4>
+                                <div class="flex justify-content-between mt-2">
+                                    <span class="ticket-priority"
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
+                                    </span>
+                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
+                                        (click)="updateStatus(ticket, StatusEnum.Closed); $event.stopPropagation();"
+                                        pTooltip="Move to Closed"></button>
+                                </div>
+                            </div>
+                            <div *ngIf="resolvedTickets.length === 0" class="text-center p-3 text-500">
+                                No resolved tickets
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Closed Tickets -->
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-3 shadow-2 border-round">
+                        <h3 class="text-center text-primary">Closed ({{closedTickets.length}})</h3>
+                        <div class="ticket-list">
+                            <div *ngFor="let ticket of closedTickets"
+                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
+                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
+                                <h4 class="m-0">{{ticket.title}}</h4>
+                                <div class="flex justify-content-between mt-2">
+                                    <span class="ticket-priority"
+                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
+                                        {{ticket.priority}}
+                                    </span>
+                                </div>
+                            </div>
+                            <div *ngIf="closedTickets.length === 0" class="text-center p-3 text-500">
+                                No closed tickets
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Detail Panel -->
+        <div class="col-12 md:col-4">
+            <div class="surface-card p-4 shadow-2 border-round">
+                <div *ngIf="selectedTicket; else noTicketSelected">
+                    <div class="flex justify-content-between align-items-center mb-3">
+                        <h3 class="m-0">Ticket Details</h3>
+                        <button pButton icon="pi pi-times" class="p-button-text" (click)="closeDetails()"></button>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Title</label>
+                        <div>{{selectedTicket.title}}</div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Description</label>
+                        <div>{{selectedTicket.description}}</div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Status</label>
+                        <p-dropdown [options]="statusOptions" [(ngModel)]="selectedTicket.status"
+                            (onChange)="updateStatus(selectedTicket, $event.value)" styleClass="w-full"></p-dropdown>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Priority</label>
+                        <p-dropdown [options]="priorityOptions" [(ngModel)]="selectedTicket.priority"
+                            (onChange)="updatePriority(selectedTicket, $event.value)" styleClass="w-full"></p-dropdown>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Category</label>
+                        <div>{{selectedTicket.category}}</div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Assign To</label>
+                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedHrId" optionLabel="username"
+                            optionValue="id" placeholder="Select HR Representative" styleClass="w-full"
+                            (onChange)="assignTicket()"></p-dropdown>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Created On</label>
+                        <div>{{selectedTicket.dateAndTimeOfCreation}}</div>
+                    </div>
+                </div>
+                <ng-template #noTicketSelected>
+                    <div class="text-center p-5">
+                        <i class="pi pi-ticket text-500" style="font-size: 3rem"></i>
+                        <h3 class="text-500 mt-3">Select a ticket to view details</h3>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
