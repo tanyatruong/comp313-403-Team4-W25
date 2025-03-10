@@ -192,19 +192,41 @@ export class TicketService {
   }
 
   // Update a ticket
-  updateTicket(id: string, ticketData: Partial<Ticket>): Observable<Ticket> {
-    return this.apiService.updateTicket(id, ticketData).pipe(
-      tap((updatedTicket) => {
-        const index = this.tickets.findIndex((t) => t.id?.toString() === id);
-        if (index !== -1) {
-          this.tickets[index] = { ...this.tickets[index], ...updatedTicket };
-        }
-      }),
-      catchError((error) => {
-        console.error('Error updating ticket', error);
-        return throwError(() => new Error('Failed to update ticket'));
-      })
-    );
+  updateTicket(
+    ticketId: string | number,
+    updatedTicket: Ticket
+  ): Observable<Ticket> {
+    if (this.useMockData) {
+      // Mock implementation (for testing only)
+      const index = this.tickets.findIndex(
+        (t) => t.id?.toString() === ticketId.toString()
+      );
+      if (index !== -1) {
+        this.tickets[index] = { ...updatedTicket };
+        return of(this.tickets[index]);
+      }
+      return throwError(() => new Error('Ticket not found'));
+    } else {
+      // Real implementation - connect to MongoDB through API
+      return this.apiService
+        .updateTicket(ticketId.toString(), updatedTicket)
+        .pipe(
+          map((response) => {
+            // Update local cache after successful server update
+            const index = this.tickets.findIndex(
+              (t) => t.id?.toString() === ticketId.toString()
+            );
+            if (index !== -1) {
+              this.tickets[index] = response;
+            }
+            return response;
+          }),
+          catchError((error) => {
+            console.error('Error updating ticket:', error);
+            return throwError(() => new Error('Failed to update ticket'));
+          })
+        );
+    }
   }
 
   // Delete a ticket
