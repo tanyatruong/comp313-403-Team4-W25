@@ -158,37 +158,41 @@ export class TicketService {
   // Create a new ticket
   createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
     if (this.useMockData) {
-      // Generate a mock ticket with an ID
+      // Convert partial ticket to complete ticket
       const newTicket: Ticket = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: (this.tickets.length + 1).toString(),
         title: ticket.title || 'Untitled',
         description: ticket.description || '',
         employeeNumber: ticket.employeeNumber || 'unknown',
         assignedTo: ticket.assignedTo || '',
-        status: StatusEnum.Open,
+        status: ticket.status || StatusEnum.Open,
         priority: ticket.priority || PriorityEnum.Medium,
         category: ticket.category || CategoryEnum.General,
-        createdAt: new Date(),
+        createdAt: new Date(), // Use Date object, not string
         updatedAt: new Date(),
       };
-
-      // Add to local cache
       this.tickets.push(newTicket);
-      console.log('Created mock ticket:', newTicket);
-
+      console.log('Created ticket locally:', newTicket);
       return of(newTicket);
-    }
+    } else {
+      // Add required fields for API
+      const completeTicket = {
+        ...ticket,
+        status: ticket.status || StatusEnum.Open,
+        createdAt: new Date(),
+      } as Ticket;
 
-    // Otherwise use the real API
-    return this.apiService.createTicket(ticket).pipe(
-      tap((newTicket) => {
-        this.tickets.push(newTicket);
-      }),
-      catchError((error) => {
-        console.error('Error creating ticket', error);
-        return throwError(() => new Error('Failed to create ticket'));
-      })
-    );
+      return this.apiService.createTicket(completeTicket).pipe(
+        map((response) => {
+          this.tickets.push(response);
+          return response;
+        }),
+        catchError((error) => {
+          console.error('Error creating ticket:', error);
+          return throwError(() => new Error('Failed to create ticket'));
+        })
+      );
+    }
   }
 
   // Update a ticket
