@@ -4,6 +4,7 @@ import { StatusEnum } from '../data/enums/StatusEnum';
 import { type Ticket } from '../data/models/ticket.model';
 import { PriorityEnum } from '../data/enums/PriorityEnum';
 import { SentimentEnum } from '../data/enums/SentimentEnum';
+import { CategoryEnum } from '../data/enums/CategoryEnum';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
@@ -19,7 +20,7 @@ export class TicketService {
       assignedTo: '0',
       status: StatusEnum.Open,
       priority: PriorityEnum.Medium,
-      category: '?',
+      category: CategoryEnum.General,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -35,7 +36,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.Open,
       priority: PriorityEnum.Medium,
-      category: '?',
+      category: CategoryEnum.General,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -51,7 +52,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.Open,
       priority: PriorityEnum.High,
-      category: '?',
+      category: CategoryEnum.Technical,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -67,7 +68,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.Open,
       priority: PriorityEnum.Low,
-      category: '?',
+      category: CategoryEnum.Payroll,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -83,7 +84,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.InProgress,
       priority: PriorityEnum.Medium,
-      category: '?',
+      category: CategoryEnum.Benefits,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -99,7 +100,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.Resolved,
       priority: PriorityEnum.Medium,
-      category: '?',
+      category: CategoryEnum.Facilities,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -115,7 +116,7 @@ export class TicketService {
       assignedTo: '2',
       status: StatusEnum.Closed,
       priority: PriorityEnum.Medium,
-      category: '?',
+      category: CategoryEnum.General,
       sentiment: SentimentEnum.Neutral,
       comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
@@ -165,31 +166,34 @@ export class TicketService {
     const formattedDate =
       dateObj.getFullYear() +
       '/' +
-      dateObj.getMonth() +
+      (dateObj.getMonth() + 1) +
       '/' +
       dateObj.getDate() +
       ' @ ' +
       dateObj.getHours() +
       ':' +
+      (dateObj.getMinutes() < 10 ? '0' : '') +
       dateObj.getMinutes() +
       ':' +
+      (dateObj.getSeconds() < 10 ? '0' : '') +
       dateObj.getSeconds();
 
     const newTicket: Ticket = {
       id: this.tickets.length + 1,
       userId: ticketData.userId || 0,
-      status: ticketData.status || StatusEnum.Open,
       title: ticketData.title || '',
       description: ticketData.description || '',
       employeeNumber: ticketData.employeeNumber || '',
       assignedTo: ticketData.assignedTo || '',
+      status: StatusEnum.Open,
       priority: ticketData.priority || PriorityEnum.Medium,
-      category: ticketData.category || '?',
-      sentiment: ticketData.sentiment || SentimentEnum.Neutral,
-      comments: ticketData.comments || [],
+      category: ticketData.category || CategoryEnum.General,
+      sentiment: SentimentEnum.Neutral,
+      comments: [],
       attachments: ticketData.attachments || [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      dateAndTimeOfCreation: formattedDate,
     };
 
     this.tickets.unshift(newTicket);

@@ -9,6 +9,7 @@ import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
 import { PriorityEnum } from '../../data/enums/PriorityEnum';
+import { CategoryEnum } from '../../data/enums/CategoryEnum';
 
 @Component({
   selector: 'app-home',
@@ -76,7 +77,7 @@ export class HomeComponent implements OnInit {
         (ticket) => ({
           ...ticket,
           priority: PriorityEnum.Medium,
-          category: 'General',
+          category: CategoryEnum.General,
         })
       );
     } else {
@@ -88,7 +89,7 @@ export class HomeComponent implements OnInit {
         .map((ticket) => ({
           ...ticket,
           priority: PriorityEnum.Medium,
-          category: 'General',
+          category: CategoryEnum.General,
         }));
     }
   }

@@ -1,69 +1,87 @@
-import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgStyle } from '@angular/common';
-import { NgClass } from '@angular/common';
-
-//primeNG imports
 import { PrimengModule } from '../../../primeng.module';
-
-//My imports
-import { UserService } from '../../services/user.service';
 import { RouterService } from '../../services/router.service';
-import { StatusEnum } from '../../data/enums/StatusEnum';
 import { TicketService } from '../../services/ticket.service';
+import { UserService } from '../../services/user.service';
 import { Ticket } from '../../data/models/ticket.model';
+import { PriorityEnum } from '../../data/enums/PriorityEnum';
+import { CategoryEnum } from '../../data/enums/CategoryEnum';
 
 @Component({
   selector: 'app-ticket-create',
   standalone: true,
-  imports: [PrimengModule, NgStyle, NgClass],
+  imports: [CommonModule, FormsModule, PrimengModule],
   templateUrl: './ticket-create.component.html',
-  styleUrl: './ticket-create.component.css',
+  styleUrls: ['./ticket-create.component.css'],
 })
-export class TicketCreateComponent {
-  private userService = inject(UserService);
-  private routerService = inject(RouterService);
-  private ticketService = inject(TicketService);
-
-  user = this.userService.getLoggedInUser;
-  private dateObj = new Date();
-  ticket = {
-    id: '100',
-    userId: '0',
-    status: StatusEnum.Open,
-    title: 'title100',
-    description: 'description100',
-    dateAndTimeOfCreation:
-      this.dateObj.getFullYear() +
-      '/' +
-      this.dateObj.getMonth() +
-      '/' +
-      this.dateObj.getDate() +
-      ' @ ' +
-      this.dateObj.getHours() +
-      ':' +
-      this.dateObj.getMinutes() +
-      ':' +
-      this.dateObj.getSeconds(),
+export class TicketCreateComponent implements OnInit {
+  newTicket: Partial<Ticket> = {
+    title: '',
+    description: '',
+    category: CategoryEnum.General,
+    priority: PriorityEnum.Medium,
   };
 
-  targetEmployeeID!: number;
+  categories = [
+    { name: 'General Inquiry', value: CategoryEnum.General },
+    { name: 'Technical Support', value: CategoryEnum.Technical },
+    { name: 'Payroll Issue', value: CategoryEnum.Payroll },
+    { name: 'Benefits Question', value: CategoryEnum.Benefits },
+    { name: 'Office Facilities', value: CategoryEnum.Facilities },
+  ];
 
-  onReturnButtonClick() {
-    // This currently discards/does not save in progress ticket
-    console.log('event: onReturnButtonClick');
+  priorities = [
+    { name: 'Low', value: PriorityEnum.Low },
+    { name: 'Medium', value: PriorityEnum.Medium },
+    { name: 'High', value: PriorityEnum.High },
+  ];
+
+  constructor(
+    private routerService: RouterService,
+    private ticketService: TicketService,
+    private userService: UserService
+  ) {}
+
+  ngOnInit(): void {
+    const currentUser = this.userService.getLoggedInUser();
+    if (currentUser) {
+      this.newTicket.employeeNumber = currentUser.employeeNumber || '';
+      this.newTicket.userId = currentUser.id ? parseInt(currentUser.id, 10) : 0;
+    }
+  }
+
+  onSubmit(): void {
+    if (this.validateForm()) {
+      const createdTicket = this.ticketService.createTicket(this.newTicket);
+      console.log('Ticket created successfully:', createdTicket);
+      this.routerService.navigateToHome();
+    }
+  }
+
+  validateForm(): boolean {
+    return !!(
+      this.newTicket.title &&
+      this.newTicket.description &&
+      this.newTicket.category &&
+      this.newTicket.priority
+    );
+  }
+
+  goBack(): void {
     this.routerService.navigateToHome();
   }
 
+  onReturnButtonClick() {
+    this.goBack();
+  }
+
   onDiscardButtonClick() {
-    // This currently discards/does not save in progress ticket
-    console.log('event: onDiscardButtonClick');
-    this.onReturnButtonClick();
+    this.goBack();
   }
 
   onCompleteTicketCreationButtonClick() {
-    // This currently discards/does not save in progress ticket
-    // this.onReturnButtonClick();
-    console.log('event: onCompleteTicketCreationButtonClick');
+    this.onSubmit();
   }
 }

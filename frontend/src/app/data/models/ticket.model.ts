@@ -1,6 +1,7 @@
 import { StatusEnum } from '../enums/StatusEnum';
 import { PriorityEnum } from '../enums/PriorityEnum';
 import { SentimentEnum } from '../enums/SentimentEnum';
+import { CategoryEnum } from '../enums/CategoryEnum';
 
 export interface Ticket {
   id?: number; // For frontend use - MongoDB's _id will be mapped to this
@@ -11,7 +12,7 @@ export interface Ticket {
   assignedTo: string; // MongoDB ObjectId as string
   status: StatusEnum;
   priority: PriorityEnum;
-  category: string;
+  category: CategoryEnum;
   sentiment: SentimentEnum;
   comments: {
     user: string; // User ID
