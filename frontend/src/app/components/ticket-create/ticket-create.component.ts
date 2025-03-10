@@ -38,6 +38,8 @@ export class TicketCreateComponent implements OnInit {
     { name: 'High', value: PriorityEnum.High },
   ];
 
+  errorMessage: string | null = null;
+
   constructor(
     private routerService: RouterService,
     private ticketService: TicketService,
@@ -54,9 +56,7 @@ export class TicketCreateComponent implements OnInit {
 
   onSubmit(): void {
     if (this.validateForm()) {
-      const createdTicket = this.ticketService.createTicket(this.newTicket);
-      console.log('Ticket created successfully:', createdTicket);
-      this.routerService.navigateToHome();
+      this.submitTicket();
     }
   }
 
@@ -83,5 +83,26 @@ export class TicketCreateComponent implements OnInit {
 
   onCompleteTicketCreationButtonClick() {
     this.onSubmit();
+  }
+
+  submitTicket(): void {
+    if (!this.newTicket) {
+      this.errorMessage = 'No ticket to save';
+      return;
+    }
+
+    console.log('Creating ticket:', this.newTicket);
+
+    // Make sure we're sending a complete ticket object
+    this.ticketService.createTicket(this.newTicket).subscribe(
+      (createdTicket) => {
+        console.log('Ticket created successfully', createdTicket);
+        this.routerService.navigateToHome();
+      },
+      (error) => {
+        console.error('Error creating ticket:', error);
+        this.errorMessage = 'Failed to create ticket';
+      }
+    );
   }
 }
