@@ -8,6 +8,8 @@ import { PrimengModule } from '../../../primeng.module';
 //my imports
 import { UserService } from '../../services/user.service';
 import { RouterService } from '../../services/router.service';
+import { User } from '../../data/models/user.model';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -49,15 +51,22 @@ export class LoginComponent {
     this.onLoginAttempt();
   }
 
-  loginWithCredentials(): void {
-    this.userService
-      .authenticateUser(this.email, this.password)
-      .subscribe((isAuthenticated) => {
-        if (isAuthenticated) {
-          this.router.navigate(['/home']);
-        } else {
-          this.errorMessage = 'Invalid email or password';
+  onSubmit(): void {
+    this.userService.login(this.email, this.password).subscribe(
+      (response) => {
+        console.log('Login successful:', response);
+
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          console.log('Token stored successfully:', response.token);
         }
-      });
+
+        this.router.navigate(['/home']);
+      },
+      (error) => {
+        console.error('Login failed:', error);
+        this.errorMessage = 'Invalid credentials';
+      }
+    );
   }
 }
