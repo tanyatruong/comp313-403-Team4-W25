@@ -3,7 +3,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { type User } from '../data/models/user.model';
 import { UserRoleEnum } from '../data/enums/UserRoleEnum';
 import { ApiService } from './api.service';
+<<<<<<< HEAD
 import { Observable, of, tap } from 'rxjs';
+=======
+import { Observable, of } from 'rxjs';
+>>>>>>> origin/connect-backend
 import { map, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -60,6 +64,7 @@ export class UserService {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private apiService: ApiService
+<<<<<<< HEAD
   ) {
     this.getLoggedInUser();
   }
@@ -87,6 +92,27 @@ export class UserService {
       }),
       map((user) => !!user),
       catchError(() => of(false))
+=======
+  ) {}
+
+  authenticateUser(email: string, password: string): Observable<boolean> {
+    return this.apiService.login(email, password).pipe(
+      map((user) => {
+        if (user) {
+          // Only set localStorage in browser environment
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+          }
+          this.loggedInUser = user;
+          return true;
+        }
+        return false;
+      }),
+      catchError((error) => {
+        console.error('Login failed', error);
+        return of(false);
+      })
+>>>>>>> origin/connect-backend
     );
   }
 
