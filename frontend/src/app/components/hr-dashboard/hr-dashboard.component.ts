@@ -83,46 +83,48 @@ export class HrDashboardComponent implements OnInit {
   }
 
   loadTickets(): void {
-    // Get all tickets first
-    const allTickets = this.ticketService.getAllTickets().map((ticket) => {
-      // Create a complete ticket object with required properties
-      return {
-        id: ticket.id,
-        title: ticket.title,
-        description: ticket.description,
-        employeeNumber: ticket.employeeNumber,
-        assignedTo: ticket.assignedTo,
-        status: ticket.status,
-        priority: ticket.priority,
-        category: ticket.category || CategoryEnum.General,
-        sentiment: ticket.sentiment,
-        comments: ticket.comments,
-        attachments: ticket.attachments,
-        createdAt: ticket.createdAt,
-        updatedAt: ticket.updatedAt,
-        // Add any derived properties needed for UI
-        dateAndTimeOfCreation: ticket.createdAt
-          ? ticket.createdAt.toISOString()
-          : new Date().toISOString(),
-      };
+    // Subscribe to the Observable
+    this.ticketService.getAllTickets().subscribe((tickets) => {
+      // Now map the array of tickets that comes from the subscription
+      const allTickets = tickets.map((ticket) => {
+        // Create a complete ticket object with required properties
+        return {
+          id: ticket.id,
+          title: ticket.title,
+          description: ticket.description,
+          employeeNumber: ticket.employeeNumber,
+          assignedTo: ticket.assignedTo,
+          status: ticket.status,
+          priority: ticket.priority,
+          category: ticket.category || CategoryEnum.General,
+          sentiment: ticket.sentiment,
+          comments: ticket.comments,
+          attachments: ticket.attachments,
+          createdAt: ticket.createdAt,
+          updatedAt: ticket.updatedAt,
+          dateAndTimeOfCreation: ticket.createdAt
+            ? ticket.createdAt.toISOString()
+            : new Date().toISOString(),
+        };
+      });
+
+      // Filter and sort the tickets
+      const filteredTickets = this.applyFilters(allTickets);
+
+      // Distribute tickets by status
+      this.openTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Open
+      );
+      this.inProgressTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.InProgress
+      );
+      this.resolvedTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Resolved
+      );
+      this.closedTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Closed
+      );
     });
-
-    // Filter and sort the tickets
-    const filteredTickets = this.applyFilters(allTickets);
-
-    // Distribute tickets by status
-    this.openTickets = filteredTickets.filter(
-      (ticket) => ticket.status === StatusEnum.Open
-    );
-    this.inProgressTickets = filteredTickets.filter(
-      (ticket) => ticket.status === StatusEnum.InProgress
-    );
-    this.resolvedTickets = filteredTickets.filter(
-      (ticket) => ticket.status === StatusEnum.Resolved
-    );
-    this.closedTickets = filteredTickets.filter(
-      (ticket) => ticket.status === StatusEnum.Closed
-    );
   }
 
   applyFilters(tickets: Ticket[]): Ticket[] {
@@ -219,16 +221,9 @@ export class HrDashboardComponent implements OnInit {
 
       // Update if we were viewing the ticket
       if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-        const foundTicket = this.ticketService
-          .getAllTickets()
-          .find((t) => t.id === ticket.id);
-        this.selectedTicket = foundTicket
-          ? {
-              ...foundTicket,
-              priority: PriorityEnum.Medium,
-              category: CategoryEnum.General,
-            }
-          : null;
+        this.ticketService.getTicketById(ticket.id).subscribe((foundTicket) => {
+          this.selectedTicket = foundTicket;
+        });
       }
     }
   }
@@ -239,12 +234,9 @@ export class HrDashboardComponent implements OnInit {
 
       // If we were viewing the updated ticket, refresh the selection
       if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-        const foundTicket = this.ticketService
-          .getAllTickets()
-          .find((t) => t.id === ticket.id);
-        this.selectedTicket = foundTicket
-          ? { ...foundTicket, category: CategoryEnum.General }
-          : null;
+        this.ticketService.getTicketById(ticket.id).subscribe((foundTicket) => {
+          this.selectedTicket = foundTicket;
+        });
       }
     }
 
