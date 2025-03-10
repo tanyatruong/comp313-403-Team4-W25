@@ -1,17 +1,16 @@
+import { UserRoleEnum } from '../enums/UserRoleEnum';
+
 export interface User {
-  employeeNumber: string; //{ type: String, required: true, unique: true }, // Example: "EMP001"
-  employeeId: string; // Holds MongoDB _id reference
+  id?: string; // For frontend use
+  employeeNumber?: string;
   name: string;
   email: string;
-  phonenumber: string;
-  password: string;
-  role: string; //aka userType //UserRoleEnum: ['Employee', 'HR', 'Admin']
-  department: string;
+  phonenumber?: string;
+  role: UserRoleEnum;
+  department?: string;
   createdAt: Date;
+  userType?: string; // Add back for backward compatibility
+  username?: string; // Add back for backward compatibility
+  // Only include other fields used in UI components
+  password?: string; // Only needed for authentication
 }
-// export interface User {
-//   id: string;
-//   userType: string;
-//   username: string;
-//   password: string;
-// }
