@@ -5,7 +5,7 @@ import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
 import { StatusEnum } from '../data/enums/StatusEnum';
 import { PriorityEnum } from '../data/enums/PriorityEnum';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
 @Injectable({
@@ -122,11 +122,52 @@ export class ApiService {
   }
 
   // Update ticket status
-  updateTicketStatus(ticketId: string, status: StatusEnum): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/tickets/${ticketId}/status`,
-      { status },
-      { headers: this.getAuthHeaders() }
+  updateTicketStatus(ticketId: string, status: string): Observable<Ticket> {
+    console.log(`API Service: Updating ticket ${ticketId} status to ${status}`);
+
+    // Check auth token before making request
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error(
+        '⚠️ No auth token available for updateTicketStatus request'
+      );
+      return throwError(() => new Error('Authentication token missing'));
+    }
+
+    // First, get the current ticket to avoid overwriting other fields
+    return this.getTicketById(ticketId).pipe(
+      switchMap((currentTicket) => {
+        // Create a new ticket object with the updated status
+        const updatedTicket = {
+          ...currentTicket,
+          status: status as StatusEnum,
+        };
+
+        console.log('Updating ticket with new status:', updatedTicket);
+
+        // Use the existing updateTicket method that works
+        return this.updateTicket(ticketId, updatedTicket);
+      }),
+      tap((response) => {
+        console.log('Status update response:', response);
+        console.log(
+          'Verifying if status was updated. Expected:',
+          status,
+          'Actual:',
+          response.status
+        );
+      }),
+      catchError((error) => {
+        console.error(`Status update error for ticket ${ticketId}:`, error);
+        return throwError(
+          () =>
+            new Error(
+              `Failed to update ticket status: ${
+                error.message || 'Server error'
+              }`
+            )
+        );
+      })
     );
   }
 
