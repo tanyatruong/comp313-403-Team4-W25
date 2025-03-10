@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
+import { StatusEnum } from '../data/enums/StatusEnum';
+import { PriorityEnum } from '../data/enums/PriorityEnum';
 
 @Injectable({
   providedIn: 'root',
@@ -63,8 +65,8 @@ export class ApiService {
   }
 
   // Update ticket status
-  updateTicketStatus(id: string, status: string): Observable<Ticket> {
-    return this.http.patch<Ticket>(`${this.apiUrl}/tickets/${id}/status`, {
+  updateTicketStatus(ticketId: string, status: StatusEnum): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tickets/${ticketId}/status`, {
       status,
     });
   }
@@ -81,6 +83,16 @@ export class ApiService {
     return this.http.post<User>(`${this.apiUrl}/auth/login`, {
       employeeNumber: email,
       password,
+    });
+  }
+
+  // Add this method to update ticket priority
+  updateTicketPriority(
+    ticketId: string,
+    priority: PriorityEnum
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tickets/${ticketId}/priority`, {
+      priority,
     });
   }
 }
