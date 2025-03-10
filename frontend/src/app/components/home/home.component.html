@@ -34,80 +34,192 @@
     </div>
   </div>
 
-  <!-- Ticket List Section -->
+  <!-- Ticket List Section - now with status groups -->
   <div id="ticketListContainer" class="shadow-2 text-center mt-4">
     <h2 style="color: black; font-size: 24px">Ticket List</h2>
 
     <!-- No Tickets Found -->
-    <div *ngIf="filteredTickets.length === 0" style="
-        color: #6c757d;
-        margin-top: 20px;
-        font-size: 18px;
-      ">
+    <div *ngIf="filteredTickets.length === 0" style="color: #6c757d; margin-top: 20px; font-size: 18px;">
       <p>No tickets available to display.</p>
     </div>
 
-    <!-- Tickets Loop -->
-    <div *ngFor="let ticket of filteredTickets" style="
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background-color: #f8f9fa;
-        text-align: left;
-      ">
-      <!-- Ticket Title -->
-      <h4 style="
-          color: #34495e;
-          font-size: 20px;
-          display: flex;
-          align-items: center;
-        ">
-        <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px"></i>
-        {{ ticket.title }}
-      </h4>
-
-      <!-- Ticket Description -->
-      <p style="color: #6c757d; font-size: 16px">{{ ticket.description }}</p>
-
-      <!-- Ticket Status -->
-      <p [ngStyle]="{
-          color:
-            ticket.status === StatusEnum.Open
-              ? 'blue'
-              : ticket.status === StatusEnum.Closed
-              ? 'red'
-              : ticket.status === StatusEnum.InProgress
-              ? 'green'
-              : 'black'
-        }" style="font-size: 16px; font-weight: bold; margin-top: 10px">
-        Status: {{ ticket.status }}
-      </p>
-
-      <!-- Edit and Delete Buttons -->
-      <div style="margin-top: 15px; display: flex; justify-content: space-between;">
-        <button style="
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-          " (click)="editTicket(ticket)">
-          <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
-        </button>
-        <button *ngIf="ticket.id" (click)="deleteTicket(ticket.id)" style="
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
+    <!-- Open Tickets -->
+    <div *ngIf="openTickets.length > 0">
+      <h3 class="ticket-section-header">Open Tickets ({{openTickets.length}})</h3>
+      <div *ngFor="let ticket of openTickets" class="ticket-card">
+        <!-- Ticket Title -->
+        <h4 style="
+            color: #34495e;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
           ">
-          <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
-        </button>
+          <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px"></i>
+          {{ ticket.title }}
+        </h4>
+
+        <!-- Ticket Description -->
+        <p style="color: #6c757d; font-size: 16px">{{ ticket.description }}</p>
+
+        <!-- Ticket Status -->
+        <p [ngStyle]="{
+            color:
+              ticket.status === StatusEnum.Open
+                ? 'blue'
+                : ticket.status === StatusEnum.Closed
+                ? 'red'
+                : ticket.status === StatusEnum.InProgress
+                ? 'green'
+                : 'black'
+          }" style="font-size: 16px; font-weight: bold; margin-top: 10px">
+          Status: {{ ticket.status }}
+        </p>
+
+        <!-- Edit and Delete Buttons -->
+        <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+          <button style="
+              background-color: #007bff;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            " (click)="editTicket(ticket)">
+            <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
+          </button>
+          <button *ngIf="ticket.id" (click)="deleteTicket(ticket.id)" style="
+              background-color: #dc3545;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+            <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- In Progress Tickets -->
+    <div *ngIf="inProgressTickets.length > 0">
+      <h3 class="ticket-section-header">In Progress Tickets ({{inProgressTickets.length}})</h3>
+      <div *ngFor="let ticket of inProgressTickets" class="ticket-card">
+        <!-- Ticket Title -->
+        <h4 style="
+            color: #34495e;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+          ">
+          <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px"></i>
+          {{ ticket.title }}
+        </h4>
+
+        <!-- Ticket Description -->
+        <p style="color: #6c757d; font-size: 16px">{{ ticket.description }}</p>
+
+        <!-- Ticket Status -->
+        <p [ngStyle]="{
+            color:
+              ticket.status === StatusEnum.Open
+                ? 'blue'
+                : ticket.status === StatusEnum.Closed
+                ? 'red'
+                : ticket.status === StatusEnum.InProgress
+                ? 'green'
+                : 'black'
+          }" style="font-size: 16px; font-weight: bold; margin-top: 10px">
+          Status: {{ ticket.status }}
+        </p>
+
+        <!-- Edit and Delete Buttons -->
+        <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+          <button style="
+              background-color: #007bff;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            " (click)="editTicket(ticket)">
+            <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
+          </button>
+          <button *ngIf="ticket.id" (click)="deleteTicket(ticket.id)" style="
+              background-color: #dc3545;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+            <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resolved Tickets -->
+    <div *ngIf="resolvedTickets.length > 0">
+      <h3 class="ticket-section-header">Resolved Tickets ({{resolvedTickets.length}})</h3>
+      <div *ngFor="let ticket of resolvedTickets" class="ticket-card">
+        <!-- Ticket Title -->
+        <h4 style="
+            color: #34495e;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+          ">
+          <i class="pi pi-ticket" style="font-size: 20px; margin-right: 10px"></i>
+          {{ ticket.title }}
+        </h4>
+
+        <!-- Ticket Description -->
+        <p style="color: #6c757d; font-size: 16px">{{ ticket.description }}</p>
+
+        <!-- Ticket Status -->
+        <p [ngStyle]="{
+            color:
+              ticket.status === StatusEnum.Open
+                ? 'blue'
+                : ticket.status === StatusEnum.Closed
+                ? 'red'
+                : ticket.status === StatusEnum.InProgress
+                ? 'green'
+                : 'black'
+          }" style="font-size: 16px; font-weight: bold; margin-top: 10px">
+          Status: {{ ticket.status }}
+        </p>
+
+        <!-- Edit and Delete Buttons -->
+        <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+          <button style="
+              background-color: #007bff;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            " (click)="editTicket(ticket)">
+            <i class="pi pi-pencil" style="margin-right: 5px;"></i> Update
+          </button>
+          <button *ngIf="ticket.id" (click)="deleteTicket(ticket.id)" style="
+              background-color: #dc3545;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+            <i class="pi pi-trash" style="margin-right: 5px;"></i> Delete
+          </button>
+        </div>
       </div>
     </div>
   </div>

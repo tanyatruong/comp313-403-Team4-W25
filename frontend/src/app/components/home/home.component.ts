@@ -31,6 +31,12 @@ export class HomeComponent implements OnInit {
   showDeleteModal: boolean = false;
   ticketToDelete: number | null = null;
 
+  // Add these properties to store tickets by status
+  openTickets: Ticket[] = [];
+  inProgressTickets: Ticket[] = [];
+  resolvedTickets: Ticket[] = [];
+  closedTickets: Ticket[] = [];
+
   StatusEnum = StatusEnum;
 
   constructor(private router: Router) {}
@@ -66,32 +72,43 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // if (this.currentUser.userType === 'admin') {
-    //   this.tickets = [...this.ticketService['tickets']];
-    // } else {
-    //   const userId = parseInt(this.currentUser.id, 10);
-    //   this.tickets = this.ticketService.getOpenTicketsByUserId(userId);
-    // }
+    let tickets: Ticket[] = [];
+
     if (this.currentUser.userType === 'admin') {
-      this.filteredTickets = [...this.ticketService['tickets']].map(
-        (ticket) => ({
-          ...ticket,
-          priority: PriorityEnum.Medium,
-          category: CategoryEnum.General,
-        })
-      );
+      tickets = [...this.ticketService['tickets']].map((ticket) => ({
+        ...ticket,
+        priority: ticket.priority || PriorityEnum.Medium,
+        category: ticket.category || CategoryEnum.General,
+      }));
     } else {
       const userId = this.currentUser.id
         ? parseInt(this.currentUser.id, 10)
         : 0;
-      this.filteredTickets = this.ticketService
+      tickets = this.ticketService
         .getOpenTicketsByUserId(userId)
         .map((ticket) => ({
           ...ticket,
-          priority: PriorityEnum.Medium,
-          category: CategoryEnum.General,
+          priority: ticket.priority || PriorityEnum.Medium,
+          category: ticket.category || CategoryEnum.General,
         }));
     }
+
+    // Store all tickets for filtering
+    this.filteredTickets = tickets;
+
+    // Group tickets by status
+    this.openTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Open
+    );
+    this.inProgressTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.InProgress
+    );
+    this.resolvedTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Resolved
+    );
+    this.closedTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Closed
+    );
   }
 
   openSettings(): void {
