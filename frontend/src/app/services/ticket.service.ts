@@ -1,259 +1,263 @@
 import { Injectable } from '@angular/core';
-
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { Ticket } from '../data/models/ticket.model';
 import { StatusEnum } from '../data/enums/StatusEnum';
-import { type Ticket } from '../data/models/ticket.model';
 import { PriorityEnum } from '../data/enums/PriorityEnum';
-import { SentimentEnum } from '../data/enums/SentimentEnum';
+import { CategoryEnum } from '../data/enums/CategoryEnum';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private dateObj = new Date();
+  // Keep a local cache of tickets
+  private tickets: Ticket[] = [];
+  private loaded = false;
+  currentTicket: Ticket | null = null;
 
-  private tickets: Ticket[] = [
-    {
-      id: 1,
-      userId: 1,
-      title: '0',
-      description: '0',
-      employeeNumber: '0',
-      assignedTo: '0',
-      status: StatusEnum.Open,
-      priority: PriorityEnum.Medium,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 2,
-      userId: 1,
-      title: 't0',
-      description: 'd0',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.Open,
-      priority: PriorityEnum.Medium,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 3,
-      userId: 1,
-      title: 't1',
-      description: 'd1',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.Open,
-      priority: PriorityEnum.High,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 4,
-      userId: 1,
-      title: 't2',
-      description: 'd2',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.Open,
-      priority: PriorityEnum.Low,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 5,
-      userId: 1,
-      title: 't3',
-      description: 'd3',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.InProgress,
-      priority: PriorityEnum.Medium,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 6,
-      userId: 1,
-      title: 't4',
-      description: 'd4',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.Resolved,
-      priority: PriorityEnum.Medium,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 7,
-      userId: 1,
-      title: 't5',
-      description: 'd5',
-      employeeNumber: '1',
-      assignedTo: '2',
-      status: StatusEnum.Closed,
-      priority: PriorityEnum.Medium,
-      category: '?',
-      sentiment: SentimentEnum.Neutral,
-      comments: [],
-      attachments: ['attachment0', 'attachment1', 'attachment2'],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  // Add a flag to control API vs mock data
+  private useMockData = true; // Set to false when backend is ready
 
-  public currentTicket: Ticket | undefined;
+  constructor(private apiService: ApiService) {}
 
-  //   constructor() {
-  //     const tasks = localStorage.getItem('tasks');
+  // Load all tickets from the backend
+  loadTickets(): Observable<Ticket[]> {
+    if (this.useMockData) {
+      // Return existing tickets or create empty array if none exist
+      if (!this.tickets.length) {
+        // Create sample tickets for testing
+        this.tickets = [
+          {
+            id: 't1',
+            title: 'Sample Ticket 1',
+            description: 'This is a test ticket',
+            employeeNumber: 'emp1',
+            assignedTo: '',
+            status: StatusEnum.Open,
+            priority: PriorityEnum.Medium,
+            category: CategoryEnum.General,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: 't2',
+            title: 'Another Sample Ticket',
+            description: 'This is another test ticket',
+            employeeNumber: 'emp1',
+            assignedTo: '',
+            status: StatusEnum.InProgress,
+            priority: PriorityEnum.High,
+            category: CategoryEnum.Technical,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+      }
+      this.loaded = true;
+      return of(this.tickets);
+    }
 
-  //     if (tasks) {
-  //       this.tasks = JSON.parse(tasks);
-  //     }
-  //   }
+    // Otherwise use the real API
+    return this.apiService.getTickets().pipe(
+      tap((tickets) => {
+        this.tickets = tickets;
+        this.loaded = true;
+      }),
+      catchError((error) => {
+        console.error('Error loading tickets', error);
+        return throwError(() => new Error('Failed to load tickets'));
+      })
+    );
+  }
 
-  getOpenTicketsByUserId(userId: number) {
+  // Get all tickets, loading them if needed
+  getAllTickets(): Ticket[] {
+    if (!this.loaded) {
+      this.loadTickets().subscribe();
+    }
+    return this.tickets.map((ticket) => ({
+      ...ticket,
+      id: ticket.id?.toString(),
+    }));
+  }
+
+  // Get tickets by user ID
+  getOpenTicketsByUserId(userId: number): Ticket[] {
+    const strUserId = userId.toString();
     return this.tickets.filter(
-      (ticket) => ticket.userId === userId && ticket.status === StatusEnum.Open
+      (ticket) =>
+        ticket.userId?.toString() === strUserId &&
+        ticket.status !== StatusEnum.Closed
     );
   }
 
-  //   addTask(taskData: NewTaskData, userId: string) {
-  //     this.tasks.unshift({
-  //       id: new Date().getTime().toString(),
-  //       userId: userId,
-  //       title: taskData.title,
-  //       summary: taskData.summary,
-  //       dueDate: taskData.date,
-  //     });
-  //     this.saveTasks();
-  //   }
-
-  //   removeTask(id: string) {
-  //     this.tasks = this.tasks.filter((task) => task.id !== id);
-  //     this.saveTasks();
-  //   }
-
-  //   private saveTasks() {
-  //     localStorage.setItem('tasks', JSON.stringify(this.tasks));
-  //   }
-
-  createTicket(ticketData: Partial<Ticket>) {
-    const dateObj = new Date();
-    const formattedDate =
-      dateObj.getFullYear() +
-      '/' +
-      dateObj.getMonth() +
-      '/' +
-      dateObj.getDate() +
-      ' @ ' +
-      dateObj.getHours() +
-      ':' +
-      dateObj.getMinutes() +
-      ':' +
-      dateObj.getSeconds();
-
-    const newTicket: Ticket = {
-      id: this.tickets.length + 1,
-      userId: ticketData.userId || 0,
-      status: ticketData.status || StatusEnum.Open,
-      title: ticketData.title || '',
-      description: ticketData.description || '',
-      employeeNumber: ticketData.employeeNumber || '',
-      assignedTo: ticketData.assignedTo || '',
-      priority: ticketData.priority || PriorityEnum.Medium,
-      category: ticketData.category || '?',
-      sentiment: ticketData.sentiment || SentimentEnum.Neutral,
-      comments: ticketData.comments || [],
-      attachments: ticketData.attachments || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.tickets.unshift(newTicket);
-    return newTicket;
-  }
-
-  // Method to get all tickets for HR dashboard
-  getAllTickets() {
-    return this.tickets;
-  }
-
-  // Get tickets filtered by status
-  getTicketsByStatus(status: StatusEnum) {
-    return this.tickets.filter((ticket) => ticket.status === status);
-  }
-
-  // Assign ticket to HR representative
-  assignTicket(ticketId: number, hrUserId: string) {
-    const ticketIndex = this.tickets.findIndex(
-      (ticket) => ticket.id === ticketId
-    );
-
-    if (ticketIndex !== -1) {
-      this.tickets[ticketIndex] = {
-        ...this.tickets[ticketIndex],
-        assignedTo: hrUserId,
+  // Create a new ticket
+  createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
+    if (this.useMockData) {
+      // Generate a mock ticket with an ID
+      const newTicket: Ticket = {
+        id: Math.random().toString(36).substr(2, 9),
+        title: ticket.title || 'Untitled',
+        description: ticket.description || '',
+        employeeNumber: ticket.employeeNumber || 'unknown',
+        assignedTo: ticket.assignedTo || '',
+        status: StatusEnum.Open,
+        priority: ticket.priority || PriorityEnum.Medium,
+        category: ticket.category || CategoryEnum.General,
+        createdAt: new Date(),
         updatedAt: new Date(),
       };
-      return true;
+
+      // Add to local cache
+      this.tickets.push(newTicket);
+      console.log('Created mock ticket:', newTicket);
+
+      return of(newTicket);
     }
-    return false;
+
+    // Otherwise use the real API
+    return this.apiService.createTicket(ticket).pipe(
+      tap((newTicket) => {
+        this.tickets.push(newTicket);
+      }),
+      catchError((error) => {
+        console.error('Error creating ticket', error);
+        return throwError(() => new Error('Failed to create ticket'));
+      })
+    );
+  }
+
+  // Update a ticket
+  updateTicket(id: string, ticketData: Partial<Ticket>): Observable<Ticket> {
+    return this.apiService.updateTicket(id, ticketData).pipe(
+      tap((updatedTicket) => {
+        const index = this.tickets.findIndex((t) => t.id?.toString() === id);
+        if (index !== -1) {
+          this.tickets[index] = { ...this.tickets[index], ...updatedTicket };
+        }
+      }),
+      catchError((error) => {
+        console.error('Error updating ticket', error);
+        return throwError(() => new Error('Failed to update ticket'));
+      })
+    );
+  }
+
+  // Delete a ticket
+  deleteTicket(id: number): Observable<boolean> {
+    return this.apiService.deleteTicket(id.toString()).pipe(
+      map(() => {
+        this.tickets = this.tickets.filter(
+          (t) => t.id?.toString() !== id.toString()
+        );
+        return true;
+      }),
+      catchError((error) => {
+        console.error('Error deleting ticket', error);
+        return throwError(() => new Error('Failed to delete ticket'));
+      })
+    );
   }
 
   // Update ticket status
-  updateTicketStatus(ticketId: number, newStatus: StatusEnum): boolean {
-    const ticketIndex = this.tickets.findIndex(
-      (ticket) => ticket.id === ticketId
-    );
-
-    if (ticketIndex !== -1) {
-      this.tickets[ticketIndex] = {
-        ...this.tickets[ticketIndex],
-        status: newStatus,
-        updatedAt: new Date(),
-      };
-      return true;
+  updateTicketStatus(id: number, status: StatusEnum): Observable<Ticket> {
+    if (this.useMockData) {
+      // Find and update ticket in local cache
+      const index = this.tickets.findIndex(
+        (t) => t.id?.toString() === id.toString()
+      );
+      if (index !== -1) {
+        this.tickets[index] = {
+          ...this.tickets[index],
+          status: status,
+        };
+        return of(this.tickets[index]);
+      }
+      return throwError(() => new Error('Ticket not found'));
+    } else {
+      return this.apiService.updateTicketStatus(id.toString(), status).pipe(
+        tap((updatedTicket) => {
+          const index = this.tickets.findIndex(
+            (t) => t.id?.toString() === id.toString()
+          );
+          if (index !== -1) {
+            this.tickets[index] = {
+              ...this.tickets[index],
+              status: updatedTicket.status,
+            };
+          }
+        }),
+        catchError((error) => {
+          console.error('Error updating ticket status', error);
+          return throwError(() => new Error('Failed to update ticket status'));
+        })
+      );
     }
-    return false;
+  }
+
+  // Assign ticket to HR
+  assignTicket(ticketId: number, hrUserId: string): Observable<boolean> {
+    if (this.useMockData) {
+      const index = this.tickets.findIndex(
+        (t) => t.id?.toString() === ticketId.toString()
+      );
+      if (index !== -1) {
+        this.tickets[index] = {
+          ...this.tickets[index],
+          assignedTo: hrUserId,
+        };
+        console.log('Assigned ticket:', this.tickets[index]);
+        return of(true);
+      }
+      return of(false);
+    } else {
+      return this.apiService.assignTicket(ticketId.toString(), hrUserId).pipe(
+        map((response: any) => {
+          if (response) {
+            const index = this.tickets.findIndex(
+              (t) => t.id === ticketId.toString()
+            );
+            if (index !== -1) {
+              this.tickets[index] = {
+                ...this.tickets[index],
+                assignedTo: hrUserId,
+              };
+            }
+            return true;
+          }
+          return false;
+        }),
+        catchError((error) => {
+          console.error('Error assigning ticket', error);
+          return throwError(() => new Error('Failed to assign ticket'));
+        })
+      );
+    }
   }
 
   // Update ticket priority
-  updateTicketPriority(ticketId: number, priority: PriorityEnum) {
-    const ticketIndex = this.tickets.findIndex(
-      (ticket) => ticket.id === ticketId
-    );
-
-    if (ticketIndex !== -1) {
-      this.tickets[ticketIndex] = {
-        ...this.tickets[ticketIndex],
-        priority: priority,
-        updatedAt: new Date(),
-      };
-      return true;
+  updateTicketPriority(id: string, priority: PriorityEnum): Observable<Ticket> {
+    if (this.useMockData) {
+      const index = this.tickets.findIndex((t) => t.id === id);
+      if (index !== -1) {
+        this.tickets[index] = { ...this.tickets[index], priority };
+        return of(this.tickets[index]);
+      }
+      return throwError(() => new Error('Ticket not found'));
+    } else {
+      return this.apiService.updateTicket(id, { priority }).pipe(
+        tap((updatedTicket) => {
+          const index = this.tickets.findIndex((t) => t.id === id);
+          if (index !== -1) {
+            this.tickets[index] = { ...this.tickets[index], priority };
+          }
+        }),
+        catchError((error) => {
+          console.error('Error updating ticket priority', error);
+          return throwError(
+            () => new Error('Failed to update ticket priority')
+          );
+        })
+      );
     }
-    return false;
   }
 }
