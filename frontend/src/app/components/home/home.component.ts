@@ -73,43 +73,34 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    let tickets: Ticket[] = [];
+    console.log('Current user:', this.currentUser);
 
-    if (this.currentUser.userType === 'admin') {
-      tickets = [...this.ticketService['tickets']].map((ticket) => ({
-        ...ticket,
-        priority: ticket.priority || PriorityEnum.Medium,
-        category: ticket.category || CategoryEnum.General,
-      }));
-    } else {
-      const userId = this.currentUser.id
-        ? parseInt(this.currentUser.id, 10)
-        : 0;
-      tickets = this.ticketService
-        .getOpenTicketsByUserId(userId)
-        .map((ticket) => ({
-          ...ticket,
-          priority: ticket.priority || PriorityEnum.Medium,
-          category: ticket.category || CategoryEnum.General,
-        }));
-    }
+    // Use the observable pattern for real backend data
+    this.ticketService.loadTickets().subscribe((tickets) => {
+      console.log('Tickets from API:', tickets);
 
-    // Store all tickets for filtering
-    this.filteredTickets = tickets;
+      // No filtering, just use tickets directly from the API
+      const filteredTickets = tickets;
 
-    // Group tickets by status
-    this.openTickets = tickets.filter(
-      (ticket) => ticket.status === StatusEnum.Open
-    );
-    this.inProgressTickets = tickets.filter(
-      (ticket) => ticket.status === StatusEnum.InProgress
-    );
-    this.resolvedTickets = tickets.filter(
-      (ticket) => ticket.status === StatusEnum.Resolved
-    );
-    this.closedTickets = tickets.filter(
-      (ticket) => ticket.status === StatusEnum.Closed
-    );
+      console.log('Using tickets:', filteredTickets);
+
+      // Store all tickets
+      this.filteredTickets = filteredTickets;
+
+      // Group tickets by status
+      this.openTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Open
+      );
+      this.inProgressTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.InProgress
+      );
+      this.resolvedTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Resolved
+      );
+      this.closedTickets = filteredTickets.filter(
+        (ticket) => ticket.status === StatusEnum.Closed
+      );
+    });
   }
 
   openSettings(): void {
@@ -118,7 +109,14 @@ export class HomeComponent implements OnInit {
 
   editTicket(ticket: Ticket): void {
     console.log('Navigating to edit page for ticket ID:', ticket.id);
+
+    // Set the current ticket in the service
     this.ticketService.currentTicket = ticket;
+
+    // Store the ID in local storage as a backup
+    localStorage.setItem('currentTicketId', ticket.id || '');
+
+    // Then navigate
     this.routerService.navigateToTicketEdit();
   }
 

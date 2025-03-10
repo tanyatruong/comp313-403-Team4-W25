@@ -8,13 +8,21 @@ export const login = async (req, res) => {
 	logger.request(req);
 
 	try {
-		const { employeeNumber, password } = req.body;
-		logger.info(`Login attempt for employee number: ${employeeNumber}`);
+		const { email, employeeNumber, password } = req.body;
+		logger.info(
+			`Login attempt for ${
+				email ? "email: " + email : "employee number: " + employeeNumber
+			}`
+		);
 
-		// Validate input
-		if (!employeeNumber || !password) {
-			logger.info("Login failed: Missing employee number or password");
-			const response = { message: "Employee ID and password are required" };
+		// Check if either email or employeeNumber is provided
+		if ((!email && !employeeNumber) || !password) {
+			logger.info(
+				`Login failed: Missing credentials - need either email or employee number, plus password`
+			);
+			const response = {
+				message: "Employee ID/Email and password are required",
+			};
 			logger.response(400, response, Date.now() - startTime);
 			return res.status(400).json(response);
 		}

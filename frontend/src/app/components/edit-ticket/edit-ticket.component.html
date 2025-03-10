@@ -1,0 +1,49 @@
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+    <h2>Edit Ticket</h2>
+
+    <div *ngIf="errorMessage" class="p-message p-message-error mb-3">
+        <div class="p-message-text">{{ errorMessage }}</div>
+    </div>
+
+    <div *ngIf="!ticket" class="p-4 text-center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <p>Loading ticket details...</p>
+    </div>
+
+    <form *ngIf="ticket" #ticketForm="ngForm" (ngSubmit)="saveTicket()">
+        <div class="field mb-4">
+            <label for="title" class="block font-medium mb-2">Title</label>
+            <input id="title" type="text" pInputText class="w-full" [(ngModel)]="ticket.title" name="title" required>
+        </div>
+
+        <div class="field mb-4">
+            <label for="description" class="block font-medium mb-2">Description</label>
+            <textarea id="description" pInputTextarea class="w-full" rows="5" [(ngModel)]="ticket.description"
+                name="description" required></textarea>
+        </div>
+
+        <div class="field mb-4">
+            <label for="status" class="block font-medium mb-2">Status</label>
+            <p-dropdown id="status" [options]="statusOptions" [(ngModel)]="ticket.status" name="status"
+                [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="field mb-4">
+            <label for="priority" class="block font-medium mb-2">Priority</label>
+            <p-dropdown id="priority" [options]="priorityOptions" [(ngModel)]="ticket.priority" name="priority"
+                [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="field mb-4">
+            <label for="category" class="block font-medium mb-2">Category</label>
+            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="ticket.category" name="category"
+                [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="flex justify-content-end mt-4">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                class="p-button-outlined p-button-secondary mr-2" (click)="cancel()"></button>
+            <button pButton type="submit" label="Save" icon="pi pi-check" [disabled]="!ticketForm.valid"></button>
+        </div>
+    </form>
+</div>
