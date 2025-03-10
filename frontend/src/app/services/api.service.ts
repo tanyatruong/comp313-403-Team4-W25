@@ -75,4 +75,12 @@ export class ApiService {
       assignedTo: hrUserId,
     });
   }
+
+  // Add this method to ApiService
+  login(email: string, password: string): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/auth/login`, {
+      employeeNumber: email,
+      password,
+    });
+  }
 }

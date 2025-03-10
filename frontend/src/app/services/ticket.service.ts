@@ -15,7 +15,7 @@ export class TicketService {
   currentTicket: Ticket | null = null;
 
   // Add a flag to control API vs mock data
-  private useMockData = true; // Set to false when backend is ready
+  private useMockData = false; // Now using real backend
 
   constructor(private apiService: ApiService) {}
 
@@ -83,11 +83,29 @@ export class TicketService {
   // Get tickets by user ID
   getOpenTicketsByUserId(userId: number): Ticket[] {
     const strUserId = userId.toString();
-    return this.tickets.filter(
-      (ticket) =>
-        ticket.userId?.toString() === strUserId &&
-        ticket.status !== StatusEnum.Closed
-    );
+
+    if (this.useMockData) {
+      return this.tickets.filter(
+        (ticket) =>
+          ticket.userId?.toString() === strUserId &&
+          ticket.status !== StatusEnum.Closed
+      );
+    } else {
+      // For real API, we should fetch the tickets if not loaded yet
+      if (!this.loaded) {
+        this.loadTickets().subscribe();
+      }
+
+      // Then filter the tickets from our local cache
+      return this.tickets.filter(
+        (ticket) =>
+          ticket.userId?.toString() === strUserId &&
+          ticket.status !== StatusEnum.Closed
+      );
+
+      // Note: In a more sophisticated implementation, we might want to
+      // call a specific API endpoint like apiService.getTicketsByUserId()
+    }
   }
 
   // Create a new ticket

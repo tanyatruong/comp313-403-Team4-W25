@@ -2,6 +2,9 @@ import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { type User } from '../data/models/user.model';
 import { UserRoleEnum } from '../data/enums/UserRoleEnum';
+import { ApiService } from './api.service';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -54,52 +57,29 @@ export class UserService {
 
   loggedInUser!: User;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private apiService: ApiService
+  ) {}
 
-  authenticateUserLoginAndReturnResult(
-    email: string,
-    password: string
-  ): boolean {
-    // DEV ONLY: Accept any credentials that match these patterns
-    if (
-      (email === 'admin' && password === 'admin') ||
-      (email === 'hr1' && password === 'hr1') ||
-      (email === 'emp1' && password === 'emp1')
-    ) {
-      // Create mock user
-      const userType = email.startsWith('admin')
-        ? 'admin'
-        : email.startsWith('hr')
-        ? 'hr'
-        : 'employee';
-
-      const mockUser: User = {
-        id: '123',
-        employeeId: '123',
-        name: email,
-        email: `${email}@example.com`,
-        userType: userType,
-        employeeNumber: email,
-        role:
-          userType === 'admin'
-            ? UserRoleEnum.Admin
-            : userType === 'hr'
-            ? UserRoleEnum.HR
-            : UserRoleEnum.Employee,
-        createdAt: new Date(),
-      };
-
-      // Only set localStorage in browser environment
-      if (isPlatformBrowser(this.platformId)) {
-        localStorage.setItem('currentUser', JSON.stringify(mockUser));
-      }
-
-      this.loggedInUser = mockUser;
-      return true;
-    }
-
-    console.log('Login Unsuccessful');
-    return false;
+  authenticateUser(email: string, password: string): Observable<boolean> {
+    return this.apiService.login(email, password).pipe(
+      map((user) => {
+        if (user) {
+          // Only set localStorage in browser environment
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+          }
+          this.loggedInUser = user;
+          return true;
+        }
+        return false;
+      }),
+      catchError((error) => {
+        console.error('Login failed', error);
+        return of(false);
+      })
+    );
   }
 
   // Helper to maintain backward compatibility
