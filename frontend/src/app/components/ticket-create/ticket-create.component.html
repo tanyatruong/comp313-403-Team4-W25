@@ -1,77 +1,41 @@
-<div
-  class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
-  style="min-height: 92vh"
->
-  <!-- surface-card p-4 shadow-2 border-round w-4 m-auto mt-8 min-w-min -->
-  <!-- w-full h-auto lg:w-4 justify-content-center align-items-center -->
-  <div id="Header">
-    <div
-      id="buttonContainer"
-      class="surface-card shadow-2 flex justify-content-end flex-wrap m-2"
-    >
-      <button
-        pButton
-        pRipple
-        label="Return"
-        icon="pi pi-home"
-        class="w-full min-w-min max-w-min"
-        (click)="onReturnButtonClick()"
-      ></button>
-    </div>
-    <div
-      id="ticketContainer"
-      class="surface-card shadow-2 border-round flex justify-content-around align-content-end"
-    >
-      <div id="topFunctions">
-        <div id="employeeIDInput">
-          <p-floatLabel>
-            <input id="employeeIDInput" type="text" pInputText />
-            <label for="employeeIDInput">employeeID</label>
-          </p-floatLabel>
-        </div>
-      </div>
-      <!-- <div
-        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2"
-        [ngClass]="
-          ticket.status == 'open' ? 'green-background' : 'red-background'
-        "
-      >
-        Ticket Status: {{ ticket.status }}
-      </div>
-      <div
-        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2 blue-background"
-      >
-        Date of Ticket Creation {{ ticket.dateAndTimeOfCreation }} -->
-      <!-- <p-card styleClass="mypcard">Other Related information</p-card>
-    <p-card styleClass="mypcard">Date of Ticket Creation</p-card> -->
-      <!-- </div>
-    </div> -->
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h1 class="text-2xl font-bold">Create New Ticket</h1>
+    <button pButton label="Back" icon="pi pi-arrow-left" (click)="goBack()" class="p-button-outlined"></button>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #ticketForm="ngForm" class="p-fluid">
+    <div class="field mb-4">
+      <label for="title" class="font-bold block mb-2">Subject *</label>
+      <input id="title" type="text" pInputText [(ngModel)]="newTicket.title" name="title" required
+        placeholder="Enter a descriptive subject" class="w-full p-inputtext">
     </div>
 
-    <div id="chatContainer" class="shadow-2 text-center mb-4">
-      <p>ticket-create works!</p>
-      <div>This is Where ticket creation controls go</div>
+    <div class="field mb-4">
+      <label for="description" class="font-bold block mb-2">Description *</label>
+      <textarea id="description" pInputTextarea [(ngModel)]="newTicket.description" name="description" required rows="5"
+        placeholder="Provide details about your issue" class="w-full"></textarea>
     </div>
-    <div
-      id="bottomButtonControlBar"
-      class="flex flex-row justify-content-between"
-    >
-      <button
-        pButton
-        pRipple
-        label="Discard Ticket"
-        icon="pi pi-times-circle"
-        class="w-full min-w-min max-w-min"
-        (click)="onDiscardButtonClick()"
-      ></button>
-      <button
-        pButton
-        pRipple
-        label="Complete Ticket Creation"
-        icon="pi pi-file-export"
-        class="w-full min-w-min max-w-min"
-        (click)="onCompleteTicketCreationButtonClick()"
-      ></button>
+
+    <div class="field mb-4">
+      <label for="category" class="font-bold block mb-2">Category *</label>
+      <p-dropdown id="category" [options]="categories" [(ngModel)]="newTicket.category" name="category"
+        placeholder="Select a category" [required]="true" optionLabel="name" optionValue="value"
+        class="w-full"></p-dropdown>
     </div>
-  </div>
+
+    <div class="field mb-4">
+      <label for="priority" class="font-bold block mb-2">Priority *</label>
+      <p-dropdown id="priority" [options]="priorities" [(ngModel)]="newTicket.priority" name="priority"
+        placeholder="Select priority level" [required]="true" optionLabel="name" optionValue="value"
+        class="w-full"></p-dropdown>
+    </div>
+
+    <div class="flex justify-content-end mt-4">
+      <button pButton type="button" label="Cancel" class="p-button-outlined p-button-secondary mr-2"
+        (click)="goBack()"></button>
+      <button pButton type="submit" label="Submit Ticket" [disabled]="!ticketForm.form.valid"
+        icon="pi pi-check"></button>
+    </div>
+  </form>
 </div>
