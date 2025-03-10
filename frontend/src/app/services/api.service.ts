@@ -58,8 +58,8 @@ export class ApiService {
   }
 
   // Get tickets by user ID
-  getTicketsByUserId(userId: string): Observable<Ticket[]> {
-    return this.http.get<Ticket[]>(`${this.apiUrl}/tickets/user/${userId}`);
+  getTicketsByUserId(userId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/tickets/user/${userId}`);
   }
 
   // Update ticket status
@@ -73,6 +73,14 @@ export class ApiService {
   assignTicket(id: string, hrUserId: string): Observable<Ticket> {
     return this.http.patch<Ticket>(`${this.apiUrl}/tickets/${id}/assign`, {
       assignedTo: hrUserId,
+    });
+  }
+
+  // Add this method to ApiService
+  login(email: string, password: string): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/auth/login`, {
+      employeeNumber: email,
+      password,
     });
   }
 }

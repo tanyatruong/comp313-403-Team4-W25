@@ -2,6 +2,9 @@ import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { type User } from '../data/models/user.model';
 import { UserRoleEnum } from '../data/enums/UserRoleEnum';
+import { ApiService } from './api.service';
+import { Observable, of, tap } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -52,54 +55,39 @@ export class UserService {
     },
   ];
 
-  loggedInUser!: User;
+  private loggedInUser: User | null = null;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private apiService: ApiService
+  ) {
+    this.getLoggedInUser();
+  }
 
-  authenticateUserLoginAndReturnResult(
-    email: string,
+  authenticateUser(
+    employeeNumber: string,
     password: string
-  ): boolean {
-    // DEV ONLY: Accept any credentials that match these patterns
-    if (
-      (email === 'admin' && password === 'admin') ||
-      (email === 'hr1' && password === 'hr1') ||
-      (email === 'emp1' && password === 'emp1')
-    ) {
-      // Create mock user
-      const userType = email.startsWith('admin')
-        ? 'admin'
-        : email.startsWith('hr')
-        ? 'hr'
-        : 'employee';
+  ): Observable<boolean> {
+    return this.apiService.login(employeeNumber, password).pipe(
+      tap((user) => {
+        console.log('Authenticated user:', user);
+        this.loggedInUser = {
+          ...user,
+          userType: user.role?.toLowerCase() || 'employee',
+          employeeNumber: user.employeeNumber || employeeNumber,
+        };
 
-      const mockUser: User = {
-        id: '123',
-        employeeId: '123',
-        name: email,
-        email: `${email}@example.com`,
-        userType: userType,
-        employeeNumber: email,
-        role:
-          userType === 'admin'
-            ? UserRoleEnum.Admin
-            : userType === 'hr'
-            ? UserRoleEnum.HR
-            : UserRoleEnum.Employee,
-        createdAt: new Date(),
-      };
-
-      // Only set localStorage in browser environment
-      if (isPlatformBrowser(this.platformId)) {
-        localStorage.setItem('currentUser', JSON.stringify(mockUser));
-      }
-
-      this.loggedInUser = mockUser;
-      return true;
-    }
-
-    console.log('Login Unsuccessful');
-    return false;
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem(
+            'currentUser',
+            JSON.stringify(this.loggedInUser)
+          );
+          localStorage.setItem('authToken', 'dummy-token-' + Date.now());
+        }
+      }),
+      map((user) => !!user),
+      catchError(() => of(false))
+    );
   }
 
   // Helper to maintain backward compatibility
@@ -117,14 +105,11 @@ export class UserService {
   }
 
   getLoggedInUser(): User | null {
-    // If we already have the logged-in user in memory, return it
     if (this.loggedInUser) {
       return this.loggedInUser;
     }
 
-    // Check if we're in the browser environment
     if (isPlatformBrowser(this.platformId)) {
-      // Only access localStorage in browser
       const storedUser = localStorage.getItem('currentUser');
       if (storedUser) {
         this.loggedInUser = JSON.parse(storedUser);
@@ -133,6 +118,22 @@ export class UserService {
     }
 
     return null;
+  }
+
+  isAuthenticated(): boolean {
+    return (
+      isPlatformBrowser(this.platformId) &&
+      !!localStorage.getItem('authToken') &&
+      !!this.getLoggedInUser()
+    );
+  }
+
+  logout(): void {
+    this.loggedInUser = null;
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('authToken');
+    }
   }
 
   // Get all HR users for assignment
