@@ -168,4 +168,15 @@ export class HomeComponent implements OnInit {
   navigateToHRDashboard(): void {
     this.routerService.navigateToHRDashboard();
   }
+
+  // Add this helper method to check if the current user is HR or admin
+  isHrOrAdmin(): boolean {
+    if (!this.currentUser || !this.currentUser.userType) {
+      return false;
+    }
+
+    // Check if user is admin or HR (case-insensitive)
+    const userType = this.currentUser.userType.toLowerCase();
+    return userType === 'admin' || userType === 'hr';
+  }
 }
