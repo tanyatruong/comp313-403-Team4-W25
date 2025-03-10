@@ -10,7 +10,8 @@ export const login = async (req, res) => {
 	try {
 		const { email, employeeNumber, password } = req.body;
 		logger.info(
-			`Login attempt for ${email ? "email: " + email : "employee number: " + employeeNumber
+			`Login attempt for ${
+				email ? "email: " + email : "employee number: " + employeeNumber
 			}`
 		);
 
@@ -71,6 +72,7 @@ export const login = async (req, res) => {
 		// Send success response
 		const response = {
 			message: "Login successful",
+			token: token,
 			user: {
 				id: user._id,
 				name: user.name,
