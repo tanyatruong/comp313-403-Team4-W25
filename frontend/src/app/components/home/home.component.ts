@@ -5,15 +5,17 @@ import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
 import { PriorityEnum } from '../../data/enums/PriorityEnum';
+import { CategoryEnum } from '../../data/enums/CategoryEnum';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
@@ -28,7 +30,13 @@ export class HomeComponent implements OnInit {
 
   // Modal State
   showDeleteModal: boolean = false;
-  ticketToDelete: number | null = null;
+  ticketToDelete: string | null = null;
+
+  // Add these properties to store tickets by status
+  openTickets: Ticket[] = [];
+  inProgressTickets: Ticket[] = [];
+  resolvedTickets: Ticket[] = [];
+  closedTickets: Ticket[] = [];
 
   StatusEnum = StatusEnum;
 
@@ -65,32 +73,43 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // if (this.currentUser.userType === 'admin') {
-    //   this.tickets = [...this.ticketService['tickets']];
-    // } else {
-    //   const userId = parseInt(this.currentUser.id, 10);
-    //   this.tickets = this.ticketService.getOpenTicketsByUserId(userId);
-    // }
+    let tickets: Ticket[] = [];
+
     if (this.currentUser.userType === 'admin') {
-      this.filteredTickets = [...this.ticketService['tickets']].map(
-        (ticket) => ({
-          ...ticket,
-          priority: PriorityEnum.Medium,
-          category: 'General',
-        })
-      );
+      tickets = [...this.ticketService['tickets']].map((ticket) => ({
+        ...ticket,
+        priority: ticket.priority || PriorityEnum.Medium,
+        category: ticket.category || CategoryEnum.General,
+      }));
     } else {
       const userId = this.currentUser.id
         ? parseInt(this.currentUser.id, 10)
         : 0;
-      this.filteredTickets = this.ticketService
+      tickets = this.ticketService
         .getOpenTicketsByUserId(userId)
         .map((ticket) => ({
           ...ticket,
-          priority: PriorityEnum.Medium,
-          category: 'General',
+          priority: ticket.priority || PriorityEnum.Medium,
+          category: ticket.category || CategoryEnum.General,
         }));
     }
+
+    // Store all tickets for filtering
+    this.filteredTickets = tickets;
+
+    // Group tickets by status
+    this.openTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Open
+    );
+    this.inProgressTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.InProgress
+    );
+    this.resolvedTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Resolved
+    );
+    this.closedTickets = tickets.filter(
+      (ticket) => ticket.status === StatusEnum.Closed
+    );
   }
 
   openSettings(): void {
@@ -103,7 +122,7 @@ export class HomeComponent implements OnInit {
     this.routerService.navigateToTicketEdit();
   }
 
-  deleteTicket(ticketId: number): void {
+  deleteTicket(ticketId: string): void {
     this.showDeleteModal = true;
     this.ticketToDelete = ticketId;
   }
@@ -111,11 +130,11 @@ export class HomeComponent implements OnInit {
   confirmDelete(): void {
     if (this.ticketToDelete !== null) {
       this.filteredTickets = this.filteredTickets.filter(
-        (ticket) => ticket.id !== this.ticketToDelete
+        (ticket) => ticket.id?.toString() !== this.ticketToDelete
       );
 
       const ticketIndex = this.ticketService['tickets'].findIndex(
-        (ticket) => ticket.id === this.ticketToDelete
+        (ticket) => ticket.id?.toString() === this.ticketToDelete
       );
       if (ticketIndex > -1) {
         this.ticketService['tickets'].splice(ticketIndex, 1);

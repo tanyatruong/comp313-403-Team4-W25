@@ -1,7 +1,8 @@
 import { UserRoleEnum } from '../enums/UserRoleEnum';
 
 export interface User {
-  id?: string; // For frontend use
+  id: string;
+  employeeId: string;
   employeeNumber?: string;
   name: string;
   email: string;

@@ -10,17 +10,22 @@ import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
 import { SentimentEnum } from '../../data/enums/SentimentEnum';
 import { PriorityEnum } from '../../data/enums/PriorityEnum';
+import { CategoryEnum } from '../../data/enums/CategoryEnum';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, PrimengModule],
+  imports: [CommonModule, FormsModule, PrimengModule, HttpClientModule],
   templateUrl: './hr-dashboard.component.html',
   styleUrls: ['./hr-dashboard.component.css'],
 })
 export class HrDashboardComponent implements OnInit {
   // Add this line to expose StatusEnum to the template
   StatusEnum = StatusEnum;
+
+  // Add this line to expose CategoryEnum to the template
+  CategoryEnum = CategoryEnum;
 
   // Tickets organized by status
   openTickets: Ticket[] = [];
@@ -57,14 +62,13 @@ export class HrDashboardComponent implements OnInit {
   sortBy: string = 'dateAndTimeOfCreation';
   sortOrder: 'asc' | 'desc' = 'desc';
 
-  // Category options
+  // Update categoryOptions to use CategoryEnum
   categoryOptions = [
-    { label: 'IT Support', value: 'IT Support' },
-    { label: 'HR', value: 'HR' },
-    { label: 'Facilities', value: 'Facilities' },
-    { label: 'Finance', value: 'Finance' },
-    { label: 'General', value: 'General' },
-    { label: 'Other', value: 'Other' },
+    { label: 'General Inquiry', value: CategoryEnum.General },
+    { label: 'Technical Support', value: CategoryEnum.Technical },
+    { label: 'Payroll Issue', value: CategoryEnum.Payroll },
+    { label: 'Benefits Question', value: CategoryEnum.Benefits },
+    { label: 'Office Facilities', value: CategoryEnum.Facilities },
   ];
 
   constructor(
@@ -90,14 +94,16 @@ export class HrDashboardComponent implements OnInit {
         assignedTo: ticket.assignedTo,
         status: ticket.status,
         priority: ticket.priority,
-        category: ticket.category || 'General',
+        category: ticket.category || CategoryEnum.General,
         sentiment: ticket.sentiment,
         comments: ticket.comments,
         attachments: ticket.attachments,
         createdAt: ticket.createdAt,
         updatedAt: ticket.updatedAt,
         // Add any derived properties needed for UI
-        dateAndTimeOfCreation: ticket.createdAt.toISOString(),
+        dateAndTimeOfCreation: ticket.createdAt
+          ? ticket.createdAt.toISOString()
+          : new Date().toISOString(),
       };
     });
 
@@ -199,7 +205,7 @@ export class HrDashboardComponent implements OnInit {
   assignTicket(): void {
     if (this.selectedTicket && this.selectedTicket.id && this.selectedHrId) {
       this.ticketService.assignTicket(
-        this.selectedTicket.id,
+        Number(this.selectedTicket.id),
         this.selectedHrId
       );
       this.loadTickets();
@@ -208,7 +214,7 @@ export class HrDashboardComponent implements OnInit {
 
   updateStatus(ticket: Ticket, newStatus: StatusEnum): void {
     if (ticket.id) {
-      this.ticketService.updateTicketStatus(ticket.id, newStatus);
+      this.ticketService.updateTicketStatus(Number(ticket.id), newStatus);
       this.loadTickets();
 
       // Update if we were viewing the ticket
@@ -220,7 +226,7 @@ export class HrDashboardComponent implements OnInit {
           ? {
               ...foundTicket,
               priority: PriorityEnum.Medium,
-              category: 'General',
+              category: CategoryEnum.General,
             }
           : null;
       }
@@ -237,7 +243,7 @@ export class HrDashboardComponent implements OnInit {
           .getAllTickets()
           .find((t) => t.id === ticket.id);
         this.selectedTicket = foundTicket
-          ? { ...foundTicket, category: 'General' }
+          ? { ...foundTicket, category: CategoryEnum.General }
           : null;
       }
     }

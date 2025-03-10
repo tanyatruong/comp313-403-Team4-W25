@@ -165,12 +165,7 @@
       height="50"
       class="mb-3"
     /> -->
-    <p-image
-      src="assets/images/icons/noun-bunny_purple.png"
-      alt="Hopper Logo"
-      height="50"
-      class="mb-3"
-    />
+    <p-image src="assets/images/icons/noun-bunny_purple.png" alt="Hopper Logo" height="50" class="mb-3" />
     <div class="text-900 text-3xl font-medium mb-3">HoppeR</div>
     <!-- <span class="text-600 font-medium line-height-3"
         >Don't have an account?</span
@@ -181,31 +176,13 @@
   </div>
 
   <div>
-    <label for="username" class="block text-900 font-medium mb-2"
-      >Username</label
-    >
-    <input
-      id="username"
-      type="text"
-      placeholder="Username"
-      pInputText
-      class="w-full mb-3"
-      [(ngModel)]="username"
-      (keyup.enter)="onEnterButtonPress()"
-    />
+    <label for="email" class="block text-900 font-medium mb-2">Email</label>
+    <input id="email" type="email" placeholder="Email" pInputText class="w-full mb-3" [(ngModel)]="email"
+      (keyup.enter)="onEnterButtonPress()" required />
 
-    <label for="password" class="block text-900 font-medium mb-2"
-      >Password</label
-    >
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      pInputText
-      class="w-full mb-3"
-      [(ngModel)]="password"
-      (keyup.enter)="onEnterButtonPress()"
-    />
+    <label for="password" class="block text-900 font-medium mb-2">Password</label>
+    <input id="password" type="password" placeholder="Password" pInputText class="w-full mb-3" [(ngModel)]="password"
+      (keyup.enter)="onEnterButtonPress()" />
 
     <!-- <div id="rememberMeAndForgotPassord" class="flex align-items-center justify-content-between mb-6">
       <div class="flex align-items-center">
@@ -222,13 +199,7 @@
       >
     </div> -->
 
-    <button
-      pButton
-      pRipple
-      label="Sign In"
-      icon="pi pi-user"
-      class="w-full min-w-min"
-      (click)="onLoginAttempt()"
-    ></button>
+    <button pButton pRipple label="Sign In" icon="pi pi-user" class="w-full min-w-min"
+      (click)="onLoginAttempt()"></button>
   </div>
 </div>

@@ -1,0 +1,23 @@
+.field label {
+  color: #495057;
+}
+
+.field input,
+.field textarea {
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+:host ::ng-deep .p-dropdown {
+  border-radius: 6px;
+}
+
+:host ::ng-deep .p-button {
+  border-radius: 6px;
+}
+
+.required-field::after {
+  content: "*";
+  color: red;
+  margin-left: 4px;
+}

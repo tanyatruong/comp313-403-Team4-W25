@@ -6,6 +6,7 @@ import { HomeComponent } from './components/home/home.component';
 import { TicketCreateComponent } from './components/ticket-create/ticket-create.component';
 import { HrDashboardComponent } from './components/hr-dashboard/hr-dashboard.component';
 import { HrAuthGuard } from './guards/hr-auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 // import { SettingsComponent } from './settings/settings.component';
 // import { TicketClosureComponent } from './ticket-closure/ticket-closure.component';
 
@@ -20,6 +21,7 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
+    canActivate: [AuthGuard],
   },
   // {
   //   path: 'settings',
@@ -29,6 +31,7 @@ export const routes: Routes = [
   {
     path: 'ticketcreate',
     component: TicketCreateComponent,
+    canActivate: [AuthGuard],
   },
   // {
   //   path: 'ticketedit',
@@ -55,8 +58,10 @@ export const routes: Routes = [
   {
     path: 'hr-dashboard',
     component: HrDashboardComponent,
-    canActivate: [HrAuthGuard]
+    canActivate: [AuthGuard, HrAuthGuard],
   },
+  // Catch all route - redirect to login
+  { path: '**', redirectTo: 'login' },
 ];
 
 // Not going to use Modules(for routing)
