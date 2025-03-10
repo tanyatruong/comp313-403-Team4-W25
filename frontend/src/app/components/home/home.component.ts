@@ -5,6 +5,7 @@ import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
@@ -14,7 +15,7 @@ import { CategoryEnum } from '../../data/enums/CategoryEnum';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
@@ -29,7 +30,7 @@ export class HomeComponent implements OnInit {
 
   // Modal State
   showDeleteModal: boolean = false;
-  ticketToDelete: number | null = null;
+  ticketToDelete: string | null = null;
 
   // Add these properties to store tickets by status
   openTickets: Ticket[] = [];
@@ -121,7 +122,7 @@ export class HomeComponent implements OnInit {
     this.routerService.navigateToTicketEdit();
   }
 
-  deleteTicket(ticketId: number): void {
+  deleteTicket(ticketId: string): void {
     this.showDeleteModal = true;
     this.ticketToDelete = ticketId;
   }
@@ -129,11 +130,11 @@ export class HomeComponent implements OnInit {
   confirmDelete(): void {
     if (this.ticketToDelete !== null) {
       this.filteredTickets = this.filteredTickets.filter(
-        (ticket) => ticket.id !== this.ticketToDelete
+        (ticket) => ticket.id?.toString() !== this.ticketToDelete
       );
 
       const ticketIndex = this.ticketService['tickets'].findIndex(
-        (ticket) => ticket.id === this.ticketToDelete
+        (ticket) => ticket.id?.toString() === this.ticketToDelete
       );
       if (ticketIndex > -1) {
         this.ticketService['tickets'].splice(ticketIndex, 1);

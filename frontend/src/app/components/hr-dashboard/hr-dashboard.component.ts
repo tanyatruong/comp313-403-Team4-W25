@@ -11,11 +11,12 @@ import { StatusEnum } from '../../data/enums/StatusEnum';
 import { SentimentEnum } from '../../data/enums/SentimentEnum';
 import { PriorityEnum } from '../../data/enums/PriorityEnum';
 import { CategoryEnum } from '../../data/enums/CategoryEnum';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, PrimengModule],
+  imports: [CommonModule, FormsModule, PrimengModule, HttpClientModule],
   templateUrl: './hr-dashboard.component.html',
   styleUrls: ['./hr-dashboard.component.css'],
 })
@@ -100,7 +101,9 @@ export class HrDashboardComponent implements OnInit {
         createdAt: ticket.createdAt,
         updatedAt: ticket.updatedAt,
         // Add any derived properties needed for UI
-        dateAndTimeOfCreation: ticket.createdAt.toISOString(),
+        dateAndTimeOfCreation: ticket.createdAt
+          ? ticket.createdAt.toISOString()
+          : new Date().toISOString(),
       };
     });
 
@@ -202,7 +205,7 @@ export class HrDashboardComponent implements OnInit {
   assignTicket(): void {
     if (this.selectedTicket && this.selectedTicket.id && this.selectedHrId) {
       this.ticketService.assignTicket(
-        this.selectedTicket.id,
+        Number(this.selectedTicket.id),
         this.selectedHrId
       );
       this.loadTickets();
@@ -211,7 +214,7 @@ export class HrDashboardComponent implements OnInit {
 
   updateStatus(ticket: Ticket, newStatus: StatusEnum): void {
     if (ticket.id) {
-      this.ticketService.updateTicketStatus(ticket.id, newStatus);
+      this.ticketService.updateTicketStatus(Number(ticket.id), newStatus);
       this.loadTickets();
 
       // Update if we were viewing the ticket
