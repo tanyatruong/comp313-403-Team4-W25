@@ -1,5 +1,6 @@
 import express from "express";
 import * as ticketController from "../controllers/ticketController.js";
+import { employeeOnly, protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.get("/", ticketController.getAllTickets);
 router.get("/:id", ticketController.getTicketById);
 
 // Create new ticket
-router.post("/", ticketController.createTicket);
+router.post("/", protect, employeeOnly, ticketController.createTicket);
 
 // Update ticket
 router.put("/:id", ticketController.updateTicket);
