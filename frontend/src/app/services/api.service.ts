@@ -3,6 +3,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
+import { StatusEnum } from '../data/enums/StatusEnum';
+import { PriorityEnum } from '../data/enums/PriorityEnum';
+import { tap, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -49,8 +53,17 @@ export class ApiService {
     return this.http.post<Ticket>(`${this.apiUrl}/tickets`, ticket);
   }
 
-  updateTicket(id: string, ticket: Partial<Ticket>): Observable<Ticket> {
-    return this.http.put<Ticket>(`${this.apiUrl}/tickets/${id}`, ticket);
+  updateTicket(ticketId: string, ticket: Ticket): Observable<Ticket> {
+    console.log('API Service: Updating ticket with status:', ticket.status);
+    return this.http
+      .put<Ticket>(`${this.apiUrl}/tickets/${ticketId}`, ticket)
+      .pipe(
+        tap((response) => console.log('API Response:', response)),
+        catchError((error) => {
+          console.error('API Error:', error);
+          return throwError(() => error);
+        })
+      );
   }
 
   deleteTicket(id: string): Observable<any> {
@@ -63,8 +76,8 @@ export class ApiService {
   }
 
   // Update ticket status
-  updateTicketStatus(id: string, status: string): Observable<Ticket> {
-    return this.http.patch<Ticket>(`${this.apiUrl}/tickets/${id}/status`, {
+  updateTicketStatus(ticketId: string, status: StatusEnum): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tickets/${ticketId}/status`, {
       status,
     });
   }
@@ -81,6 +94,16 @@ export class ApiService {
     return this.http.post<User>(`${this.apiUrl}/auth/login`, {
       employeeNumber: email,
       password,
+    });
+  }
+
+  // Add this method to update ticket priority
+  updateTicketPriority(
+    ticketId: string,
+    priority: PriorityEnum
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tickets/${ticketId}/priority`, {
+      priority,
     });
   }
 }
