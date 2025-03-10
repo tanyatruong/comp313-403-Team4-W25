@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
+import { PriorityEnum } from '../../data/enums/PriorityEnum';
 
 @Component({
   selector: 'app-home',
@@ -71,13 +72,24 @@ export class HomeComponent implements OnInit {
     //   this.tickets = this.ticketService.getOpenTicketsByUserId(userId);
     // }
     if (this.currentUser.userType === 'admin') {
-      this.filteredTickets = [...this.ticketService['tickets']].map(ticket => ({
-        ...ticket, priority: 'Medium', category: 'General'
-      }));
+      this.filteredTickets = [...this.ticketService['tickets']].map(
+        (ticket) => ({
+          ...ticket,
+          priority: PriorityEnum.Medium,
+          category: 'General',
+        })
+      );
     } else {
-      const userId = parseInt(this.currentUser.id, 10);
-      this.filteredTickets = this.ticketService.getOpenTicketsByUserId(userId)
-        .map(ticket => ({...ticket, priority: 'Medium', category: 'General'}));
+      const userId = this.currentUser.id
+        ? parseInt(this.currentUser.id, 10)
+        : 0;
+      this.filteredTickets = this.ticketService
+        .getOpenTicketsByUserId(userId)
+        .map((ticket) => ({
+          ...ticket,
+          priority: PriorityEnum.Medium,
+          category: 'General',
+        }));
     }
   }
 

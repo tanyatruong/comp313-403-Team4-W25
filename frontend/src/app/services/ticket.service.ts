@@ -9,167 +9,119 @@ import { SentimentEnum } from '../data/enums/SentimentEnum';
 export class TicketService {
   private dateObj = new Date();
 
-  private tickets = [
+  private tickets: Ticket[] = [
     {
+      id: 1,
+      userId: 1,
       title: '0',
       description: '0',
-      employeeNumber: '0', //mongoose.Schema.Types.ObjectId of (User) employee
-      assignedTo: '0', //mongoose.Schema.Types.ObjectId of (User) HR Employee
-      status: StatusEnum.Open, //enum: ['Open', 'In Progress', 'Resolved', 'Closed'], default: 'Open'
-      pritority: PriorityEnum.Medium, //enum: ['Low', 'Medium', 'High'], default: 'Medium'
+      employeeNumber: '0',
+      assignedTo: '0',
+      status: StatusEnum.Open,
+      priority: PriorityEnum.Medium,
       category: '?',
-      sentiment: SentimentEnum.Neutral, // enum: ['positive', 'neutral', 'negative'], default: 'neutral'
-      comments: [
-        // {
-        //   user: 'string', //user who wrote message in chat
-        //   message: 'string', //text of message
-        //   timestamp: Date, //when message was sent
-        // },
-      ],
+      sentiment: SentimentEnum.Neutral,
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 2,
+      userId: 1,
       title: 't0',
       description: 'd0',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
-      pritority: PriorityEnum.Medium,
+      priority: PriorityEnum.Medium,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 3,
+      userId: 1,
       title: 't1',
       description: 'd1',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
-      pritority: PriorityEnum.High,
+      priority: PriorityEnum.High,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 4,
+      userId: 1,
       title: 't2',
       description: 'd2',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Open,
-      pritority: PriorityEnum.Low,
+      priority: PriorityEnum.Low,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 5,
+      userId: 1,
       title: 't3',
       description: 'd3',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.InProgress,
-      pritority: PriorityEnum.Medium,
+      priority: PriorityEnum.Medium,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 6,
+      userId: 1,
       title: 't4',
       description: 'd4',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Resolved,
-      pritority: PriorityEnum.Medium,
+      priority: PriorityEnum.Medium,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
+      id: 7,
+      userId: 1,
       title: 't5',
       description: 'd5',
       employeeNumber: '1',
       assignedTo: '2',
       status: StatusEnum.Closed,
-      pritority: PriorityEnum.Medium,
+      priority: PriorityEnum.Medium,
       category: '?',
       sentiment: SentimentEnum.Neutral,
-      comments: [
-        // {
-        //   user: 'string',
-        //   message: 'string',
-        //   timestamp: new Date(),
-        // },
-      ],
+      comments: [],
       attachments: ['attachment0', 'attachment1', 'attachment2'],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
-
-    // {
-    //   id: 8,
-    //   userId: 3,
-    //   status: StatusEnum.Closed,
-    //   title: 'title8',
-    //   description: 'description8',
-    //   dateAndTimeOfCreation:
-    //     this.dateObj.getFullYear() +
-    //     '/' +
-    //     this.dateObj.getMonth() +
-    //     '/' +
-    //     this.dateObj.getDate() +
-    //     ' @ ' +
-    //     this.dateObj.getHours() +
-    //     ':' +
-    //     this.dateObj.getMinutes() +
-    //     ':' +
-    //     this.dateObj.getSeconds(),
-    // },
   ];
 
   public currentTicket: Ticket | undefined;
@@ -223,17 +175,24 @@ export class TicketService {
       ':' +
       dateObj.getSeconds();
 
-    const newTicket = {
-      id: this.tickets.length + 1, // Simple ID generation for demo
+    const newTicket: Ticket = {
+      id: this.tickets.length + 1,
       userId: ticketData.userId || 0,
-      // Fix: Ensure status is a StatusEnum value
       status: ticketData.status || StatusEnum.Open,
       title: ticketData.title || '',
       description: ticketData.description || '',
-      dateAndTimeOfCreation: formattedDate,
+      employeeNumber: ticketData.employeeNumber || '',
+      assignedTo: ticketData.assignedTo || '',
+      priority: ticketData.priority || PriorityEnum.Medium,
+      category: ticketData.category || '?',
+      sentiment: ticketData.sentiment || SentimentEnum.Neutral,
+      comments: ticketData.comments || [],
+      attachments: ticketData.attachments || [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    this.tickets.unshift(newTicket); // Add to beginning of array
+    this.tickets.unshift(newTicket);
     return newTicket;
   }
 
@@ -254,40 +213,45 @@ export class TicketService {
     );
 
     if (ticketIndex !== -1) {
-      // Use type assertion to tell TypeScript this is a Ticket
       this.tickets[ticketIndex] = {
-        ...(this.tickets[ticketIndex] as Ticket),
-        assignedToId: hrUserId,
-      } as Ticket;
+        ...this.tickets[ticketIndex],
+        assignedTo: hrUserId,
+        updatedAt: new Date(),
+      };
       return true;
     }
     return false;
   }
 
   // Update ticket status
-  updateTicketStatus(ticketId: number, newStatus: StatusEnum) {
-    const ticketIndex = this.tickets.findIndex(
-      (ticket) => ticket.id === ticketId
-    );
-
-    if (ticketIndex !== -1) {
-      this.tickets[ticketIndex].status = newStatus;
-      return true;
-    }
-    return false;
-  }
-
-  // Update ticket priority
-  updateTicketPriority(ticketId: number, priority: 'Low' | 'Medium' | 'High') {
+  updateTicketStatus(ticketId: number, newStatus: StatusEnum): boolean {
     const ticketIndex = this.tickets.findIndex(
       (ticket) => ticket.id === ticketId
     );
 
     if (ticketIndex !== -1) {
       this.tickets[ticketIndex] = {
-        ...(this.tickets[ticketIndex] as Ticket),
+        ...this.tickets[ticketIndex],
+        status: newStatus,
+        updatedAt: new Date(),
+      };
+      return true;
+    }
+    return false;
+  }
+
+  // Update ticket priority
+  updateTicketPriority(ticketId: number, priority: PriorityEnum) {
+    const ticketIndex = this.tickets.findIndex(
+      (ticket) => ticket.id === ticketId
+    );
+
+    if (ticketIndex !== -1) {
+      this.tickets[ticketIndex] = {
+        ...this.tickets[ticketIndex],
         priority: priority,
-      } as Ticket;
+        updatedAt: new Date(),
+      };
       return true;
     }
     return false;

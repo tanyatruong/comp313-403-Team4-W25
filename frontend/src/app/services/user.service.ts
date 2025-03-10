@@ -67,7 +67,15 @@ export class UserService {
           '\n-userType: ' +
           user.userType
       );
-      this.loggedInUser = user;
+      this.loggedInUser = {
+        ...user,
+        name: user.name || user.username || 'User',
+        email: user.email || 'user@company.com',
+        role:
+          user.role ||
+          (user.userType === 'hr' ? UserRoleEnum.HR : UserRoleEnum.Employee),
+        createdAt: user.createdAt || new Date(),
+      };
       return true;
     }
   }
@@ -78,6 +86,22 @@ export class UserService {
 
   // Get all HR users for assignment
   getHRUsers() {
-    return this.users.filter((user) => user.userType === 'hr');
+    const hrUsers = this.users.filter(
+      (user) => user.role === UserRoleEnum.HR || user.userType === 'hr'
+    );
+
+    // Ensure each user has all required fields
+    return hrUsers.map((user) => ({
+      ...user,
+      id:
+        user.id ||
+        user.employeeId ||
+        `hr-${Math.random().toString(36).substring(2, 9)}`,
+      name: user.name || user.username || 'HR Employee',
+      email: user.email || 'hr@company.com',
+      role: user.role || UserRoleEnum.HR,
+      employeeNumber: user.employeeNumber || 'EMP-HR',
+      createdAt: user.createdAt || new Date(),
+    }));
   }
 }
