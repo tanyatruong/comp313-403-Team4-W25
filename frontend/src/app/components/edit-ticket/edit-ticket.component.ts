@@ -20,9 +20,24 @@ import { PrimengModule } from '../../../primeng.module';
 })
 export class EditTicketComponent implements OnInit {
   ticket: Ticket | null = null;
-  statusOptions = Object.values(StatusEnum);
-  priorityOptions = Object.values(PriorityEnum);
-  categoryOptions = Object.values(CategoryEnum);
+  statusOptions = [
+    { label: 'Open', value: StatusEnum.Open },
+    { label: 'In Progress', value: StatusEnum.InProgress },
+    { label: 'Resolved', value: StatusEnum.Resolved },
+    { label: 'Closed', value: StatusEnum.Closed },
+  ];
+  priorityOptions = [
+    { label: 'Low', value: PriorityEnum.Low },
+    { label: 'Medium', value: PriorityEnum.Medium },
+    { label: 'High', value: PriorityEnum.High },
+  ];
+  categoryOptions = [
+    { label: 'General Inquiry', value: CategoryEnum.General },
+    { label: 'Technical Support', value: CategoryEnum.Technical },
+    { label: 'Payroll Issue', value: CategoryEnum.Payroll },
+    { label: 'Benefits Question', value: CategoryEnum.Benefits },
+    { label: 'Office Facilities', value: CategoryEnum.Facilities },
+  ];
   errorMessage: string = '';
 
   constructor(
@@ -62,10 +77,34 @@ export class EditTicketComponent implements OnInit {
       return;
     }
 
+    // Store the current status for later use
+    const currentStatus = this.ticket.status;
+    console.log('Current status before save:', currentStatus);
+
+    // First update the ticket
     this.ticketService.updateTicket(this.ticket.id!, this.ticket).subscribe(
       (updatedTicket) => {
         console.log('Ticket updated successfully', updatedTicket);
-        this.routerService.navigateToHome();
+
+        // Then specifically update the status to ensure it's changed
+        if (this.ticket && this.ticket.id) {
+          console.log('Now updating status specifically to:', currentStatus);
+          this.ticketService
+            .updateTicketStatus(this.ticket.id, currentStatus as StatusEnum)
+            .subscribe(
+              () => {
+                console.log('Status updated successfully');
+                this.routerService.navigateToHome();
+              },
+              (error) => {
+                console.error('Error updating ticket status:', error);
+                // Still navigate to home since the main ticket was updated
+                this.routerService.navigateToHome();
+              }
+            );
+        } else {
+          this.routerService.navigateToHome();
+        }
       },
       (error) => {
         console.error('Error updating ticket:', error);
