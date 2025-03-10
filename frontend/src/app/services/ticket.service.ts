@@ -15,7 +15,7 @@ export class TicketService {
   currentTicket: Ticket | null = null;
 
   // Add a flag to control API vs mock data
-  private useMockData = true; // Set to false when backend is ready
+  private useMockData = false; // Now using real backend
 
   constructor(private apiService: ApiService) {}
 
@@ -56,8 +56,9 @@ export class TicketService {
       return of(this.tickets);
     }
 
-    // Otherwise use the real API
+    // Otherwise use the real API with mapping for MongoDB format
     return this.apiService.getTickets().pipe(
+      map((tickets) => tickets.map((ticket) => this.mapMongoTicket(ticket))),
       tap((tickets) => {
         this.tickets = tickets;
         this.loaded = true;
@@ -69,24 +70,88 @@ export class TicketService {
     );
   }
 
-  // Get all tickets, loading them if needed
-  getAllTickets(): Ticket[] {
-    if (!this.loaded) {
-      this.loadTickets().subscribe();
-    }
-    return this.tickets.map((ticket) => ({
-      ...ticket,
-      id: ticket.id?.toString(),
-    }));
+  // Add this helper method to map MongoDB ticket format to your app's format
+  private mapMongoTicket(ticket: any): Ticket {
+    return {
+      id: ticket._id,
+      title: ticket.title,
+      description: ticket.description,
+      employeeNumber: ticket.employeeNumber,
+      assignedTo: ticket.assignedTo || '',
+      status: this.mapStatusFromBackend(ticket.status),
+      priority: this.mapPriorityFromBackend(ticket.priority),
+      category: this.mapCategoryFromBackend(ticket.category),
+      sentiment: ticket.sentiment,
+      comments: ticket.comments,
+      attachments: ticket.attachments,
+      createdAt: new Date(ticket.createdAt),
+      updatedAt: new Date(ticket.updatedAt),
+    };
   }
 
-  // Get tickets by user ID
-  getOpenTicketsByUserId(userId: number): Ticket[] {
-    const strUserId = userId.toString();
-    return this.tickets.filter(
-      (ticket) =>
-        ticket.userId?.toString() === strUserId &&
-        ticket.status !== StatusEnum.Closed
+  // Helper methods to handle status format differences
+  private mapStatusFromBackend(status: string): StatusEnum {
+    switch (status) {
+      case 'Open':
+        return StatusEnum.Open;
+      case 'In Progress':
+        return StatusEnum.InProgress;
+      case 'Resolved':
+        return StatusEnum.Resolved;
+      case 'Closed':
+        return StatusEnum.Closed;
+      default:
+        return StatusEnum.Open;
+    }
+  }
+
+  private mapPriorityFromBackend(priority: string): PriorityEnum {
+    switch (priority) {
+      case 'Low':
+        return PriorityEnum.Low;
+      case 'Medium':
+        return PriorityEnum.Medium;
+      case 'High':
+        return PriorityEnum.High;
+      default:
+        return PriorityEnum.Medium;
+    }
+  }
+
+  private mapCategoryFromBackend(category: string): CategoryEnum {
+    // Add any missing categories to the CategoryEnum as needed
+    switch (category) {
+      case 'General':
+        return CategoryEnum.General;
+      case 'Technical':
+        return CategoryEnum.Technical;
+      case 'Payroll':
+        return CategoryEnum.Payroll;
+      case 'Benefits':
+        return CategoryEnum.Benefits;
+      case 'Facilities':
+        return CategoryEnum.Facilities;
+      // Handle other categories by returning a default if they don't match
+      default:
+        return CategoryEnum.General;
+    }
+  }
+
+  // Get all tickets, loading them if needed
+  getAllTickets(): Observable<Ticket[]> {
+    // Simply load tickets from the API without local filtering
+    return this.loadTickets();
+  }
+
+  // Get tickets by user ID - simplified to call API directly
+  getOpenTicketsByUserId(userId: number): Observable<Ticket[]> {
+    // This should now call a specific API endpoint that returns pre-filtered tickets
+    return this.apiService.getTicketsByUserId(userId.toString()).pipe(
+      map((tickets) => tickets.map((ticket) => this.mapMongoTicket(ticket))),
+      catchError((error) => {
+        console.error('Error loading user tickets', error);
+        return throwError(() => new Error('Failed to load user tickets'));
+      })
     );
   }
 
@@ -259,5 +324,18 @@ export class TicketService {
         })
       );
     }
+  }
+
+  getTicketById(id: string): Observable<Ticket> {
+    // Check if it's in our cache first
+    const cachedTicket = this.tickets.find((ticket) => ticket.id === id);
+    if (cachedTicket) {
+      return of(cachedTicket);
+    }
+
+    // Otherwise get it from the API
+    return this.apiService
+      .getTicketById(id)
+      .pipe(map((ticket) => this.mapMongoTicket(ticket)));
   }
 }

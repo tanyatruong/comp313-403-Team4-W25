@@ -15,12 +15,16 @@ export const routes: Routes = [
   // { path: '**', redirectTo: 'login' },
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () =>
+      import('./components/login/login.component').then(
+        (c) => c.LoginComponent
+      ),
   },
 
   {
     path: 'home',
-    component: HomeComponent,
+    loadComponent: () =>
+      import('./components/home/home.component').then((c) => c.HomeComponent),
     canActivate: [AuthGuard],
   },
   // {
@@ -59,6 +63,14 @@ export const routes: Routes = [
     path: 'hr-dashboard',
     component: HrDashboardComponent,
     canActivate: [AuthGuard, HrAuthGuard],
+  },
+  {
+    path: 'edit-ticket',
+    loadComponent: () =>
+      import('./components/edit-ticket/edit-ticket.component').then(
+        (c) => c.EditTicketComponent
+      ),
+    canActivate: [AuthGuard],
   },
   // Catch all route - redirect to login
   { path: '**', redirectTo: 'login' },

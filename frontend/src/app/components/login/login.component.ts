@@ -26,24 +26,22 @@ export class LoginComponent {
   errorMessage: string = '';
 
   onLoginAttempt() {
-    // start login process
     console.log(
       'Login Attempted:\n-email: ' +
         this.email +
         '\n-password: ' +
         this.password
     );
-    const isAuthenticated =
-      this.userService.authenticateUserLoginAndReturnResult(
-        this.email,
-        this.password
-      );
 
-    if (isAuthenticated) {
-      this.routerService.navigateToHome();
-    } else {
-      this.errorMessage = 'Invalid email or password';
-    }
+    this.userService
+      .authenticateUser(this.email, this.password)
+      .subscribe((isAuthenticated) => {
+        if (isAuthenticated) {
+          this.routerService.navigateToHome();
+        } else {
+          this.errorMessage = 'Invalid email or password';
+        }
+      });
   }
 
   // when user opts to press enter instead of clicking login button
@@ -52,16 +50,14 @@ export class LoginComponent {
   }
 
   loginWithCredentials(): void {
-    const isAuthenticated =
-      this.userService.authenticateUserLoginAndReturnResult(
-        this.email,
-        this.password
-      );
-
-    if (isAuthenticated) {
-      this.router.navigate(['/home']);
-    } else {
-      this.errorMessage = 'Invalid email or password';
-    }
+    this.userService
+      .authenticateUser(this.email, this.password)
+      .subscribe((isAuthenticated) => {
+        if (isAuthenticated) {
+          this.router.navigate(['/home']);
+        } else {
+          this.errorMessage = 'Invalid email or password';
+        }
+      });
   }
 }
