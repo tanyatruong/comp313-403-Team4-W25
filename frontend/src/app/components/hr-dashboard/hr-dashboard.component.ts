@@ -216,31 +216,40 @@ export class HrDashboardComponent implements OnInit {
 
   updateStatus(ticket: Ticket, newStatus: StatusEnum): void {
     if (ticket.id) {
-      this.ticketService.updateTicketStatus(Number(ticket.id), newStatus);
-      this.loadTickets();
+      this.ticketService.updateTicketStatus(ticket.id, newStatus).subscribe(
+        (updatedTicket) => {
+          console.log('Ticket status updated successfully:', updatedTicket);
+          this.loadTickets();
 
-      // Update if we were viewing the ticket
-      if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-        this.ticketService.getTicketById(ticket.id).subscribe((foundTicket) => {
-          this.selectedTicket = foundTicket;
-        });
-      }
+          // Update if we were viewing the ticket
+          if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+            this.selectedTicket = updatedTicket || this.selectedTicket;
+          }
+        },
+        (error) => {
+          console.error('Error updating ticket status:', error);
+        }
+      );
     }
   }
 
   updatePriority(ticket: Ticket, priority: PriorityEnum): void {
     if (ticket.id) {
-      this.ticketService.updateTicketPriority(ticket.id, priority);
+      this.ticketService.updateTicketPriority(ticket.id, priority).subscribe(
+        (updatedTicket) => {
+          console.log('Ticket priority updated successfully:', updatedTicket);
+          this.loadTickets();
 
-      // If we were viewing the updated ticket, refresh the selection
-      if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-        this.ticketService.getTicketById(ticket.id).subscribe((foundTicket) => {
-          this.selectedTicket = foundTicket;
-        });
-      }
+          // Update if we were viewing the ticket
+          if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+            this.selectedTicket = updatedTicket || this.selectedTicket;
+          }
+        },
+        (error) => {
+          console.error('Error updating ticket priority:', error);
+        }
+      );
     }
-
-    this.loadTickets();
   }
 
   closeDetails(): void {

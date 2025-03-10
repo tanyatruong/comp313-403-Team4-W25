@@ -224,38 +224,49 @@ export class TicketService {
   }
 
   // Update ticket status
-  updateTicketStatus(id: number, status: StatusEnum): Observable<Ticket> {
+  updateTicketStatus(
+    ticketId: number | string,
+    status: StatusEnum
+  ): Observable<any> {
     if (this.useMockData) {
-      // Find and update ticket in local cache
+      // Mock implementation (for local testing only)
       const index = this.tickets.findIndex(
-        (t) => t.id?.toString() === id.toString()
+        (t) => t.id?.toString() === ticketId.toString()
       );
       if (index !== -1) {
         this.tickets[index] = {
           ...this.tickets[index],
           status: status,
         };
+        console.log('Updated ticket status locally:', this.tickets[index]);
         return of(this.tickets[index]);
       }
-      return throwError(() => new Error('Ticket not found'));
+      return of(null);
     } else {
-      return this.apiService.updateTicketStatus(id.toString(), status).pipe(
-        tap((updatedTicket) => {
-          const index = this.tickets.findIndex(
-            (t) => t.id?.toString() === id.toString()
-          );
-          if (index !== -1) {
-            this.tickets[index] = {
-              ...this.tickets[index],
-              status: updatedTicket.status,
-            };
-          }
-        }),
-        catchError((error) => {
-          console.error('Error updating ticket status', error);
-          return throwError(() => new Error('Failed to update ticket status'));
-        })
-      );
+      // Real implementation - send to MongoDB through API
+      return this.apiService
+        .updateTicketStatus(ticketId.toString(), status)
+        .pipe(
+          map((response) => {
+            // Update local cache after successful server update
+            const index = this.tickets.findIndex(
+              (t) => t.id?.toString() === ticketId.toString()
+            );
+            if (index !== -1) {
+              this.tickets[index] = {
+                ...this.tickets[index],
+                status: status,
+              };
+            }
+            return response;
+          }),
+          catchError((error) => {
+            console.error('Error updating ticket status:', error);
+            return throwError(
+              () => new Error('Failed to update ticket status')
+            );
+          })
+        );
     }
   }
 
@@ -300,29 +311,49 @@ export class TicketService {
   }
 
   // Update ticket priority
-  updateTicketPriority(id: string, priority: PriorityEnum): Observable<Ticket> {
+  updateTicketPriority(
+    ticketId: number | string,
+    priority: PriorityEnum
+  ): Observable<any> {
     if (this.useMockData) {
-      const index = this.tickets.findIndex((t) => t.id === id);
+      // Mock implementation (for local testing only)
+      const index = this.tickets.findIndex(
+        (t) => t.id?.toString() === ticketId.toString()
+      );
       if (index !== -1) {
-        this.tickets[index] = { ...this.tickets[index], priority };
+        this.tickets[index] = {
+          ...this.tickets[index],
+          priority: priority,
+        };
+        console.log('Updated ticket priority locally:', this.tickets[index]);
         return of(this.tickets[index]);
       }
-      return throwError(() => new Error('Ticket not found'));
+      return of(null);
     } else {
-      return this.apiService.updateTicket(id, { priority }).pipe(
-        tap((updatedTicket) => {
-          const index = this.tickets.findIndex((t) => t.id === id);
-          if (index !== -1) {
-            this.tickets[index] = { ...this.tickets[index], priority };
-          }
-        }),
-        catchError((error) => {
-          console.error('Error updating ticket priority', error);
-          return throwError(
-            () => new Error('Failed to update ticket priority')
-          );
-        })
-      );
+      // Real implementation - send to MongoDB through API
+      return this.apiService
+        .updateTicketPriority(ticketId.toString(), priority)
+        .pipe(
+          map((response) => {
+            // Update local cache after successful server update
+            const index = this.tickets.findIndex(
+              (t) => t.id?.toString() === ticketId.toString()
+            );
+            if (index !== -1) {
+              this.tickets[index] = {
+                ...this.tickets[index],
+                priority: priority,
+              };
+            }
+            return response;
+          }),
+          catchError((error) => {
+            console.error('Error updating ticket priority:', error);
+            return throwError(
+              () => new Error('Failed to update ticket priority')
+            );
+          })
+        );
     }
   }
 
