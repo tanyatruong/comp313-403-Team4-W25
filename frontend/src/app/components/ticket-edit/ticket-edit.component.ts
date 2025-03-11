@@ -59,10 +59,10 @@ export class TicketEditComponent {
   }
 
   onStatusLabelClick() {
-    if (this.ticket.status == StatusEnum.AttentionRequired) {
+    if (this.ticket.status == StatusEnum.InProgress) {
       this.ticket.status = StatusEnum.Open;
     } else if (this.ticket.status == StatusEnum.Open) {
-      this.ticket.status = StatusEnum.AttentionRequired;
+      this.ticket.status = StatusEnum.InProgress;
     }
   }
 
