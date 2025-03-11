@@ -1,9 +1,3 @@
-// Define functions for the ticket
-
-//Testing this push
-
-// Matthew pushing to test
-
 import Ticket from "../models/Ticket.js";
 import { logger } from "../utils/logger.js";
 

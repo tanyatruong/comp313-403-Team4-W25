@@ -14,63 +14,22 @@ export class TicketService {
   private loaded = false;
   currentTicket: Ticket | null = null;
 
-  // Add a flag to control API vs mock data
-  private useMockData = false; // Now using real backend
-
   constructor(private apiService: ApiService) {}
 
   // Load all tickets from the backend
   loadTickets(): Observable<Ticket[]> {
-    if (this.useMockData) {
-      // Return existing tickets or create empty array if none exist
-      if (!this.tickets.length) {
-        // Create sample tickets for testing
-        this.tickets = [
-          {
-            id: 't1',
-            title: 'Sample Ticket 1',
-            description: 'This is a test ticket',
-            employeeNumber: 'emp1',
-            assignedTo: '',
-            status: StatusEnum.Open,
-            priority: PriorityEnum.Medium,
-            category: CategoryEnum.General,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 't2',
-            title: 'Another Sample Ticket',
-            description: 'This is another test ticket',
-            employeeNumber: 'emp1',
-            assignedTo: '',
-            status: StatusEnum.InProgress,
-            priority: PriorityEnum.High,
-            category: CategoryEnum.Technical,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
-      }
-      this.loaded = true;
-      return of(this.tickets);
-    }
-
-    // Otherwise use the real API with mapping for MongoDB format
+    // Use the real API with mapping for MongoDB format
     return this.apiService.getTickets().pipe(
       map((tickets) => tickets.map((ticket) => this.mapMongoTicket(ticket))),
       tap((tickets) => {
         this.tickets = tickets;
         this.loaded = true;
       }),
-      catchError((error) => {
-        console.error('Error loading tickets', error);
-        return throwError(() => new Error('Failed to load tickets'));
-      })
+      catchError((error) => this.handleApiError('loading tickets', error))
     );
   }
 
-  // Add this helper method to map MongoDB ticket format to your app's format
+  // Helper method to map MongoDB ticket format to app's format
   private mapMongoTicket(ticket: any): Ticket {
     return {
       id: ticket._id,
@@ -119,7 +78,6 @@ export class TicketService {
   }
 
   private mapCategoryFromBackend(category: string): CategoryEnum {
-    // Add any missing categories to the CategoryEnum as needed
     switch (category) {
       case 'General':
         return CategoryEnum.General;
@@ -131,68 +89,54 @@ export class TicketService {
         return CategoryEnum.Benefits;
       case 'Facilities':
         return CategoryEnum.Facilities;
-      // Handle other categories by returning a default if they don't match
       default:
         return CategoryEnum.General;
     }
   }
 
-  // Get all tickets, loading them if needed
-  getAllTickets(): Observable<Ticket[]> {
-    // Simply load tickets from the API without local filtering
-    return this.loadTickets();
+  // Generic error handler
+  private handleApiError(operation: string, error: any): Observable<never> {
+    console.error(`Error ${operation}:`, error);
+    return throwError(() => new Error(`Failed to ${operation}`));
   }
 
-  // Get tickets by user ID - simplified to call API directly
+  // Update cache helper
+  private updateTicketCache(
+    ticketId: string,
+    updatedData: Partial<Ticket>
+  ): void {
+    const index = this.tickets.findIndex(
+      (t) => t.id?.toString() === ticketId.toString()
+    );
+    if (index !== -1) {
+      this.tickets[index] = { ...this.tickets[index], ...updatedData };
+    }
+  }
+
+  // Get tickets by user ID
   getOpenTicketsByUserId(userId: number): Observable<Ticket[]> {
-    // This should now call a specific API endpoint that returns pre-filtered tickets
     return this.apiService.getTicketsByUserId(userId.toString()).pipe(
       map((tickets) => tickets.map((ticket) => this.mapMongoTicket(ticket))),
-      catchError((error) => {
-        console.error('Error loading user tickets', error);
-        return throwError(() => new Error('Failed to load user tickets'));
-      })
+      catchError((error) => this.handleApiError('loading user tickets', error))
     );
   }
 
   // Create a new ticket
   createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
-    if (this.useMockData) {
-      // Convert partial ticket to complete ticket
-      const newTicket: Ticket = {
-        id: (this.tickets.length + 1).toString(),
-        title: ticket.title || 'Untitled',
-        description: ticket.description || '',
-        employeeNumber: ticket.employeeNumber || 'unknown',
-        assignedTo: ticket.assignedTo || '',
-        status: ticket.status || StatusEnum.Open,
-        priority: ticket.priority || PriorityEnum.Medium,
-        category: ticket.category || CategoryEnum.General,
-        createdAt: new Date(), // Use Date object, not string
-        updatedAt: new Date(),
-      };
-      this.tickets.push(newTicket);
-      console.log('Created ticket locally:', newTicket);
-      return of(newTicket);
-    } else {
-      // Add required fields for API
-      const completeTicket = {
-        ...ticket,
-        status: ticket.status || StatusEnum.Open,
-        createdAt: new Date(),
-      } as Ticket;
+    // Add required fields for API
+    const completeTicket = {
+      ...ticket,
+      status: ticket.status || StatusEnum.Open,
+      createdAt: new Date(),
+    } as Ticket;
 
-      return this.apiService.createTicket(completeTicket).pipe(
-        map((response) => {
-          this.tickets.push(response);
-          return response;
-        }),
-        catchError((error) => {
-          console.error('Error creating ticket:', error);
-          return throwError(() => new Error('Failed to create ticket'));
-        })
-      );
-    }
+    return this.apiService.createTicket(completeTicket).pipe(
+      map((response) => {
+        this.tickets.push(response);
+        return response;
+      }),
+      catchError((error) => this.handleApiError('creating ticket', error))
+    );
   }
 
   // Update a ticket
@@ -200,37 +144,16 @@ export class TicketService {
     ticketId: string | number,
     updatedTicket: Ticket
   ): Observable<Ticket> {
-    if (this.useMockData) {
-      // Mock implementation (for testing only)
-      const index = this.tickets.findIndex(
-        (t) => t.id?.toString() === ticketId.toString()
+    return this.apiService
+      .updateTicket(ticketId.toString(), updatedTicket)
+      .pipe(
+        map((response) => {
+          // Update local cache after successful server update
+          this.updateTicketCache(ticketId.toString(), response);
+          return response;
+        }),
+        catchError((error) => this.handleApiError('updating ticket', error))
       );
-      if (index !== -1) {
-        this.tickets[index] = { ...updatedTicket };
-        return of(this.tickets[index]);
-      }
-      return throwError(() => new Error('Ticket not found'));
-    } else {
-      // Real implementation - connect to MongoDB through API
-      return this.apiService
-        .updateTicket(ticketId.toString(), updatedTicket)
-        .pipe(
-          map((response) => {
-            // Update local cache after successful server update
-            const index = this.tickets.findIndex(
-              (t) => t.id?.toString() === ticketId.toString()
-            );
-            if (index !== -1) {
-              this.tickets[index] = response;
-            }
-            return response;
-          }),
-          catchError((error) => {
-            console.error('Error updating ticket:', error);
-            return throwError(() => new Error('Failed to update ticket'));
-          })
-        );
-    }
   }
 
   // Delete a ticket
@@ -242,10 +165,7 @@ export class TicketService {
         );
         return true;
       }),
-      catchError((error) => {
-        console.error('Error deleting ticket', error);
-        return throwError(() => new Error('Failed to delete ticket'));
-      })
+      catchError((error) => this.handleApiError('deleting ticket', error))
     );
   }
 
@@ -255,9 +175,6 @@ export class TicketService {
       `TicketService: Updating ticket ${ticketId} status to ${status}`
     );
 
-    // Add logging to verify the method is being called
-    console.log(`Token available: ${!!localStorage.getItem('token')}`);
-
     // Ensure we're passing the right parameters
     return this.apiService.updateTicketStatus(ticketId, status).pipe(
       tap((updatedTicket) =>
@@ -265,7 +182,6 @@ export class TicketService {
       ),
       catchError((error) => {
         console.error('TicketService: Failed to update status', error);
-        // Return a more detailed error that includes the original error
         return throwError(
           () =>
             new Error(
@@ -280,42 +196,16 @@ export class TicketService {
 
   // Assign ticket to HR
   assignTicket(ticketId: number, hrUserId: string): Observable<boolean> {
-    if (this.useMockData) {
-      const index = this.tickets.findIndex(
-        (t) => t.id?.toString() === ticketId.toString()
-      );
-      if (index !== -1) {
-        this.tickets[index] = {
-          ...this.tickets[index],
-          assignedTo: hrUserId,
-        };
-        console.log('Assigned ticket:', this.tickets[index]);
-        return of(true);
-      }
-      return of(false);
-    } else {
-      return this.apiService.assignTicket(ticketId.toString(), hrUserId).pipe(
-        map((response: any) => {
-          if (response) {
-            const index = this.tickets.findIndex(
-              (t) => t.id === ticketId.toString()
-            );
-            if (index !== -1) {
-              this.tickets[index] = {
-                ...this.tickets[index],
-                assignedTo: hrUserId,
-              };
-            }
-            return true;
-          }
-          return false;
-        }),
-        catchError((error) => {
-          console.error('Error assigning ticket', error);
-          return throwError(() => new Error('Failed to assign ticket'));
-        })
-      );
-    }
+    return this.apiService.assignTicket(ticketId.toString(), hrUserId).pipe(
+      map((response: any) => {
+        if (response) {
+          this.updateTicketCache(ticketId.toString(), { assignedTo: hrUserId });
+          return true;
+        }
+        return false;
+      }),
+      catchError((error) => this.handleApiError('assigning ticket', error))
+    );
   }
 
   // Update ticket priority
@@ -323,46 +213,18 @@ export class TicketService {
     ticketId: number | string,
     priority: PriorityEnum
   ): Observable<any> {
-    if (this.useMockData) {
-      // Mock implementation (for local testing only)
-      const index = this.tickets.findIndex(
-        (t) => t.id?.toString() === ticketId.toString()
+    return this.apiService
+      .updateTicketPriority(ticketId.toString(), priority)
+      .pipe(
+        map((response) => {
+          // Update local cache after successful server update
+          this.updateTicketCache(ticketId.toString(), { priority });
+          return response;
+        }),
+        catchError((error) =>
+          this.handleApiError('updating ticket priority', error)
+        )
       );
-      if (index !== -1) {
-        this.tickets[index] = {
-          ...this.tickets[index],
-          priority: priority,
-        };
-        console.log('Updated ticket priority locally:', this.tickets[index]);
-        return of(this.tickets[index]);
-      }
-      return of(null);
-    } else {
-      // Real implementation - send to MongoDB through API
-      return this.apiService
-        .updateTicketPriority(ticketId.toString(), priority)
-        .pipe(
-          map((response) => {
-            // Update local cache after successful server update
-            const index = this.tickets.findIndex(
-              (t) => t.id?.toString() === ticketId.toString()
-            );
-            if (index !== -1) {
-              this.tickets[index] = {
-                ...this.tickets[index],
-                priority: priority,
-              };
-            }
-            return response;
-          }),
-          catchError((error) => {
-            console.error('Error updating ticket priority:', error);
-            return throwError(
-              () => new Error('Failed to update ticket priority')
-            );
-          })
-        );
-    }
   }
 
   getTicketById(id: string): Observable<Ticket> {

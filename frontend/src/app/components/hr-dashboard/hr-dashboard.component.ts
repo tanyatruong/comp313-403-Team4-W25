@@ -83,10 +83,10 @@ export class HrDashboardComponent implements OnInit {
   }
 
   loadTickets(): void {
-    // Subscribe to the Observable
-    this.ticketService.getAllTickets().subscribe((tickets) => {
+    // Subscribe to the Observable - use loadTickets instead of getAllTickets
+    this.ticketService.loadTickets().subscribe((tickets: Ticket[]) => {
       // Now map the array of tickets that comes from the subscription
-      const allTickets = tickets.map((ticket) => {
+      const allTickets = tickets.map((ticket: Ticket) => {
         // Create a complete ticket object with required properties
         return {
           id: ticket.id,
