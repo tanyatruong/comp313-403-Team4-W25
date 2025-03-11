@@ -1,24 +1,41 @@
 import { StatusEnum } from '../enums/StatusEnum';
 import { PriorityEnum } from '../enums/PriorityEnum';
-import { SentimentEnum } from '../enums/SentimentEnum';
 import { CategoryEnum } from '../enums/CategoryEnum';
+import { SentimentEnum } from '../enums/SentimentEnum';
+
+export interface Comment {
+  id?: string;
+  text: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface Attachment {
+  id?: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: Date;
+}
 
 export interface Ticket {
-  id?: string; // Change from number to string
-  userId?: number; // Add this back for compatibility with existing code
+  id?: string; // Maps to MongoDB _id
   title: string;
   description: string;
-  employeeNumber: string; // Reference to employee
-  assignedTo: string; // MongoDB ObjectId as string
+  employeeNumber: string;
+  userId?: number; // Optional field for frontend use
+  assignedTo?: string; // HR/Admin user ID who is assigned to the ticket
   status: StatusEnum;
   priority: PriorityEnum;
   category: CategoryEnum;
   sentiment?: SentimentEnum;
   comments?: Comment[];
-  attachments?: string[];
+  attachments?: Attachment[];
   createdAt?: Date;
   updatedAt?: Date;
-  dateAndTimeOfCreation?: string;
-}
 
-// No duplicate enums - use the ones from separate files
+  // Optional fields for UI display purposes
+  dateAndTimeOfCreation?: string; // Formatted string for display
+}
