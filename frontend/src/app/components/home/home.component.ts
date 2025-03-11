@@ -87,7 +87,9 @@ export class HomeComponent implements OnInit {
     this.ticketService.currentTicket = ticket;
 
     // Store the ID in local storage as a backup
-    localStorage.setItem('currentTicketId', ticket.id || '');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('currentTicketId', ticket.id || '');
+    }
 
     // Then navigate
     this.routerService.navigateToTicketEdit();

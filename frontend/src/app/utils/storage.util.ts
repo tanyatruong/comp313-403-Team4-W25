@@ -1,13 +1,20 @@
 export class StorageUtil {
   static setItem(key: string, value: string): void {
-    localStorage.setItem(key, value);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(key, value);
+    }
   }
 
   static getItem(key: string): string | null {
-    return localStorage.getItem(key);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem(key);
+    }
+    return null;
   }
 
   static removeItem(key: string): void {
-    localStorage.removeItem(key);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(key);
+    }
   }
 }
