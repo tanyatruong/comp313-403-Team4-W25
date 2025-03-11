@@ -190,25 +190,17 @@ export class HrDashboardComponent implements OnInit {
       return;
     }
 
-    // Check if token exists
-    const token = localStorage.getItem('token');
-    console.log(`Token exists: ${!!token}`);
-
     this.ticketService.updateTicketStatus(ticket.id, newStatus).subscribe(
       (updatedTicket) => {
         console.log('Ticket updated successfully:', updatedTicket);
-        // Refresh ticket data
         this.loadTickets();
-
-        // Update selected ticket if it's the one being modified
         if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
           this.selectedTicket = updatedTicket;
         }
       },
       (error) => {
         console.error('Error updating ticket status:', error);
-        // Shoaaaw error to user
-        // You might want to add a notification component or alert here
+        // Consider adding user feedback here
       }
     );
   }

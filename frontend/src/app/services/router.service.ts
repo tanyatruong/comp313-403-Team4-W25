@@ -27,9 +27,7 @@ export class RouterService {
   }
 
   navigateToTicketEdit(): void {
-    // Make sure we're storing the currentTicket in localStorage if needed
-    // or pass it properly through router state
-    this.router.navigate(['/edit-ticket']);
+    this.router.navigate(['/ticket-edit']);
   }
 
   navigateToMessageCreation() {
