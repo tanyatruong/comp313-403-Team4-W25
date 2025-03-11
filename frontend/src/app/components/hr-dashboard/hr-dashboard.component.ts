@@ -13,11 +13,19 @@ import { PriorityEnum, PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
 import { CategoryEnum, CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
 import { HttpClientModule } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
+import { RecommendationService } from '../../services/recommendation.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, PrimengModule, HttpClientModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    PrimengModule,
+    HttpClientModule,
+    TooltipModule,
+  ],
   templateUrl: './hr-dashboard.component.html',
   styleUrls: ['./hr-dashboard.component.css'],
 })
@@ -50,14 +58,19 @@ export class HrDashboardComponent implements OnInit {
   filterText: string = '';
   filterPriority: string = '';
   filterCategory: string = '';
-  sortBy: string = 'dateAndTimeOfCreation';
+  sortBy: string = 'createdAt';
   sortOrder: 'asc' | 'desc' = 'desc';
+
+  // Add to the component's class properties
+  recommendations: any[] = [];
+  isLoadingRecommendations: boolean = false;
 
   constructor(
     private ticketService: TicketService,
     private userService: UserService,
     private routerService: RouterService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private recommendationService: RecommendationService
   ) {}
 
   ngOnInit(): void {
@@ -154,14 +167,14 @@ export class HrDashboardComponent implements OnInit {
             (priorityOrder[a.priority as keyof typeof priorityOrder] ?? 1) -
             (priorityOrder[b.priority as keyof typeof priorityOrder] ?? 1);
           break;
-        case 'dateAndTimeOfCreation':
+        case 'createdAt':
         default:
           // Add null checks with fallback to current timestamp
-          const dateB = b.dateAndTimeOfCreation
-            ? new Date(b.dateAndTimeOfCreation).getTime()
+          const dateB = b.createdAt
+            ? new Date(b.createdAt).getTime()
             : Date.now();
-          const dateA = a.dateAndTimeOfCreation
-            ? new Date(a.dateAndTimeOfCreation).getTime()
+          const dateA = a.createdAt
+            ? new Date(a.createdAt).getTime()
             : Date.now();
           comparison = dateB - dateA;
           break;
@@ -181,6 +194,20 @@ export class HrDashboardComponent implements OnInit {
   selectTicket(ticket: Ticket): void {
     this.selectedTicket = ticket;
     this.selectedHrId = ticket.assignedTo || '';
+    this.isLoadingRecommendations = true;
+
+    // Get recommendations for ticket assignment
+    this.recommendationService.getRecommendedAssignee(ticket).subscribe(
+      (recs) => {
+        this.recommendations = recs;
+        this.isLoadingRecommendations = false;
+      },
+      (error) => {
+        console.error('Error loading recommendations:', error);
+        this.isLoadingRecommendations = false;
+        this.recommendations = [];
+      }
+    );
   }
 
   assignTicket(): void {

@@ -1,7 +1,7 @@
-import { StatusEnum } from '../enums/StatusEnum';
-import { PriorityEnum } from '../enums/PriorityEnum';
 import { CategoryEnum } from '../enums/CategoryEnum';
+import { PriorityEnum } from '../enums/PriorityEnum';
 import { SentimentEnum } from '../enums/SentimentEnum';
+import { StatusEnum } from '../enums/StatusEnum';
 
 export interface Comment {
   id?: string;
