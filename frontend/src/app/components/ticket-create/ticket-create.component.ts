@@ -41,7 +41,9 @@ export class TicketCreateComponent implements OnInit {
     const currentUser = this.userService.getLoggedInUser();
     if (currentUser) {
       this.newTicket.employeeNumber = currentUser.employeeNumber || '';
-      this.newTicket.userId = currentUser.id ? parseInt(currentUser.id, 10) : 0;
+      this.newTicket.userId = currentUser._id
+        ? parseInt(currentUser._id, 10)
+        : 0;
     }
   }
 

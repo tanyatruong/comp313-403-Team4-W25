@@ -189,9 +189,9 @@
 
                     <div class="field mb-3">
                         <label class="font-bold block mb-1">Assign To</label>
-                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedHrId" optionLabel="username"
+                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedTicket.assignedTo" optionLabel="username"
                             optionValue="id" placeholder="Select HR Representative" styleClass="w-full"
-                            (onChange)="assignTicket()"></p-dropdown>
+                            (onChange)="assignHrRep(selectedTicket, $event.value)"></p-dropdown>
                     </div>
 
                     <div class="field mb-3">
