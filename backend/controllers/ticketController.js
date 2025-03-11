@@ -1,11 +1,12 @@
-// Define functions for the ticket
-
-//Testing this push
-
-// Matthew pushing to test
-
 import Ticket from "../models/Ticket.js";
 import { logger } from "../utils/logger.js";
+
+// Utility function for logging
+const logAndRespond = (logger, res, statusCode, message, data, startTime) => {
+	const response = { message, ...data };
+	logger.response(statusCode, response, Date.now() - startTime);
+	res.status(statusCode).json(response);
+};
 
 export const createTicket = async (req, res) => {
 	const startTime = Date.now();
@@ -33,21 +34,24 @@ export const createTicket = async (req, res) => {
 		await newTicket.save();
 		logger.info(`Ticket created successfully with ID: ${newTicket._id}`);
 
-		const response = {
-			message: "Ticket created successfully",
-			ticket: newTicket,
-		};
-
-		logger.response(201, response, Date.now() - startTime);
-		res.status(201).json(response);
+		logAndRespond(
+			logger,
+			res,
+			201,
+			"Ticket created successfully",
+			{ ticket: newTicket },
+			startTime
+		);
 	} catch (error) {
 		logger.error("Error creating ticket", error);
-		const response = {
-			message: "Error creating ticket",
-			error: error.message,
-		};
-		logger.response(500, response, Date.now() - startTime);
-		res.status(500).json(response);
+		logAndRespond(
+			logger,
+			res,
+			500,
+			"Error creating ticket",
+			{ error: error.message },
+			startTime
+		);
 	}
 };
 
@@ -164,13 +168,11 @@ export const updateTicket = async (req, res) => {
 			return res.status(404).json(response);
 		}
 
-		logger.info(
-			`Successfully updated ticket: ${ticket._id} with status: ${ticket.status}`
-		);
+		logger.info(`Ticket updated successfully with ID: ${ticket._id}`);
 		logger.response(200, { ticketId: ticket._id }, Date.now() - startTime);
 		res.status(200).json(ticket);
 	} catch (error) {
-		logger.error(`Error updating ticket with ID: ${req.params.id}`, error);
+		logger.error("Error updating ticket", error);
 		const response = {
 			message: "Error updating ticket",
 			error: error.message,
@@ -180,130 +182,25 @@ export const updateTicket = async (req, res) => {
 	}
 };
 
-// Delete ticket
-export const deleteTicket = async (req, res) => {
-	const startTime = Date.now();
-	logger.request(req);
-	logger.info(`Deleting ticket with ID: ${req.params.id}`);
-
-	try {
-		const ticket = await Ticket.findByIdAndDelete(req.params.id);
-
-		if (!ticket) {
-			logger.info(`Ticket with ID ${req.params.id} not found for deletion`);
-			const response = { message: "Ticket not found" };
-			logger.response(404, response, Date.now() - startTime);
-			return res.status(404).json(response);
-		}
-
-		logger.info(`Successfully deleted ticket: ${req.params.id}`);
-		const response = { message: "Ticket deleted successfully" };
-		logger.response(200, response, Date.now() - startTime);
-		res.status(200).json(response);
-	} catch (error) {
-		logger.error(`Error deleting ticket with ID: ${req.params.id}`, error);
-		const response = {
-			message: "Error deleting ticket",
-			error: error.message,
-		};
-		logger.response(500, response, Date.now() - startTime);
-		res.status(500).json(response);
-	}
-};
-
-// Update ticket status
 export const updateTicketStatus = async (req, res) => {
-	const startTime = Date.now();
-	logger.request(req);
-	logger.info(`Updating status for ticket with ID: ${req.params.id}`);
+	const { id } = req.params;
+	const { status } = req.body;
 
 	try {
-		const { status } = req.body;
-		logger.info(`Changing ticket status to: ${status}`);
-
 		const ticket = await Ticket.findByIdAndUpdate(
-			req.params.id,
-			{
-				status,
-				updatedAt: Date.now(),
-			},
+			id,
+			{ status, updatedAt: Date.now() },
 			{ new: true }
 		);
 
 		if (!ticket) {
-			logger.info(
-				`Ticket with ID ${req.params.id} not found for status update`
-			);
-			const response = { message: "Ticket not found" };
-			logger.response(404, response, Date.now() - startTime);
-			return res.status(404).json(response);
+			return res.status(404).json({ message: "Ticket not found" });
 		}
 
-		logger.info(
-			`Successfully updated status for ticket: ${ticket._id} to ${status}`
-		);
-		logger.response(
-			200,
-			{ ticketId: ticket._id, status },
-			Date.now() - startTime
-		);
 		res.status(200).json(ticket);
 	} catch (error) {
-		logger.error(
-			`Error updating status for ticket with ID: ${req.params.id}`,
-			error
-		);
-		const response = {
-			message: "Error updating ticket status",
-			error: error.message,
-		};
-		logger.response(500, response, Date.now() - startTime);
-		res.status(500).json(response);
-	}
-};
-
-// Assign ticket to HR
-export const assignTicket = async (req, res) => {
-	const startTime = Date.now();
-	logger.request(req);
-	logger.info(`Assigning ticket with ID: ${req.params.id}`);
-
-	try {
-		const { assignedTo } = req.body;
-		logger.info(`Assigning ticket to user: ${assignedTo}`);
-
-		const ticket = await Ticket.findByIdAndUpdate(
-			req.params.id,
-			{
-				assignedTo,
-				updatedAt: Date.now(),
-			},
-			{ new: true }
-		);
-
-		if (!ticket) {
-			logger.info(`Ticket with ID ${req.params.id} not found for assignment`);
-			const response = { message: "Ticket not found" };
-			logger.response(404, response, Date.now() - startTime);
-			return res.status(404).json(response);
-		}
-
-		logger.info(
-			`Successfully assigned ticket: ${ticket._id} to user: ${assignedTo}`
-		);
-		logger.response(
-			200,
-			{ ticketId: ticket._id, assignedTo },
-			Date.now() - startTime
-		);
-		res.status(200).json(ticket);
-	} catch (error) {
-		logger.error(`Error assigning ticket with ID: ${req.params.id}`, error);
-		const response = {
-			message: "Error assigning ticket",
-			error: error.message,
-		};
-		logger.response(500, response, Date.now() - startTime);
-		res.status(500).json(response);
+		res
+			.status(500)
+			.json({ message: "Error updating ticket status", error: error.message });
 	}
 };

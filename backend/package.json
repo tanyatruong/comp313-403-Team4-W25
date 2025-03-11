@@ -13,6 +13,10 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@angular/common": "^19.2.1",
+		"@angular/compiler": "^19.2.1",
+		"@angular/core": "^19.2.1",
+		"@angular/platform-browser": "^19.2.1",
 		"backend": "file:",
 		"bcrypt": "^5.1.1",
 		"cookie-parser": "^1.4.7",

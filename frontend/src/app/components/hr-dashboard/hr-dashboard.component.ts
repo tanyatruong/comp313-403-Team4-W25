@@ -7,10 +7,10 @@ import { UserService } from '../../services/user.service';
 import { RouterService } from '../../services/router.service';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
-import { StatusEnum } from '../../data/enums/StatusEnum';
+import { StatusEnum, STATUS_OPTIONS } from '../../data/enums/StatusEnum';
 import { SentimentEnum } from '../../data/enums/SentimentEnum';
-import { PriorityEnum } from '../../data/enums/PriorityEnum';
-import { CategoryEnum } from '../../data/enums/CategoryEnum';
+import { PriorityEnum, PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
+import { CategoryEnum, CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
 import { HttpClientModule } from '@angular/common/http';
 
 @Component({
@@ -40,20 +40,10 @@ export class HrDashboardComponent implements OnInit {
   hrUsers: User[] = [];
   selectedHrId: string = '';
 
-  // Status options for dropdown
-  statusOptions = [
-    { label: 'Open', value: StatusEnum.Open },
-    { label: 'In Progress', value: StatusEnum.InProgress },
-    { label: 'Resolved', value: StatusEnum.Resolved },
-    { label: 'Closed', value: StatusEnum.Closed },
-  ];
-
-  // Priority options for dropdown
-  priorityOptions = [
-    { label: 'Low', value: PriorityEnum.Low },
-    { label: 'Medium', value: PriorityEnum.Medium },
-    { label: 'High', value: PriorityEnum.High },
-  ];
+  // Use the shared option constants
+  statusOptions = STATUS_OPTIONS;
+  priorityOptions = PRIORITY_OPTIONS;
+  categoryOptions = CATEGORY_OPTIONS;
 
   // Filter and Sort options
   filterText: string = '';
@@ -61,15 +51,6 @@ export class HrDashboardComponent implements OnInit {
   filterCategory: string = '';
   sortBy: string = 'dateAndTimeOfCreation';
   sortOrder: 'asc' | 'desc' = 'desc';
-
-  // Update categoryOptions to use CategoryEnum
-  categoryOptions = [
-    { label: 'General Inquiry', value: CategoryEnum.General },
-    { label: 'Technical Support', value: CategoryEnum.Technical },
-    { label: 'Payroll Issue', value: CategoryEnum.Payroll },
-    { label: 'Benefits Question', value: CategoryEnum.Benefits },
-    { label: 'Office Facilities', value: CategoryEnum.Facilities },
-  ];
 
   constructor(
     private ticketService: TicketService,
@@ -79,34 +60,19 @@ export class HrDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTickets();
-    this.hrUsers = this.userService.getHRUsers();
   }
 
   loadTickets(): void {
-    // Subscribe to the Observable
-    this.ticketService.getAllTickets().subscribe((tickets) => {
-      // Now map the array of tickets that comes from the subscription
-      const allTickets = tickets.map((ticket) => {
-        // Create a complete ticket object with required properties
-        return {
-          id: ticket.id,
-          title: ticket.title,
-          description: ticket.description,
-          employeeNumber: ticket.employeeNumber,
-          assignedTo: ticket.assignedTo,
-          status: ticket.status,
-          priority: ticket.priority,
-          category: ticket.category || CategoryEnum.General,
-          sentiment: ticket.sentiment,
-          comments: ticket.comments,
-          attachments: ticket.attachments,
-          createdAt: ticket.createdAt,
-          updatedAt: ticket.updatedAt,
-          dateAndTimeOfCreation: ticket.createdAt
-            ? ticket.createdAt.toISOString()
-            : new Date().toISOString(),
-        };
-      });
+    this.ticketService.loadTickets().subscribe((tickets: Ticket[]) => {
+      // Use spread operator to simplify mapping
+      const allTickets = tickets.map((ticket) => ({
+        ...ticket,
+        // Only set properties that need special handling
+        category: ticket.category || CategoryEnum.General,
+        dateAndTimeOfCreation: ticket.createdAt
+          ? ticket.createdAt.toISOString()
+          : new Date().toISOString(),
+      }));
 
       // Filter and sort the tickets
       const filteredTickets = this.applyFilters(allTickets);
@@ -201,13 +167,13 @@ export class HrDashboardComponent implements OnInit {
 
   selectTicket(ticket: Ticket): void {
     this.selectedTicket = ticket;
-    this.selectedHrId = ticket.assignedTo;
+    this.selectedHrId = ticket.assignedTo || '';
   }
 
   assignTicket(): void {
-    if (this.selectedTicket && this.selectedTicket.id && this.selectedHrId) {
+    if (this.selectedTicket && this.selectedTicket.id) {
       this.ticketService.assignTicket(
-        Number(this.selectedTicket.id),
+        this.selectedTicket.id,
         this.selectedHrId
       );
       this.loadTickets();
@@ -224,25 +190,17 @@ export class HrDashboardComponent implements OnInit {
       return;
     }
 
-    // Check if token exists
-    const token = localStorage.getItem('token');
-    console.log(`Token exists: ${!!token}`);
-
     this.ticketService.updateTicketStatus(ticket.id, newStatus).subscribe(
       (updatedTicket) => {
         console.log('Ticket updated successfully:', updatedTicket);
-        // Refresh ticket data
         this.loadTickets();
-
-        // Update selected ticket if it's the one being modified
         if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
           this.selectedTicket = updatedTicket;
         }
       },
       (error) => {
         console.error('Error updating ticket status:', error);
-        // Show error to user
-        // You might want to add a notification component or alert here
+        // Consider adding user feedback here
       }
     );
   }

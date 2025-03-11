@@ -55,70 +55,25 @@ export const protect = async (req, res, next) => {
 	}
 };
 
-// Middleware to check if user is an employee or admin
-export const employeeOnly = (req, res, next) => {
-	logger.info(`Checking employee permission for user: ${req.user._id}`);
+// Refactor role-based middleware checks
+const checkRole = (roles) => (req, res, next) => {
+	logger.info(`Checking roles ${roles.join(", ")} for user: ${req.user._id}`);
 
-	if (req.user && (req.user.role === "Employee" || req.user.role === "Admin")) {
-		logger.info(`${req.user.role} permission granted for employee action`);
-		next();
-	} else {
-		logger.info(
-			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access employee-only resource`
-		);
-		res
-			.status(403)
-			.json({ message: "Access denied. Only employees can create tickets." });
-	}
-};
-
-// Middleware to check if user is HR
-export const hrOnly = (req, res, next) => {
-	logger.info(`Checking HR permission for user: ${req.user._id}`);
-
-	if (req.user && req.user.role === "HR") {
-		logger.info("HR permission granted");
-		next();
-	} else {
-		logger.info(
-			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access HR-only resource`
-		);
-		res.status(403).json({
-			message: "Access denied. Only HR personnel can access this resource.",
-		});
-	}
-};
-
-// Middleware to check if user is an admin
-export const adminOnly = (req, res, next) => {
-	logger.info(`Checking admin permission for user: ${req.user._id}`);
-
-	if (req.user && req.user.role === "Admin") {
-		logger.info("Admin permission granted");
-		next();
-	} else {
-		logger.info(
-			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access admin-only resource`
-		);
-		res.status(403).json({
-			message: "Access denied. Only admins can access this resource.",
-		});
-	}
-};
-
-// Middleware to check if user is HR or admin
-export const hrOrAdminOnly = (req, res, next) => {
-	logger.info(`Checking HR/Admin permission for user: ${req.user._id}`);
-
-	if (req.user && (req.user.role === "HR" || req.user.role === "Admin")) {
+	if (req.user && roles.includes(req.user.role)) {
 		logger.info(`${req.user.role} permission granted`);
 		next();
 	} else {
 		logger.info(
-			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access HR/Admin-only resource`
+			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access restricted resource`
 		);
 		res.status(403).json({
-			message: "Access denied. Only HR or admin can access this resource.",
+			message: `Access denied. Only ${roles.join(
+				" or "
+			)} can access this resource.`,
 		});
 	}
 };
+
+export const employeeOnly = checkRole(["Employee", "Admin"]);
+export const adminOnly = checkRole(["Admin"]);
+export const hrOrAdminOnly = checkRole(["HR", "Admin"]);

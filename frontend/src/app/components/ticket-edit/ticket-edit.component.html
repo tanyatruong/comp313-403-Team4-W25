@@ -1,77 +1,49 @@
-<div
-  class="surface-card shadow-2 border-round my-5 mx-6 p-4 flex flex-column justify-content-between"
-  style="min-height: 92vh"
->
-  <!-- surface-card p-4 shadow-2 border-round w-4 m-auto mt-8 min-w-min -->
-  <!-- w-full h-auto lg:w-4 justify-content-center align-items-center -->
-  <div id="Header">
-    <div
-      id="buttonContainer"
-      class="surface-card flex justify-content-end flex-wrap m-2"
-    >
-      <button
-        pButton
-        pRipple
-        label="Return"
-        icon="pi pi-home"
-        class="w-full min-w-min max-w-min"
-        (click)="onReturnButtonClick()"
-      ></button>
-    </div>
-    <div
-      id="ticketInfoHeaderContainer"
-      class="surface-card border-round flex justify-content-around align-content-end"
-    >
-      <div
-        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2"
-        [ngClass]="
-          ticket.status == 'open' ? 'green-background' : 'yellow-background'
-        "
-        (click)="onStatusLabelClick()"
-      >
-        Ticket Status: {{ ticket.status }}
-      </div>
-      <div
-        class="shadow-2 border-round justify-content-center align-content-center px-3 py-2 blue-background"
-      >
-        Date of Ticket Creation {{ ticket.dateAndTimeOfCreation }}
-        <!-- <p-card styleClass="mypcard">Other Related information</p-card>
-    <p-card styleClass="mypcard">Date of Ticket Creation</p-card> -->
-      </div>
-    </div>
-  </div>
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+    <h2>Edit Ticket</h2>
 
-  <div id="chatContainer" class="shadow-2 text-center">
-    <p>ticket-edit works!</p>
-    <div>This is Where the chat goes</div>
-  </div>
-  <div
-    id="bottomButtonControlBar"
-    class="flex flex-row justify-content-between"
-  >
-    <button
-      pButton
-      pRipple
-      label="Escalate to Upper Managment"
-      icon="pi pi-sort-amount-up-alt"
-      class="w-full min-w-min max-w-min"
-      (click)="onEscalateClick()"
-    ></button>
-    <button
-      pButton
-      pRipple
-      label="Close Ticket"
-      icon="pi pi-times-circle"
-      class="w-full min-w-min max-w-min"
-      (click)="onCloseTicketClick()"
-    ></button>
-    <button
-      pButton
-      pRipple
-      label="Write new message"
-      icon="pi pi-plus-circle"
-      class="w-full min-w-min max-w-min"
-      (click)="onCreateButtonClick()"
-    ></button>
-  </div>
+    <div *ngIf="errorMessage" class="p-message p-message-error mb-3">
+        <div class="p-message-text">{{ errorMessage }}</div>
+    </div>
+
+    <div *ngIf="!ticket" class="p-4 text-center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <p>Loading ticket details...</p>
+    </div>
+
+    <form *ngIf="ticket" #ticketForm="ngForm" (ngSubmit)="saveTicket()">
+        <div class="field mb-4">
+            <label for="title" class="block font-medium mb-2">Title</label>
+            <input id="title" type="text" pInputText class="w-full" [(ngModel)]="ticket.title" name="title" required>
+        </div>
+
+        <div class="field mb-4">
+            <label for="description" class="block font-medium mb-2">Description</label>
+            <textarea id="description" pInputTextarea class="w-full" rows="5" [(ngModel)]="ticket.description"
+                name="description" required></textarea>
+        </div>
+
+        <div class="field mb-4">
+            <label for="status" class="block font-medium mb-2">Status</label>
+            <p-dropdown id="status" [options]="statusOptions" [(ngModel)]="ticket.status" optionLabel="label"
+                optionValue="value" name="status" [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="field mb-4">
+            <label for="priority" class="block font-medium mb-2">Priority</label>
+            <p-dropdown id="priority" [options]="priorityOptions" [(ngModel)]="ticket.priority" name="priority"
+                [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="field mb-4">
+            <label for="category" class="block font-medium mb-2">Category</label>
+            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="ticket.category" name="category"
+                [style]="{'width':'100%'}" required></p-dropdown>
+        </div>
+
+        <div class="flex justify-content-end mt-4">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                class="p-button-outlined p-button-secondary mr-2" (click)="cancel()"></button>
+            <button pButton type="submit" label="Save" icon="pi pi-check" [disabled]="!ticketForm.valid"></button>
+        </div>
+    </form>
 </div>

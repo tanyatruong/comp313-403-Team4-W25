@@ -8,26 +8,22 @@ export const login = async (req, res) => {
 	logger.request(req);
 
 	try {
-		const { email, employeeNumber, password } = req.body;
-		logger.info(
-			`Login attempt for ${
-				email ? "email: " + email : "employee number: " + employeeNumber
-			}`
-		);
+		const { employeeNumber, password } = req.body;
+		logger.info(`Login attempt for employee number: ${employeeNumber}`);
 
-		// Check if either email or employeeNumber is provided
-		if ((!email && !employeeNumber) || !password) {
+		// Check if employeeNumber and password are provided
+		if (!employeeNumber || !password) {
 			logger.info(
-				`Login failed: Missing credentials - need either email or employee number, plus password`
+				`Login failed: Missing credentials - need employee number and password`
 			);
 			const response = {
-				message: "Employee ID/Email and password are required",
+				message: "Employee ID and password are required",
 			};
 			logger.response(400, response, Date.now() - startTime);
 			return res.status(400).json(response);
 		}
 
-		// Find user by employeeId
+		// Find user by employeeNumber
 		const user = await User.findOne({ employeeNumber });
 		if (!user) {
 			logger.info(
@@ -76,7 +72,7 @@ export const login = async (req, res) => {
 			user: {
 				id: user._id,
 				name: user.name,
-				employeeId: user.employeeId,
+				employeeNumber: user.employeeNumber,
 				role: user.role,
 			},
 		};

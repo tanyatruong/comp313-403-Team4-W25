@@ -1,9 +1,11 @@
-import express from 'express';
-// import { createUser } from '../controllers/userController.js';
+import express from "express";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// // Route to create a new user
-// router.post('/', createUser);
+// This is a minimal implementation - expand as needed
+router.get("/", protect, (req, res) => {
+	res.json({ message: "User routes implemented" });
+});
 
-export default router; 
+export default router;
