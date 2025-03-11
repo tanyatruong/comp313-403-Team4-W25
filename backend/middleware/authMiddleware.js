@@ -72,23 +72,6 @@ export const employeeOnly = (req, res, next) => {
 	}
 };
 
-// Middleware to check if user is HR
-export const hrOnly = (req, res, next) => {
-	logger.info(`Checking HR permission for user: ${req.user._id}`);
-
-	if (req.user && req.user.role === "HR") {
-		logger.info("HR permission granted");
-		next();
-	} else {
-		logger.info(
-			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access HR-only resource`
-		);
-		res.status(403).json({
-			message: "Access denied. Only HR personnel can access this resource.",
-		});
-	}
-};
-
 // Middleware to check if user is an admin
 export const adminOnly = (req, res, next) => {
 	logger.info(`Checking admin permission for user: ${req.user._id}`);

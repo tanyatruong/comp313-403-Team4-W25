@@ -18,17 +18,10 @@ export class ApiService {
 
 	// Get headers with auth token if available
 	private getHeaders(): HttpHeaders {
-		let headers = new HttpHeaders({
+		// Only set content type, let the interceptor handle the auth token
+		return new HttpHeaders({
 			"Content-Type": "application/json",
 		});
-
-		// If you're using Authorization header approach
-		const token = localStorage.getItem("token");
-		if (token) {
-			headers = headers.set("Authorization", `Bearer ${token}`);
-		}
-
-		return headers;
 	}
 
 	// GET request
