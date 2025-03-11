@@ -13,7 +13,7 @@
 
 .ticket-card.selected {
   background-color: #e3f2fd;
-  border-left: 3px solid #2196F3;
+  border-left: 3px solid #2196f3;
 }
 
 .ticket-priority {
@@ -36,4 +36,35 @@
 .priority-low {
   background-color: #e8f5e9;
   color: #388e3c;
-} 
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 10px 10px 30px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.p-input-icon-left {
+  position: relative;
+}
+
+.p-input-icon-left .pi-search {
+  position: absolute;
+  left: 10px;
+  color: #aaa;
+  pointer-events: none;
+}

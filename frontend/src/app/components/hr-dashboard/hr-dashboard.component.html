@@ -9,9 +9,9 @@
     <div class="surface-card p-3 shadow-1 border-round mb-4">
         <div class="grid align-items-center">
             <div class="col-12 md:col-3">
-                <span class="p-input-icon-left w-full">
+                <span class="p-input-icon-left w-full search-container">
                     <i class="pi pi-search"></i>
-                    <input type="text" pInputText placeholder="Search tickets..." class="w-full"
+                    <input type="text" pInputText placeholder="Search tickets..." class="w-full search-input"
                         [(ngModel)]="filterText" (keyup.enter)="loadTickets()">
                 </span>
             </div>
@@ -25,7 +25,7 @@
             </div>
             <div class="col-12 md:col-2">
                 <p-dropdown [options]="[
-                                {label: 'Date (Newest)', value: 'dateAndTimeOfCreation'},
+                                {label: 'Date (Newest)', value: 'createdAt'},
                                 {label: 'Title', value: 'title'},
                                 {label: 'Priority', value: 'priority'}
                              ]" [(ngModel)]="sortBy" placeholder="Sort by" class="w-full"
@@ -189,14 +189,50 @@
 
                     <div class="field mb-3">
                         <label class="font-bold block mb-1">Assign To</label>
-                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedHrId" optionLabel="username"
+
+                        <!-- AI Recommendations Section -->
+                        <div class="mb-2" *ngIf="recommendations && recommendations.length > 0">
+                            <p class="text-sm text-600 mb-2">
+                                <i class="pi pi-star text-yellow-500 mr-1"></i> AI Recommended Assignees:
+                            </p>
+                            <div class="grid">
+                                <div *ngFor="let rec of recommendations.slice(0, 2)" class="col-6">
+                                    <div class="surface-100 p-2 border-round mb-2">
+                                        <div class="flex align-items-center">
+                                            <button pButton pRipple [label]="rec.username"
+                                                [class]="rec.confidenceScore > 70 ? 'p-button-success' : 'p-button-secondary'"
+                                                [style.opacity]="0.4 + (rec.confidenceScore/100)*0.6" icon="pi pi-user"
+                                                class="p-button-sm p-button-text"
+                                                (click)="assignHrRep(selectedTicket, rec.userId)">
+                                            </button>
+                                            <span [pTooltip]="rec.reason" class="ml-auto text-sm text-600">
+                                                {{rec.confidenceScore}}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading indicator while getting recommendations -->
+                        <div *ngIf="isLoadingRecommendations" class="mb-2 text-center">
+                            <i class="pi pi-spin pi-spinner mr-2"></i> Getting recommendations...
+                        </div>
+
+                        <!-- Manual assignment dropdown (still available to override) -->
+                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedTicket.assignedTo" optionLabel="username"
                             optionValue="id" placeholder="Select HR Representative" styleClass="w-full"
-                            (onChange)="assignTicket()"></p-dropdown>
+                            (onChange)="assignHrRep(selectedTicket, $event.value)"></p-dropdown>
                     </div>
 
                     <div class="field mb-3">
                         <label class="font-bold block mb-1">Created On</label>
-                        <div>{{selectedTicket.dateAndTimeOfCreation}}</div>
+                        <div>{{selectedTicket.createdAt | date:'medium'}}</div>
+                    </div>
+
+                    <div class="field mb-3">
+                        <label class="font-bold block mb-1">Updated On</label>
+                        <div>{{selectedTicket.updatedAt | date:'medium'}}</div>
                     </div>
                 </div>
                 <ng-template #noTicketSelected>
