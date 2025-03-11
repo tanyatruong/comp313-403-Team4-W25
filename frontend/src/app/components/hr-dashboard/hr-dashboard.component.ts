@@ -12,6 +12,7 @@ import { SentimentEnum } from '../../data/enums/SentimentEnum';
 import { PriorityEnum, PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
 import { CategoryEnum, CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
 import { HttpClientModule } from '@angular/common/http';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-hr-dashboard',
@@ -37,7 +38,7 @@ export class HrDashboardComponent implements OnInit {
   selectedTicket: Ticket | null = null;
 
   // HR representatives for assignment
-  hrUsers: User[] = [];
+  hrUsers: { id: string; username: string }[] = [];
   selectedHrId: string = '';
 
   // Use the shared option constants
@@ -55,11 +56,13 @@ export class HrDashboardComponent implements OnInit {
   constructor(
     private ticketService: TicketService,
     private userService: UserService,
-    private routerService: RouterService
+    private routerService: RouterService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
     this.loadTickets();
+    this.loadHrUsers();
   }
 
   loadTickets(): void {
@@ -91,6 +94,17 @@ export class HrDashboardComponent implements OnInit {
         (ticket) => ticket.status === StatusEnum.Closed
       );
     });
+  }
+
+  loadHrUsers(): void {
+    this.userService.getHrUsers().subscribe(
+      (hrUsers) => {
+        this.hrUsers = hrUsers;
+      },
+      (error) => {
+        console.error('Failed to load HR users:', error);
+      }
+    );
   }
 
   applyFilters(tickets: Ticket[]): Ticket[] {
@@ -239,5 +253,48 @@ export class HrDashboardComponent implements OnInit {
 
   goToHome(): void {
     this.routerService.navigateToHome();
+  }
+
+  // Add this method to update HR rep assignment
+  assignHrRep(ticket: Ticket, hrUserId: string): void {
+    console.log(
+      `HR Dashboard: Assigning HR rep ${hrUserId} to ticket ${ticket.id}`
+    );
+
+    if (!ticket.id) {
+      console.error('Cannot update ticket without ID');
+      return;
+    }
+
+    // Create updated ticket with new HR rep assigned
+    const updatedTicket = {
+      ...ticket,
+      assignedTo: hrUserId,
+    };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
+      (result) => {
+        console.log('Ticket updated with new HR rep:', result);
+        this.loadTickets();
+        if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+          this.selectedTicket = result;
+        }
+        // Optional: Show success message
+        this.messageService.add({
+          severity: 'success',
+          summary: 'HR Rep Assigned',
+          detail: 'Ticket has been assigned to a new HR representative',
+        });
+      },
+      (error) => {
+        console.error('Error assigning HR rep to ticket:', error);
+        // Optional: Show error message
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Assignment Failed',
+          detail: 'Could not assign ticket to HR representative',
+        });
+      }
+    );
   }
 }

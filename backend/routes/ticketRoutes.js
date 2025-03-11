@@ -1,27 +1,39 @@
 import express from "express";
-import * as ticketController from "../controllers/ticketController.js";
+import {
+	getAllTickets,
+	getTicketById,
+	createTicket,
+	updateTicket,
+	deleteTicket,
+	getTicketsByUserId,
+	assignTicket,
+	updateTicketStatus,
+} from "../controllers/ticketController.js";
 
 const router = express.Router();
 
 // Get all tickets
-router.get("/", ticketController.getAllTickets);
+router.get("/", getAllTickets);
 
 // Get ticket by ID
-router.get("/:id", ticketController.getTicketById);
+router.get("/:id", getTicketById);
 
 // Create new ticket
-router.post("/", ticketController.createTicket);
+router.post("/", createTicket);
 
 // Update ticket
-router.put("/:id", ticketController.updateTicket);
+router.put("/:id", updateTicket);
 
 // Delete ticket
-router.delete("/:id", ticketController.deleteTicket);
+router.delete("/:id", deleteTicket);
 
 // Get tickets by user ID
-router.get("/user/:userId", ticketController.getTicketsByUserId);
+router.get("/user/:userId", getTicketsByUserId);
 
 // Assign ticket to HR
-router.patch("/:id/assign", ticketController.assignTicket);
+router.patch("/:id/assign", assignTicket);
+
+// Add the missing route for updating status
+router.patch("/:id/status", updateTicketStatus);
 
 export default router;

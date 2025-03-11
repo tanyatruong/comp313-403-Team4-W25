@@ -27,6 +27,7 @@ export class LoginComponent {
 
   errorMessage: string = '';
 
+  // Combined login method that replaces both onLoginAttempt and onSubmit
   onLoginAttempt() {
     console.log(
       'Login Attempted:\n-email: ' +
@@ -35,15 +36,20 @@ export class LoginComponent {
         this.password
     );
 
-    this.userService
-      .authenticateUser(this.email, this.password)
-      .subscribe((isAuthenticated) => {
-        if (isAuthenticated) {
+    this.userService.login(this.email, this.password).subscribe(
+      (response) => {
+        if (response.success) {
+          console.log('Login successful');
           this.routerService.navigateToHome();
         } else {
           this.errorMessage = 'Invalid email or password';
         }
-      });
+      },
+      (error) => {
+        console.error('Login failed:', error);
+        this.errorMessage = 'Invalid credentials';
+      }
+    );
   }
 
   // when user opts to press enter instead of clicking login button
@@ -51,22 +57,8 @@ export class LoginComponent {
     this.onLoginAttempt();
   }
 
+  // Keeping this method as an alias to onLoginAttempt for any existing form bindings
   onSubmit(): void {
-    this.userService.login(this.email, this.password).subscribe(
-      (response) => {
-        console.log('Login successful:', response);
-
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          console.log('Token stored successfully:', response.token);
-        }
-
-        this.router.navigate(['/home']);
-      },
-      (error) => {
-        console.error('Login failed:', error);
-        this.errorMessage = 'Invalid credentials';
-      }
-    );
+    this.onLoginAttempt();
   }
 }
