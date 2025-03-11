@@ -19,15 +19,15 @@
 
     <div class="field mb-4">
       <label for="category" class="font-bold block mb-2">Category *</label>
-      <p-dropdown id="category" [options]="categories" [(ngModel)]="newTicket.category" name="category"
-        placeholder="Select a category" [required]="true" optionLabel="name" optionValue="value"
+      <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="newTicket.category" name="category"
+        placeholder="Select a category" [required]="true" optionLabel="label" optionValue="value"
         class="w-full"></p-dropdown>
     </div>
 
     <div class="field mb-4">
       <label for="priority" class="font-bold block mb-2">Priority *</label>
-      <p-dropdown id="priority" [options]="priorities" [(ngModel)]="newTicket.priority" name="priority"
-        placeholder="Select priority level" [required]="true" optionLabel="name" optionValue="value"
+      <p-dropdown id="priority" [options]="priorityOptions" [(ngModel)]="newTicket.priority" name="priority"
+        placeholder="Select priority level" [required]="true" optionLabel="label" optionValue="value"
         class="w-full"></p-dropdown>
     </div>
 

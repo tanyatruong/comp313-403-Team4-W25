@@ -11,22 +11,83 @@ import { CategoryEnum } from '../data/enums/CategoryEnum';
 export class TicketService {
   // Keep a local cache of tickets
   private tickets: Ticket[] = [];
-  private loaded = false;
   currentTicket: Ticket | null = null;
 
   constructor(private apiService: ApiService) {}
 
-  // Load all tickets from the backend
+  // CRUD Operations
   loadTickets(): Observable<Ticket[]> {
-    // Use the real API with mapping for MongoDB format
-    return this.apiService.getTickets().pipe(
+    return this.apiService.get<any[]>('/tickets').pipe(
       map((tickets) => tickets.map((ticket) => this.mapMongoTicket(ticket))),
-      tap((tickets) => {
-        this.tickets = tickets;
-        this.loaded = true;
-      }),
+      tap((tickets) => (this.tickets = tickets)),
       catchError((error) => this.handleApiError('loading tickets', error))
     );
+  }
+
+  getTicketById(id: string): Observable<Ticket> {
+    return this.apiService.get<any>(`/tickets/${id}`).pipe(
+      map((ticket) => this.mapMongoTicket(ticket)),
+      catchError((error) => this.handleApiError('loading ticket', error))
+    );
+  }
+
+  createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
+    const completeTicket = {
+      ...ticket,
+      status: ticket.status || StatusEnum.Open,
+      createdAt: new Date(),
+    } as Ticket;
+
+    return this.apiService.post<any>('/tickets', completeTicket).pipe(
+      map((response) => this.mapMongoTicket(response)),
+      tap((newTicket) => this.tickets.push(newTicket)),
+      catchError((error) => this.handleApiError('creating ticket', error))
+    );
+  }
+
+  updateTicket(id: string, ticket: Partial<Ticket>): Observable<Ticket> {
+    return this.apiService.put<any>(`/tickets/${id}`, ticket).pipe(
+      map((response) => this.mapMongoTicket(response)),
+      tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
+      catchError((error) => this.handleApiError('updating ticket', error))
+    );
+  }
+
+  deleteTicket(id: string): Observable<void> {
+    return this.apiService.delete<void>(`/tickets/${id}`).pipe(
+      map(() => void 0),
+      tap(() => this.removeFromCache(id)),
+      catchError((error) => this.handleApiError('deleting ticket', error))
+    );
+  }
+
+  // Specialized Operations
+  updateTicketStatus(id: string, status: StatusEnum): Observable<Ticket> {
+    return this.apiService.patch<any>(`/tickets/${id}/status`, { status }).pipe(
+      map((response) => this.mapMongoTicket(response)),
+      tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
+      catchError((error) => this.handleApiError('updating status', error))
+    );
+  }
+
+  updateTicketPriority(id: string, priority: PriorityEnum): Observable<Ticket> {
+    return this.apiService
+      .patch<any>(`/tickets/${id}/priority`, { priority })
+      .pipe(
+        map((response) => this.mapMongoTicket(response)),
+        tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
+        catchError((error) => this.handleApiError('updating priority', error))
+      );
+  }
+
+  assignTicket(id: string, hrUserId: string): Observable<Ticket> {
+    return this.apiService
+      .patch<any>(`/tickets/${id}/assign`, { assignedTo: hrUserId })
+      .pipe(
+        map((response) => this.mapMongoTicket(response)),
+        tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
+        catchError((error) => this.handleApiError('assigning ticket', error))
+      );
   }
 
   // Helper method to map MongoDB ticket format to app's format
@@ -121,122 +182,10 @@ export class TicketService {
     );
   }
 
-  // Create a new ticket
-  createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
-    // Add required fields for API
-    const completeTicket = {
-      ...ticket,
-      status: ticket.status || StatusEnum.Open,
-      createdAt: new Date(),
-    } as Ticket;
-
-    return this.apiService.createTicket(completeTicket).pipe(
-      map((response) => {
-        this.tickets.push(response);
-        return response;
-      }),
-      catchError((error) => this.handleApiError('creating ticket', error))
+  // Remove from cache
+  private removeFromCache(id: string): void {
+    this.tickets = this.tickets.filter(
+      (t) => t.id?.toString() !== id.toString()
     );
-  }
-
-  // Update a ticket
-  updateTicket(
-    ticketId: string | number,
-    updatedTicket: Ticket
-  ): Observable<Ticket> {
-    return this.apiService
-      .updateTicket(ticketId.toString(), updatedTicket)
-      .pipe(
-        map((response) => {
-          // Update local cache after successful server update
-          this.updateTicketCache(ticketId.toString(), response);
-          return response;
-        }),
-        catchError((error) => this.handleApiError('updating ticket', error))
-      );
-  }
-
-  // Delete a ticket
-  deleteTicket(id: number): Observable<boolean> {
-    return this.apiService.deleteTicket(id.toString()).pipe(
-      map(() => {
-        this.tickets = this.tickets.filter(
-          (t) => t.id?.toString() !== id.toString()
-        );
-        return true;
-      }),
-      catchError((error) => this.handleApiError('deleting ticket', error))
-    );
-  }
-
-  // Update ticket status
-  updateTicketStatus(ticketId: string, status: string): Observable<Ticket> {
-    console.log(
-      `TicketService: Updating ticket ${ticketId} status to ${status}`
-    );
-
-    // Ensure we're passing the right parameters
-    return this.apiService.updateTicketStatus(ticketId, status).pipe(
-      tap((updatedTicket) =>
-        console.log('Status updated successfully:', updatedTicket)
-      ),
-      catchError((error) => {
-        console.error('TicketService: Failed to update status', error);
-        return throwError(
-          () =>
-            new Error(
-              `Failed to update ticket status: ${
-                error.message || 'Unknown error'
-              }`
-            )
-        );
-      })
-    );
-  }
-
-  // Assign ticket to HR
-  assignTicket(ticketId: number, hrUserId: string): Observable<boolean> {
-    return this.apiService.assignTicket(ticketId.toString(), hrUserId).pipe(
-      map((response: any) => {
-        if (response) {
-          this.updateTicketCache(ticketId.toString(), { assignedTo: hrUserId });
-          return true;
-        }
-        return false;
-      }),
-      catchError((error) => this.handleApiError('assigning ticket', error))
-    );
-  }
-
-  // Update ticket priority
-  updateTicketPriority(
-    ticketId: number | string,
-    priority: PriorityEnum
-  ): Observable<any> {
-    return this.apiService
-      .updateTicketPriority(ticketId.toString(), priority)
-      .pipe(
-        map((response) => {
-          // Update local cache after successful server update
-          this.updateTicketCache(ticketId.toString(), { priority });
-          return response;
-        }),
-        catchError((error) =>
-          this.handleApiError('updating ticket priority', error)
-        )
-      );
-  }
-
-  getTicketById(id: string): Observable<Ticket> {
-    // Check if it's in our cache first
-    const cachedTicket = this.tickets.find((ticket) => ticket.id === id);
-    if (cachedTicket) {
-      return of(cachedTicket);
-    }
-
-    // Otherwise get it from the API
-    return this.apiService
-      .getTicketById(id)
-      .pipe(map((ticket) => this.mapMongoTicket(ticket)));
   }
 }
