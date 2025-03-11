@@ -69,24 +69,36 @@ export class UserService {
     password: string
   ): Observable<boolean> {
     return this.apiService.login(employeeNumber, password).pipe(
-      tap((user) => {
-        console.log('Authenticated user:', user);
+      tap((response) => {
+        console.log('Authentication response:', response);
+        // Store the user details
         this.loggedInUser = {
-          ...user,
-          userType: user.role?.toLowerCase() || 'employee',
-          employeeNumber: user.employeeNumber || employeeNumber,
+          ...response.user, // Assuming the response structure has a user property
+          userType: response.user?.role?.toLowerCase() || 'employee',
+          employeeNumber: response.user?.employeeNumber || employeeNumber,
         };
 
         if (isPlatformBrowser(this.platformId)) {
+          // Store user in localStorage
           localStorage.setItem(
             'currentUser',
             JSON.stringify(this.loggedInUser)
           );
-          localStorage.setItem('authToken', 'dummy-token-' + Date.now());
+
+          // Store the actual token from the response, not a dummy one
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            console.log('Token stored in localStorage');
+          } else {
+            console.error('No token received from authentication response');
+          }
         }
       }),
-      map((user) => !!user),
-      catchError(() => of(false))
+      map((response) => !!response?.user), // Return true if user exists in response
+      catchError((error) => {
+        console.error('Authentication error:', error);
+        return of(false);
+      })
     );
   }
 
@@ -152,5 +164,24 @@ export class UserService {
       department: user.department,
       createdAt: new Date(user.createdAt.$date),
     }));
+  }
+
+  login(
+    email: string,
+    password: string
+  ): Observable<{ user: User; token: string }> {
+    return this.apiService.login(email, password).pipe(
+      tap((response: any) => {
+        if (response.user) {
+          this.loggedInUser = response.user;
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+        }
+
+        if (response.token) {
+          console.log('Storing token:', response.token);
+          localStorage.setItem('token', response.token);
+        }
+      })
+    );
   }
 }
