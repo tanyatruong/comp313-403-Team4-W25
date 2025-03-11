@@ -61,25 +61,6 @@ export class TicketService {
     );
   }
 
-  // Specialized Operations
-  updateTicketStatus(id: string, status: StatusEnum): Observable<Ticket> {
-    return this.apiService.patch<any>(`/tickets/${id}/status`, { status }).pipe(
-      map((response) => this.mapMongoTicket(response)),
-      tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
-      catchError((error) => this.handleApiError('updating status', error))
-    );
-  }
-
-  updateTicketPriority(id: string, priority: PriorityEnum): Observable<Ticket> {
-    return this.apiService
-      .patch<any>(`/tickets/${id}/priority`, { priority })
-      .pipe(
-        map((response) => this.mapMongoTicket(response)),
-        tap((updatedTicket) => this.updateTicketCache(id, updatedTicket)),
-        catchError((error) => this.handleApiError('updating priority', error))
-      );
-  }
-
   assignTicket(id: string, hrUserId: string): Observable<Ticket> {
     return this.apiService
       .patch<any>(`/tickets/${id}/assign`, { assignedTo: hrUserId })
