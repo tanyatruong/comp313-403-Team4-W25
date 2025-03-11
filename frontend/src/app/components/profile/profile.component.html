@@ -1,0 +1,45 @@
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+    <div class="flex justify-content-between align-items-center mb-5">
+        <h2 class="m-0">My Profile</h2>
+        <button pButton icon="pi pi-home" label="Home" routerLink="/home"></button>
+    </div>
+
+    <div class="grid">
+        <div class="col-12 md:col-6 lg:col-4">
+            <div class="surface-card p-4 shadow-1 border-round">
+                <div class="mb-4">
+                    <h3>Personal Information</h3>
+                    <p class="text-500">Update your profile information</p>
+                    <button pButton icon="pi pi-refresh" label="Refresh Profile" (click)="refreshUserProfile()"
+                        class="p-button-outlined p-button-secondary mt-2"></button>
+                </div>
+
+                <div class="field mb-4" *ngIf="user">
+                    <label class="block font-bold mb-2">Name</label>
+                    <div>{{ user.name }}</div>
+                </div>
+
+                <div class="field mb-4" *ngIf="user">
+                    <label class="block font-bold mb-2">Email</label>
+                    <div>{{ user.email }}</div>
+                </div>
+
+                <div class="field mb-4" *ngIf="user">
+                    <label class="block font-bold mb-2">Employee Number</label>
+                    <div>{{ user.employeeNumber }}</div>
+                </div>
+
+                <div class="field mb-4">
+                    <label for="phone" class="block font-bold mb-2">Phone Number</label>
+                    <input id="phone" type="tel" pInputText [(ngModel)]="phone" class="w-full"
+                        placeholder="Enter your phone number">
+                </div>
+
+                <button pButton label="Save Changes" (click)="updatePhoneNumber()" [disabled]="isSaving"
+                    [loading]="isSaving" class="w-full"></button>
+            </div>
+        </div>
+    </div>
+
+    <p-toast></p-toast>
+</div>

@@ -27,9 +27,40 @@
           font-size: 16px;
           border-radius: 5px;
           cursor: pointer;
+          margin-right: 10px;
         " (click)="openSettings()">
         <i class="pi pi-cog" style="font-size: 20px; margin-right: 5px"></i>
         Settings
+      </button>
+
+      <!-- Profile button for all users -->
+      <button style="
+          background-color: #3F51B5;
+          color: white;
+          border: 1px solid rgb(255, 255, 255);
+          padding: 10px 20px;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-right: 10px;
+        " (click)="navigateToProfile()">
+        <i class="pi pi-user" style="font-size: 20px; margin-right: 5px;"></i>
+        My Profile
+      </button>
+
+      <!-- Admin button only for admin users -->
+      <button *ngIf="currentUser?.role === 'Admin'" style="
+          background-color: #4CAF50;
+          color: white;
+          border: 1px solid rgb(255, 255, 255);
+          padding: 10px 20px;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-right: 10px;
+        " (click)="navigateToEmployeeManagement()">
+        <i class="pi pi-users" style="font-size: 20px; margin-right: 5px;"></i>
+        Manage Employees
       </button>
     </div>
   </div>

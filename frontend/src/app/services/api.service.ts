@@ -4,8 +4,6 @@ import { Observable, throwError } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
-import { StatusEnum } from '../data/enums/StatusEnum';
-import { PriorityEnum } from '../data/enums/PriorityEnum';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -112,61 +110,9 @@ export class ApiService {
     return this.get<any[]>(`/tickets/user/${userId}`);
   }
 
-  updateTicketStatus(ticketId: string, status: string): Observable<Ticket> {
-    console.log(`API Service: Updating ticket ${ticketId} status to ${status}`);
-
-    const token = this.authService.getToken();
-    if (!token) {
-      console.error(
-        '⚠️ No auth token available for updateTicketStatus request'
-      );
-      return throwError(() => new Error('Authentication token missing'));
-    }
-
-    return this.getTicketById(ticketId).pipe(
-      switchMap((currentTicket) => {
-        const updatedTicket = {
-          ...currentTicket,
-          status: status as StatusEnum,
-        };
-
-        console.log('Updating ticket with new status:', updatedTicket);
-
-        return this.updateTicket(ticketId, updatedTicket);
-      }),
-      tap((response) => {
-        console.log('Status update response:', response);
-        console.log(
-          'Verifying if status was updated. Expected:',
-          status,
-          'Actual:',
-          response.status
-        );
-      }),
-      catchError((error) => {
-        console.error(`Status update error for ticket ${ticketId}:`, error);
-        return throwError(
-          () =>
-            new Error(
-              `Failed to update ticket status: ${
-                error.message || 'Server error'
-              }`
-            )
-        );
-      })
-    );
-  }
-
   assignTicket(id: string, hrUserId: string): Observable<Ticket> {
     return this.patch<Ticket>(`/tickets/${id}/assign`, {
       assignedTo: hrUserId,
     });
-  }
-
-  updateTicketPriority(
-    ticketId: string,
-    priority: PriorityEnum
-  ): Observable<any> {
-    return this.patch<any>(`/tickets/${ticketId}/priority`, { priority });
   }
 }

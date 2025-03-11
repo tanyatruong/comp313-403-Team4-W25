@@ -1,0 +1,94 @@
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+    <div class="flex justify-content-between align-items-center mb-5">
+        <h2 class="m-0">Employee Management</h2>
+        <div>
+            <button pButton icon="pi pi-plus" label="New Employee" class="mr-2" (click)="createNewEmployee()"></button>
+            <button pButton icon="pi pi-home" label="Home" routerLink="/home"></button>
+        </div>
+    </div>
+
+    <p-table [value]="employees" [loading]="loading" styleClass="p-datatable-sm p-datatable-striped" [paginator]="true"
+        [rows]="10" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Name</th>
+                <th>Employee #</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-employee>
+            <tr>
+                <td>{{employee.name}}</td>
+                <td>{{employee.employeeNumber}}</td>
+                <td>{{employee.email}}</td>
+                <td>{{employee.phone || 'Not set'}}</td>
+                <td>
+                    <span class="p-badge" [ngClass]="{
+                            'p-badge-success': employee.role === 'admin',
+                            'p-badge-info': employee.role === 'hr',
+                            'p-badge-secondary': employee.role === 'employee'
+                          }">
+                        {{employee.role | titlecase}}
+                    </span>
+                </td>
+                <td>
+                    <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm"
+                        (click)="editEmployee(employee)"></button>
+                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                        (click)="deleteEmployee(employee)"></button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="6" class="text-center p-4">
+                    No employees found.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <!-- Edit Dialog -->
+    <p-dialog [(visible)]="displayDialog" [style]="{width: '450px'}"
+        [header]="isNewEmployee ? 'New Employee' : 'Edit Employee'" [modal]="true" styleClass="p-fluid">
+        <ng-template pTemplate="content" *ngIf="selectedEmployee">
+            <div class="field">
+                <label for="name">Name</label>
+                <input id="name" type="text" pInputText [(ngModel)]="selectedEmployee.name" required>
+            </div>
+            <div class="field">
+                <label for="employeeNumber">Employee Number</label>
+                <input id="employeeNumber" type="text" pInputText [(ngModel)]="selectedEmployee.employeeNumber"
+                    required>
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" pInputText [(ngModel)]="selectedEmployee.email" required>
+            </div>
+            <div class="field">
+                <label for="phone">Phone Number</label>
+                <input id="phone" type="tel" pInputText [(ngModel)]="selectedEmployee.phone">
+            </div>
+            <div class="field">
+                <label for="role">Role</label>
+                <p-dropdown id="role" [options]="roles" [(ngModel)]="selectedEmployee.role" placeholder="Select a Role"
+                    optionLabel="label" optionValue="value"></p-dropdown>
+            </div>
+            <div class="field" *ngIf="isNewEmployee">
+                <label for="password">Password</label>
+                <input id="password" type="password" pInputText [(ngModel)]="selectedEmployee.password" required>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <button pButton label="Cancel" icon="pi pi-times" class="p-button-text"
+                (click)="displayDialog=false"></button>
+            <button pButton label="Save" icon="pi pi-check" (click)="saveEmployee()" [loading]="loading"></button>
+        </ng-template>
+    </p-dialog>
+
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+</div>

@@ -6,17 +6,25 @@ import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
 import { RouterService } from '../../services/router.service';
 import { Ticket } from '../../data/models/ticket.model';
-import { User } from '../../data/models/user.model';
 import { StatusEnum, STATUS_OPTIONS } from '../../data/enums/StatusEnum';
-import { SentimentEnum } from '../../data/enums/SentimentEnum';
+// import { SentimentEnum } from '../../data/enums/SentimentEnum';
 import { PriorityEnum, PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
 import { CategoryEnum, CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
 import { HttpClientModule } from '@angular/common/http';
+import { MessageService } from 'primeng/api';
+import { RecommendationService } from '../../services/recommendation.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, PrimengModule, HttpClientModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    PrimengModule,
+    HttpClientModule,
+    TooltipModule,
+  ],
   templateUrl: './hr-dashboard.component.html',
   styleUrls: ['./hr-dashboard.component.css'],
 })
@@ -37,7 +45,7 @@ export class HrDashboardComponent implements OnInit {
   selectedTicket: Ticket | null = null;
 
   // HR representatives for assignment
-  hrUsers: User[] = [];
+  hrUsers: { id: string; username: string }[] = [];
   selectedHrId: string = '';
 
   // Use the shared option constants
@@ -49,17 +57,24 @@ export class HrDashboardComponent implements OnInit {
   filterText: string = '';
   filterPriority: string = '';
   filterCategory: string = '';
-  sortBy: string = 'dateAndTimeOfCreation';
+  sortBy: string = 'createdAt';
   sortOrder: 'asc' | 'desc' = 'desc';
+
+  // Add to the component's class properties
+  recommendations: any[] = [];
+  isLoadingRecommendations: boolean = false;
 
   constructor(
     private ticketService: TicketService,
     private userService: UserService,
-    private routerService: RouterService
+    private routerService: RouterService,
+    private messageService: MessageService,
+    private recommendationService: RecommendationService
   ) {}
 
   ngOnInit(): void {
     this.loadTickets();
+    this.loadHrUsers();
   }
 
   loadTickets(): void {
@@ -91,6 +106,17 @@ export class HrDashboardComponent implements OnInit {
         (ticket) => ticket.status === StatusEnum.Closed
       );
     });
+  }
+
+  loadHrUsers(): void {
+    this.userService.getHrUsers().subscribe(
+      (hrUsers) => {
+        this.hrUsers = hrUsers;
+      },
+      (error) => {
+        console.error('Failed to load HR users:', error);
+      }
+    );
   }
 
   applyFilters(tickets: Ticket[]): Ticket[] {
@@ -140,19 +166,18 @@ export class HrDashboardComponent implements OnInit {
             (priorityOrder[a.priority as keyof typeof priorityOrder] ?? 1) -
             (priorityOrder[b.priority as keyof typeof priorityOrder] ?? 1);
           break;
-        case 'dateAndTimeOfCreation':
+        case 'createdAt':
         default:
           // Add null checks with fallback to current timestamp
-          const dateB = b.dateAndTimeOfCreation
-            ? new Date(b.dateAndTimeOfCreation).getTime()
+          const dateB = b.createdAt
+            ? new Date(b.createdAt).getTime()
             : Date.now();
-          const dateA = a.dateAndTimeOfCreation
-            ? new Date(a.dateAndTimeOfCreation).getTime()
+          const dateA = a.createdAt
+            ? new Date(a.createdAt).getTime()
             : Date.now();
           comparison = dateB - dateA;
           break;
       }
-
       // Reverse for ascending order
       return this.sortOrder === 'desc' ? comparison : -comparison;
     });
@@ -168,6 +193,20 @@ export class HrDashboardComponent implements OnInit {
   selectTicket(ticket: Ticket): void {
     this.selectedTicket = ticket;
     this.selectedHrId = ticket.assignedTo || '';
+    this.isLoadingRecommendations = true;
+
+    // Get recommendations for ticket assignment
+    this.recommendationService.getRecommendedAssignee(ticket).subscribe(
+      (recs) => {
+        this.recommendations = recs;
+        this.isLoadingRecommendations = false;
+      },
+      (error) => {
+        console.error('Error loading recommendations:', error);
+        this.isLoadingRecommendations = false;
+        this.recommendations = [];
+      }
+    );
   }
 
   assignTicket(): void {
@@ -190,7 +229,10 @@ export class HrDashboardComponent implements OnInit {
       return;
     }
 
-    this.ticketService.updateTicketStatus(ticket.id, newStatus).subscribe(
+    // Update the ticket object with the new status
+    const updatedTicket = { ...ticket, status: newStatus };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
       (updatedTicket) => {
         console.log('Ticket updated successfully:', updatedTicket);
         this.loadTickets();
@@ -199,29 +241,36 @@ export class HrDashboardComponent implements OnInit {
         }
       },
       (error) => {
-        console.error('Error updating ticket status:', error);
-        // Consider adding user feedback here
+        console.error('Error updating ticket:', error);
       }
     );
   }
 
-  updatePriority(ticket: Ticket, priority: PriorityEnum): void {
-    if (ticket.id) {
-      this.ticketService.updateTicketPriority(ticket.id, priority).subscribe(
-        (updatedTicket) => {
-          console.log('Ticket priority updated successfully:', updatedTicket);
-          this.loadTickets();
+  updatePriority(ticket: Ticket, newPriority: PriorityEnum): void {
+    console.log(
+      `HR Dashboard: Attempting to update ticket ${ticket.id} priority from ${ticket.priority} to ${newPriority}`
+    );
 
-          // Update if we were viewing the ticket
-          if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-            this.selectedTicket = updatedTicket || this.selectedTicket;
-          }
-        },
-        (error) => {
-          console.error('Error updating ticket priority:', error);
-        }
-      );
+    if (!ticket.id) {
+      console.error('Cannot update ticket without ID');
+      return;
     }
+
+    // Update the ticket object with the new priority
+    const updatedTicket = { ...ticket, priority: newPriority };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
+      (updatedTicket) => {
+        console.log('Ticket updated successfully:', updatedTicket);
+        this.loadTickets();
+        if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+          this.selectedTicket = updatedTicket;
+        }
+      },
+      (error) => {
+        console.error('Error updating ticket priority:', error);
+      }
+    );
   }
 
   closeDetails(): void {
@@ -230,5 +279,48 @@ export class HrDashboardComponent implements OnInit {
 
   goToHome(): void {
     this.routerService.navigateToHome();
+  }
+
+  // Add this method to update HR rep assignment
+  assignHrRep(ticket: Ticket, hrUserId: string): void {
+    console.log(
+      `HR Dashboard: Assigning HR rep ${hrUserId} to ticket ${ticket.id}`
+    );
+
+    if (!ticket.id) {
+      console.error('Cannot update ticket without ID');
+      return;
+    }
+
+    // Create updated ticket with new HR rep assigned
+    const updatedTicket = {
+      ...ticket,
+      assignedTo: hrUserId,
+    };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
+      (result) => {
+        console.log('Ticket updated with new HR rep:', result);
+        this.loadTickets();
+        if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+          this.selectedTicket = result;
+        }
+        // Optional: Show success message
+        this.messageService.add({
+          severity: 'success',
+          summary: 'HR Rep Assigned',
+          detail: 'Ticket has been assigned to a new HR representative',
+        });
+      },
+      (error) => {
+        console.error('Error assigning HR rep to ticket:', error);
+        // Optional: Show error message
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Assignment Failed',
+          detail: 'Could not assign ticket to HR representative',
+        });
+      }
+    );
   }
 }

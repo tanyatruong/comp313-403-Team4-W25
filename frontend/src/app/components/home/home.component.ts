@@ -133,4 +133,12 @@ export class HomeComponent implements OnInit {
   navigateToHRDashboard(): void {
     this.routerService.navigateToHRDashboard();
   }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
+
+  navigateToEmployeeManagement(): void {
+    this.router.navigate(['/admin/employees']);
+  }
 }
