@@ -28,19 +28,18 @@ export const routes: Routes = [
       ),
     canActivate: [AuthGuard],
   },
-
+  {
+    path: 'ticket-edit',
+    loadComponent: () =>
+      import('./components/ticket-edit/ticket-edit.component').then(
+        (c) => c.TicketEditComponent
+      ),
+    canActivate: [AuthGuard],
+  },
   {
     path: 'hr-dashboard',
     component: HrDashboardComponent,
-    canActivate: [AuthGuard, HrAuthGuard],
-  },
-  {
-    path: 'edit-ticket',
-    loadComponent: () =>
-      import('./components/edit-ticket/edit-ticket.component').then(
-        (c) => c.EditTicketComponent
-      ),
-    canActivate: [AuthGuard],
+    canActivate: [HrAuthGuard],
   },
   { path: '**', redirectTo: 'login' },
 ];
