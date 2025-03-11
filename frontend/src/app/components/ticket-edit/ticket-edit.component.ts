@@ -1,77 +1,67 @@
-import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgStyle } from '@angular/common';
-import { NgClass } from '@angular/common';
-
-//primeNG imports
-import { PrimengModule } from '../../../primeng.module';
-
-//My imports
-import { UserService } from '../../services/user.service';
-import { RouterService } from '../../services/router.service';
-import { StatusEnum } from '../../data/enums/StatusEnum';
-import { TicketService } from '../../services/ticket.service';
 import { Ticket } from '../../data/models/ticket.model';
+import { TicketService } from '../../services/ticket.service';
+import { RouterService } from '../../services/router.service';
+import { STATUS_OPTIONS } from '../../data/enums/StatusEnum';
+import { PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
+import { CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
+import { PrimengModule } from '../../../primeng.module';
 
 @Component({
   selector: 'app-ticket-edit',
   standalone: true,
-  imports: [PrimengModule, NgStyle, NgClass],
+  imports: [CommonModule, FormsModule, PrimengModule],
   templateUrl: './ticket-edit.component.html',
-  styleUrl: './ticket-edit.component.css',
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./ticket-edit.component.css'],
 })
-export class TicketEditComponent {
-  private userService = inject(UserService);
-  private routerService = inject(RouterService);
-  private ticketService = inject(TicketService);
-  // @Input({ required: true }) ticketStatus!: string;
-  // statusEnum = StatusEnum;
-  // user = this.userService.getLoggedInUser();
-  // @Input({ required: true }) ticket!: Ticket; // used in issue #10 pass ticket object to editTicket component
-  private dateObj = new Date();
-  ticket = {
-    id: '100',
-    userId: '0',
-    status: StatusEnum.Open,
-    title: 'title100',
-    description: 'description100',
-    dateAndTimeOfCreation:
-      this.dateObj.getFullYear() +
-      '/' +
-      this.dateObj.getMonth() +
-      '/' +
-      this.dateObj.getDate() +
-      ' @ ' +
-      this.dateObj.getHours() +
-      ':' +
-      this.dateObj.getMinutes() +
-      ':' +
-      this.dateObj.getSeconds(),
-  };
+export class TicketEditComponent implements OnInit {
+  ticket: Ticket | null = null;
+  statusOptions = STATUS_OPTIONS;
+  priorityOptions = PRIORITY_OPTIONS;
+  categoryOptions = CATEGORY_OPTIONS;
+  errorMessage: string = '';
 
-  getTicketStatusButtonStyling() {
-    // let styleOBJ = { background-color: 'green' };
-    // if (this.ticketStatus == this.statusEnum.AttentionRequired) {
-    //   styleOBJ = { background-color: 'yellow' };
-    // }
-    // return styleOBJ;
-  }
+  constructor(
+    private ticketService: TicketService,
+    private routerService: RouterService
+  ) {}
 
-  onStatusLabelClick() {
-    if (this.ticket.status == StatusEnum.AttentionRequired) {
-      this.ticket.status = StatusEnum.Open;
-    } else if (this.ticket.status == StatusEnum.Open) {
-      this.ticket.status = StatusEnum.AttentionRequired;
+  ngOnInit(): void {
+    // Get the current ticket from the service
+    this.ticket = this.ticketService.currentTicket;
+
+    // If no ticket is found, show error and redirect
+    if (!this.ticket) {
+      this.errorMessage = 'No ticket selected for editing';
+
+      // Navigate back to home after a short delay
+      setTimeout(() => this.routerService.navigateToHome(), 2000);
     }
   }
 
-  onReturnButtonClick() {
-    // This currently discards/does not save in progress ticket
-    this.routerService.navigateToHome();
+  saveTicket(): void {
+    if (!this.ticket) {
+      this.errorMessage = 'No ticket to save';
+      return;
+    }
+
+    // First update the ticket
+    this.ticketService.updateTicket(this.ticket.id!, this.ticket).subscribe(
+      (updatedTicket) => {
+        console.log('Ticket updated successfully', updatedTicket);
+
+        this.routerService.navigateToHome();
+      },
+      (error) => {
+        console.error('Error updating ticket:', error);
+        this.errorMessage = 'Failed to update ticket';
+      }
+    );
   }
 
-  onEscalateClick() {}
-  onCloseTicketClick() {}
-  onCreateButtonClick() {}
+  cancel(): void {
+    this.routerService.navigateToHome();
+  }
 }

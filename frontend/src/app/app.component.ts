@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-// import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 import { PrimengModule } from '../primeng.module';
 import { User } from './data/models/user.model';
@@ -9,7 +8,6 @@ import { User } from './data/models/user.model';
   standalone: true,
   imports: [RouterOutlet, PrimengModule],
   templateUrl: './app.component.html',
-  styleUrl: '../../src/styles.css',
 })
 export class AppComponent {
   @Input({ required: true }) user!: User;

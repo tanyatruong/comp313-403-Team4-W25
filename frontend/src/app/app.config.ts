@@ -15,5 +15,3 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
   ],
 };
-
-// adding provideAnimations() here replaces the need to import [BrowserAnimationsModule]

@@ -1,132 +1,121 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
 import { StatusEnum } from '../data/enums/StatusEnum';
 import { PriorityEnum } from '../data/enums/PriorityEnum';
-import { tap, catchError, switchMap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  // Update to use localhost Express server
   private apiUrl = 'http://localhost:3000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  // HTTP Headers
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
-  }
-
-  // Add a method to get authorization headers
   private getAuthHeaders(): HttpHeaders {
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
-
-    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const token = this.authService.getToken();
     if (token) {
-      // Use Authorization: Bearer [token] format
       headers = headers.set('Authorization', `Bearer ${token}`);
-      console.log(
-        'Using auth token (first 15 chars):',
-        token.substring(0, 15) + '...'
-      );
-    } else {
-      console.error(
-        '⚠️ Authentication token missing - request will fail with 401'
-      );
     }
-
     return headers;
   }
 
-  // User endpoints
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`);
+  // Core HTTP methods with auth headers
+  get<T>(endpoint: string): Observable<T> {
+    return this.http.get<T>(`${this.apiUrl}${endpoint}`, {
+      headers: this.getAuthHeaders(),
+    });
   }
 
-  getUserById(id: string): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/users/${id}`);
+  post<T>(endpoint: string, data: any): Observable<T> {
+    return this.http.post<T>(`${this.apiUrl}${endpoint}`, data, {
+      headers: this.getAuthHeaders(),
+    });
   }
 
-  authenticateUser(email: string, password: string): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/auth/login`, {
+  put<T>(endpoint: string, data: any): Observable<T> {
+    return this.http.put<T>(`${this.apiUrl}${endpoint}`, data, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  patch<T>(endpoint: string, data: any): Observable<T> {
+    return this.http.patch<T>(`${this.apiUrl}${endpoint}`, data, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  delete<T>(endpoint: string): Observable<T> {
+    return this.http.delete<T>(`${this.apiUrl}${endpoint}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  // Auth-specific endpoints
+  login(email: string, password: string): Observable<any> {
+    return this.post('/auth/login', {
       employeeNumber: email,
       password,
     });
   }
 
+  // User endpoints
+  getUsers(): Observable<User[]> {
+    return this.get<User[]>('/users');
+  }
+
+  getUserById(id: string): Observable<User> {
+    return this.get<User>(`/users/${id}`);
+  }
+
   // Ticket endpoints
   getTickets(): Observable<Ticket[]> {
-    return this.http.get<Ticket[]>(`${this.apiUrl}/tickets`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.get<Ticket[]>('/tickets');
   }
 
   getTicketById(id: string): Observable<Ticket> {
-    return this.http.get<Ticket>(`${this.apiUrl}/tickets/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.get<Ticket>(`/tickets/${id}`);
   }
 
-  // Update createTicket to use auth headers
   createTicket(ticket: Ticket): Observable<Ticket> {
     console.log('API Service: Creating new ticket:', ticket);
-    return this.http
-      .post<Ticket>(`${this.apiUrl}/tickets`, ticket, {
-        headers: this.getAuthHeaders(),
+    return this.post<Ticket>('/tickets', ticket).pipe(
+      tap((response) => console.log('Server response:', response)),
+      catchError((error) => {
+        console.error('API Error:', error);
+        return throwError(() => error);
       })
-      .pipe(
-        tap((response) => console.log('Server response:', response)),
-        catchError((error) => {
-          console.error('API Error:', error);
-          return throwError(() => error);
-        })
-      );
+    );
   }
 
-  // Also update other methods that need auth
   updateTicket(ticketId: string, ticket: Ticket): Observable<Ticket> {
     console.log('API Service: Updating ticket with status:', ticket.status);
-    return this.http
-      .put<Ticket>(`${this.apiUrl}/tickets/${ticketId}`, ticket, {
-        headers: this.getAuthHeaders(),
+    return this.put<Ticket>(`/tickets/${ticketId}`, ticket).pipe(
+      tap((response) => console.log('API Response:', response)),
+      catchError((error) => {
+        console.error('API Error:', error);
+        return throwError(() => error);
       })
-      .pipe(
-        tap((response) => console.log('API Response:', response)),
-        catchError((error) => {
-          console.error('API Error:', error);
-          return throwError(() => error);
-        })
-      );
+    );
   }
 
   deleteTicket(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/tickets/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.delete<any>(`/tickets/${id}`);
   }
 
-  // Get tickets by user ID
   getTicketsByUserId(userId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/tickets/user/${userId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.get<any[]>(`/tickets/user/${userId}`);
   }
 
-  // Update ticket status
   updateTicketStatus(ticketId: string, status: string): Observable<Ticket> {
     console.log(`API Service: Updating ticket ${ticketId} status to ${status}`);
 
-    // Check auth token before making request
-    const token = localStorage.getItem('token');
+    const token = this.authService.getToken();
     if (!token) {
       console.error(
         '⚠️ No auth token available for updateTicketStatus request'
@@ -134,10 +123,8 @@ export class ApiService {
       return throwError(() => new Error('Authentication token missing'));
     }
 
-    // First, get the current ticket to avoid overwriting other fields
     return this.getTicketById(ticketId).pipe(
       switchMap((currentTicket) => {
-        // Create a new ticket object with the updated status
         const updatedTicket = {
           ...currentTicket,
           status: status as StatusEnum,
@@ -145,7 +132,6 @@ export class ApiService {
 
         console.log('Updating ticket with new status:', updatedTicket);
 
-        // Use the existing updateTicket method that works
         return this.updateTicket(ticketId, updatedTicket);
       }),
       tap((response) => {
@@ -171,49 +157,16 @@ export class ApiService {
     );
   }
 
-  // Assign ticket to HR
   assignTicket(id: string, hrUserId: string): Observable<Ticket> {
-    return this.http.patch<Ticket>(
-      `${this.apiUrl}/tickets/${id}/assign`,
-      { assignedTo: hrUserId },
-      { headers: this.getAuthHeaders() }
-    );
+    return this.patch<Ticket>(`/tickets/${id}/assign`, {
+      assignedTo: hrUserId,
+    });
   }
 
-  // Add this method to ApiService
-  login(email: string, password: string): Observable<any> {
-    return this.http
-      .post<any>(`${this.apiUrl}/auth/login`, {
-        employeeNumber: email,
-        password,
-      })
-      .pipe(
-        tap((response) => console.log('Login response:', response)),
-        catchError((error) => {
-          console.error('Login error:', error);
-          return throwError(() => error);
-        })
-      );
-  }
-
-  // Add this method to update ticket priority
   updateTicketPriority(
     ticketId: string,
     priority: PriorityEnum
   ): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/tickets/${ticketId}/priority`,
-      { priority },
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
-  // Add a method to check token status
-  public checkAuthStatus(): boolean {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('currentUser');
-    console.log('Auth status check - Token exists:', !!token);
-    console.log('Auth status check - User exists:', !!user);
-    return !!token && !!user;
+    return this.patch<any>(`/tickets/${ticketId}/priority`, { priority });
   }
 }

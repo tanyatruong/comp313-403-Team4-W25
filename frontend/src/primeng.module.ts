@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-// import { CommonModule } from '@angular/common';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -18,7 +17,6 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 @NgModule({
   declarations: [],
   imports: [
-    // CommonModule,
     ConfirmDialogModule,
     ButtonModule,
     DialogModule,

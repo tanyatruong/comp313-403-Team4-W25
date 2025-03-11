@@ -6,8 +6,9 @@ import { RouterService } from '../../services/router.service';
 import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
 import { Ticket } from '../../data/models/ticket.model';
-import { PriorityEnum } from '../../data/enums/PriorityEnum';
-import { CategoryEnum } from '../../data/enums/CategoryEnum';
+import { PriorityEnum, PRIORITY_OPTIONS } from '../../data/enums/PriorityEnum';
+import { CategoryEnum, CATEGORY_OPTIONS } from '../../data/enums/CategoryEnum';
+import { StatusEnum, STATUS_OPTIONS } from '../../data/enums/StatusEnum';
 
 @Component({
   selector: 'app-ticket-create',
@@ -24,19 +25,9 @@ export class TicketCreateComponent implements OnInit {
     priority: PriorityEnum.Medium,
   };
 
-  categories = [
-    { name: 'General Inquiry', value: CategoryEnum.General },
-    { name: 'Technical Support', value: CategoryEnum.Technical },
-    { name: 'Payroll Issue', value: CategoryEnum.Payroll },
-    { name: 'Benefits Question', value: CategoryEnum.Benefits },
-    { name: 'Office Facilities', value: CategoryEnum.Facilities },
-  ];
-
-  priorities = [
-    { name: 'Low', value: PriorityEnum.Low },
-    { name: 'Medium', value: PriorityEnum.Medium },
-    { name: 'High', value: PriorityEnum.High },
-  ];
+  categoryOptions = CATEGORY_OPTIONS;
+  priorityOptions = PRIORITY_OPTIONS;
+  statusOptions = STATUS_OPTIONS;
 
   errorMessage: string | null = null;
 
