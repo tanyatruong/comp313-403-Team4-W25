@@ -24,7 +24,4 @@ router.get("/user/:userId", ticketController.getTicketsByUserId);
 // Assign ticket to HR
 router.patch("/:id/assign", ticketController.assignTicket);
 
-// Update ticket status
-router.patch("/:id/status", ticketController.updateTicketStatus);
-
 export default router;

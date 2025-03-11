@@ -152,7 +152,6 @@ export class HrDashboardComponent implements OnInit {
           comparison = dateB - dateA;
           break;
       }
-
       // Reverse for ascending order
       return this.sortOrder === 'desc' ? comparison : -comparison;
     });
@@ -190,7 +189,10 @@ export class HrDashboardComponent implements OnInit {
       return;
     }
 
-    this.ticketService.updateTicketStatus(ticket.id, newStatus).subscribe(
+    // Update the ticket object with the new status
+    const updatedTicket = { ...ticket, status: newStatus };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
       (updatedTicket) => {
         console.log('Ticket updated successfully:', updatedTicket);
         this.loadTickets();
@@ -199,29 +201,36 @@ export class HrDashboardComponent implements OnInit {
         }
       },
       (error) => {
-        console.error('Error updating ticket status:', error);
-        // Consider adding user feedback here
+        console.error('Error updating ticket:', error);
       }
     );
   }
 
-  updatePriority(ticket: Ticket, priority: PriorityEnum): void {
-    if (ticket.id) {
-      this.ticketService.updateTicketPriority(ticket.id, priority).subscribe(
-        (updatedTicket) => {
-          console.log('Ticket priority updated successfully:', updatedTicket);
-          this.loadTickets();
+  updatePriority(ticket: Ticket, newPriority: PriorityEnum): void {
+    console.log(
+      `HR Dashboard: Attempting to update ticket ${ticket.id} priority from ${ticket.priority} to ${newPriority}`
+    );
 
-          // Update if we were viewing the ticket
-          if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
-            this.selectedTicket = updatedTicket || this.selectedTicket;
-          }
-        },
-        (error) => {
-          console.error('Error updating ticket priority:', error);
-        }
-      );
+    if (!ticket.id) {
+      console.error('Cannot update ticket without ID');
+      return;
     }
+
+    // Update the ticket object with the new priority
+    const updatedTicket = { ...ticket, priority: newPriority };
+
+    this.ticketService.updateTicket(ticket.id, updatedTicket).subscribe(
+      (updatedTicket) => {
+        console.log('Ticket updated successfully:', updatedTicket);
+        this.loadTickets();
+        if (this.selectedTicket && this.selectedTicket.id === ticket.id) {
+          this.selectedTicket = updatedTicket;
+        }
+      },
+      (error) => {
+        console.error('Error updating ticket priority:', error);
+      }
+    );
   }
 
   closeDetails(): void {

@@ -181,26 +181,3 @@ export const updateTicket = async (req, res) => {
 		res.status(500).json(response);
 	}
 };
-
-export const updateTicketStatus = async (req, res) => {
-	const { id } = req.params;
-	const { status } = req.body;
-
-	try {
-		const ticket = await Ticket.findByIdAndUpdate(
-			id,
-			{ status, updatedAt: Date.now() },
-			{ new: true }
-		);
-
-		if (!ticket) {
-			return res.status(404).json({ message: "Ticket not found" });
-		}
-
-		res.status(200).json(ticket);
-	} catch (error) {
-		res
-			.status(500)
-			.json({ message: "Error updating ticket status", error: error.message });
-	}
-};
