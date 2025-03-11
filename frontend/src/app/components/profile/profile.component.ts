@@ -30,16 +30,19 @@ export class ProfileComponent implements OnInit {
   }
 
   loadUserData(): void {
-    // First get the basic user data
-    this.user = this.userService.getLoggedInUser();
-
-    // Then automatically fetch the complete profile
-    if (this.user && (this.user._id || (this.user as any).id)) {
-      const userId = this.user._id || (this.user as any).id;
-      this.refreshUserProfile(userId);
-    } else {
-      console.error('Cannot load profile: Missing user ID');
-    }
+    // Instead of loading basic data first, go straight to the full profile
+    this.userService.getFullUserProfile().subscribe(
+      (userData) => {
+        this.user = userData;
+        this.phone = userData.phone || '';
+      },
+      (error) => {
+        console.error('Failed to load user profile:', error);
+        // Fallback to basic data only if API call fails
+        this.user = this.userService.getLoggedInUser();
+        this.phone = this.user?.phone || '';
+      }
+    );
   }
 
   updatePhoneNumber(): void {
@@ -71,19 +74,5 @@ export class ProfileComponent implements OnInit {
           });
         },
       });
-  }
-
-  refreshUserProfile(userId?: string): void {
-    if (!userId && this.user) {
-      userId = this.user._id || (this.user as any).id;
-    }
-
-    if (!userId) return;
-
-    this.userService.getFullUserProfile(userId).subscribe((fullUser) => {
-      console.log('Full profile loaded:', fullUser);
-      this.user = fullUser;
-      this.phone = fullUser.phone || '';
-    });
   }
 }

@@ -182,64 +182,45 @@ export class UserService {
     );
   }
 
-  // Add this method to UserService to verify the stored user data
-  getDebugUserInfo(): void {
-    console.log('UserService - Current user:', this.loggedInUser);
+  // Modify this method to use the /me endpoint for current user
+  getFullUserProfile(userId?: string): Observable<User> {
+    // If no userId is provided or if it matches the current user's ID,
+    // use the /me endpoint which doesn't require an ID
+    const useCurrentUserEndpoint =
+      !userId ||
+      (this.loggedInUser &&
+        ((this.loggedInUser as any).id === userId ||
+          this.loggedInUser._id === userId));
 
-    if (isPlatformBrowser(this.platformId)) {
-      const storedUser = StorageUtil.getItem('currentUser');
-      console.log('UserService - Stored user in localStorage:', storedUser);
+    if (useCurrentUserEndpoint) {
+      console.log('Using /me endpoint for current user profile');
+      return this.apiService.get<User>('/users/me').pipe(
+        catchError((error) => {
+          console.log('Current user endpoint failed, using fallback', error);
+          return of(this.loggedInUser || ({} as User));
+        }),
+        tap((userData) => {
+          console.log('User profile data retrieved:', userData);
+          // Update stored user data with any fields from the response
+          if (userData) {
+            this.loggedInUser = {
+              ...this.loggedInUser,
+              ...userData,
+            };
 
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          console.log(
-            'UserService - Parsed user from localStorage:',
-            parsedUser
-          );
-        } catch (e) {
-          console.error('Error parsing stored user:', e);
-        }
-      }
-    }
-  }
-
-  // Add this method to properly fetch the full user profile
-  getFullUserProfile(userId: string): Observable<User> {
-    // Try alternative API endpoint structure - many backends use 'id' parameter
-    return this.apiService.get<User>(`/users/profile/${userId}`).pipe(
-      catchError((error) => {
-        // If first endpoint fails, try alternative formats
-        console.log('First endpoint failed, trying alternatives');
-        return this.apiService.get<User>(`/users/details/${userId}`).pipe(
-          catchError((error2) => {
-            // If both fail, use the current user data we have without making API call
-            console.log('Using cached user data as fallback');
-            if (this.loggedInUser) {
-              return of(this.loggedInUser);
+            // Store in localStorage if needed
+            if (isPlatformBrowser(this.platformId)) {
+              StorageUtil.setItem(
+                'currentUser',
+                JSON.stringify(this.loggedInUser)
+              );
             }
-            return throwError(() => new Error('Could not fetch user profile'));
-          })
-        );
-      }),
-      tap((userData) => {
-        console.log('User profile data retrieved:', userData);
-        // Update stored user data with any fields from the response
-        if (userData && this.loggedInUser) {
-          this.loggedInUser = {
-            ...this.loggedInUser,
-            ...userData,
-          };
-
-          // Store in localStorage if needed
-          if (isPlatformBrowser(this.platformId)) {
-            StorageUtil.setItem(
-              'currentUser',
-              JSON.stringify(this.loggedInUser)
-            );
           }
-        }
-      })
-    );
+        })
+      );
+    } else {
+      // For other users (admin viewing other profiles)
+      return this.apiService.get<User>(`/users/${userId}`);
+    }
   }
 }
