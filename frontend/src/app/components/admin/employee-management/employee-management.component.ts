@@ -24,7 +24,8 @@ import { RouterModule } from '@angular/router';
 })
 export class EmployeeManagementComponent implements OnInit {
   employees: User[] = [];
-  selectedEmployee: User | null = null;
+  filteredEmployees: User[] = [];
+  selectedEmployee: User = {} as User;
   loading: boolean = false;
   displayDialog: boolean = false;
   isNewEmployee: boolean = false;
@@ -33,6 +34,7 @@ export class EmployeeManagementComponent implements OnInit {
     { label: 'HR', value: 'hr' },
     { label: 'Admin', value: 'admin' },
   ];
+  searchTerm: string = '';
 
   constructor(
     private userService: UserService,
@@ -42,25 +44,47 @@ export class EmployeeManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEmployees();
+    this.roles = [
+      { label: 'Admin', value: 'admin' },
+      { label: 'HR', value: 'hr' },
+      { label: 'Employee', value: 'employee' },
+    ];
   }
 
   loadEmployees(): void {
     this.loading = true;
-    this.userService.getAllUsers().subscribe({
-      next: (employees) => {
-        this.employees = employees;
+    this.userService.getAllUsers().subscribe(
+      (data) => {
+        this.employees = data;
+        this.filteredEmployees = data; // Initialize filtered list with all employees
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error loading employees:', error);
+      (error) => {
+        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
           detail: 'Failed to load employees',
         });
-        this.loading = false;
-      },
-    });
+      }
+    );
+  }
+
+  filterEmployees(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredEmployees = [...this.employees];
+      return;
+    }
+
+    const search = this.searchTerm.toLowerCase().trim();
+    this.filteredEmployees = this.employees.filter(
+      (emp) =>
+        emp.name?.toLowerCase().includes(search) ||
+        emp.email?.toLowerCase().includes(search) ||
+        emp.employeeNumber?.toLowerCase().includes(search) ||
+        emp.phone?.toLowerCase().includes(search) ||
+        emp.role?.toLowerCase().includes(search)
+    );
   }
 
   editEmployee(employee: User): void {

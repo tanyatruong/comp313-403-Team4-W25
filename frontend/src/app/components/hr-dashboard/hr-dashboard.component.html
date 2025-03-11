@@ -9,10 +9,9 @@
     <div class="surface-card p-3 shadow-1 border-round mb-4">
         <div class="grid align-items-center">
             <div class="col-12 md:col-3">
-                <span class="p-input-icon-left w-full search-container">
-                    <i class="pi pi-search"></i>
-                    <input type="text" pInputText placeholder="Search tickets..." class="w-full search-input"
-                        [(ngModel)]="filterText" (keyup.enter)="loadTickets()">
+                <span class="p-input-icon-left w-full">
+                    <input type="text" pInputText [(ngModel)]="filterText" (input)="loadTickets()"
+                        placeholder="Search tickets..." class="w-full">
                 </span>
             </div>
             <div class="col-12 md:col-2">

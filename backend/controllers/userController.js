@@ -26,3 +26,23 @@ export const getCurrentUser = async (req, res) => {
 		res.status(500).json({ error: "Failed to fetch current user" });
 	}
 };
+
+// New function to get all users (admin only)
+export const getAllUsers = async (req, res) => {
+	const startTime = Date.now();
+	logger.request(req);
+
+	try {
+		const users = await User.find().select("-password");
+		logger.info(
+			`Admin ${req.user.employeeNumber} fetched all ${users.length} users`
+		);
+		logger.response(200, { count: users.length }, Date.now() - startTime);
+		res.json(users);
+	} catch (error) {
+		logger.error("Failed to fetch users", error);
+		const response = { error: "Failed to fetch users" };
+		logger.response(500, response, Date.now() - startTime);
+		res.status(500).json(response);
+	}
+};

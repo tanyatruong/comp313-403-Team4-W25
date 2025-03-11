@@ -117,9 +117,15 @@ export class UserService {
 
   // Get all users (for admin)
   getAllUsers(): Observable<User[]> {
-    return this.apiService.get<User[]>('/users').pipe(
+    // Use the new admin-protected endpoint
+    return this.apiService.get<User[]>('/users/all').pipe(
       catchError((error) => {
-        console.error('Error fetching all users:', error);
+        if (error.status === 403) {
+          console.error('Unauthorized: Admin privileges required');
+          // Show appropriate message to the user
+        } else {
+          console.error('Error fetching all users:', error);
+        }
         return of([]);
       })
     );
