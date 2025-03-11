@@ -5,6 +5,7 @@ export enum StatusEnum {
   InProgress = 'In Progress',
   Resolved = 'Resolved',
   Closed = 'Closed',
+  AttentionRequired = 'Attention Required',
 }
 // export enum StatusEnum {
 //   Open = 'open',
