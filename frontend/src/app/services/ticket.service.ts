@@ -158,37 +158,41 @@ export class TicketService {
   // Create a new ticket
   createTicket(ticket: Partial<Ticket>): Observable<Ticket> {
     if (this.useMockData) {
-      // Generate a mock ticket with an ID
+      // Convert partial ticket to complete ticket
       const newTicket: Ticket = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: (this.tickets.length + 1).toString(),
         title: ticket.title || 'Untitled',
         description: ticket.description || '',
         employeeNumber: ticket.employeeNumber || 'unknown',
         assignedTo: ticket.assignedTo || '',
-        status: StatusEnum.Open,
+        status: ticket.status || StatusEnum.Open,
         priority: ticket.priority || PriorityEnum.Medium,
         category: ticket.category || CategoryEnum.General,
-        createdAt: new Date(),
+        createdAt: new Date(), // Use Date object, not string
         updatedAt: new Date(),
       };
-
-      // Add to local cache
       this.tickets.push(newTicket);
-      console.log('Created mock ticket:', newTicket);
-
+      console.log('Created ticket locally:', newTicket);
       return of(newTicket);
-    }
+    } else {
+      // Add required fields for API
+      const completeTicket = {
+        ...ticket,
+        status: ticket.status || StatusEnum.Open,
+        createdAt: new Date(),
+      } as Ticket;
 
-    // Otherwise use the real API
-    return this.apiService.createTicket(ticket).pipe(
-      tap((newTicket) => {
-        this.tickets.push(newTicket);
-      }),
-      catchError((error) => {
-        console.error('Error creating ticket', error);
-        return throwError(() => new Error('Failed to create ticket'));
-      })
-    );
+      return this.apiService.createTicket(completeTicket).pipe(
+        map((response) => {
+          this.tickets.push(response);
+          return response;
+        }),
+        catchError((error) => {
+          console.error('Error creating ticket:', error);
+          return throwError(() => new Error('Failed to create ticket'));
+        })
+      );
+    }
   }
 
   // Update a ticket
@@ -246,50 +250,32 @@ export class TicketService {
   }
 
   // Update ticket status
-  updateTicketStatus(
-    ticketId: number | string,
-    status: StatusEnum
-  ): Observable<any> {
-    if (this.useMockData) {
-      // Mock implementation (for local testing only)
-      const index = this.tickets.findIndex(
-        (t) => t.id?.toString() === ticketId.toString()
-      );
-      if (index !== -1) {
-        this.tickets[index] = {
-          ...this.tickets[index],
-          status: status,
-        };
-        console.log('Updated ticket status locally:', this.tickets[index]);
-        return of(this.tickets[index]);
-      }
-      return of(null);
-    } else {
-      // Real implementation - send to MongoDB through API
-      return this.apiService
-        .updateTicketStatus(ticketId.toString(), status)
-        .pipe(
-          map((response) => {
-            // Update local cache after successful server update
-            const index = this.tickets.findIndex(
-              (t) => t.id?.toString() === ticketId.toString()
-            );
-            if (index !== -1) {
-              this.tickets[index] = {
-                ...this.tickets[index],
-                status: status,
-              };
-            }
-            return response;
-          }),
-          catchError((error) => {
-            console.error('Error updating ticket status:', error);
-            return throwError(
-              () => new Error('Failed to update ticket status')
-            );
-          })
+  updateTicketStatus(ticketId: string, status: string): Observable<Ticket> {
+    console.log(
+      `TicketService: Updating ticket ${ticketId} status to ${status}`
+    );
+
+    // Add logging to verify the method is being called
+    console.log(`Token available: ${!!localStorage.getItem('token')}`);
+
+    // Ensure we're passing the right parameters
+    return this.apiService.updateTicketStatus(ticketId, status).pipe(
+      tap((updatedTicket) =>
+        console.log('Status updated successfully:', updatedTicket)
+      ),
+      catchError((error) => {
+        console.error('TicketService: Failed to update status', error);
+        // Return a more detailed error that includes the original error
+        return throwError(
+          () =>
+            new Error(
+              `Failed to update ticket status: ${
+                error.message || 'Unknown error'
+              }`
+            )
         );
-    }
+      })
+    );
   }
 
   // Assign ticket to HR

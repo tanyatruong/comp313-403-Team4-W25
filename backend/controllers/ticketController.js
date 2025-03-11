@@ -140,7 +140,10 @@ export const updateTicket = async (req, res) => {
 	logger.info(`Updating ticket with ID: ${req.params.id}`);
 
 	try {
-		const { title, description, priority, category } = req.body;
+		// Include status in the fields that can be updated
+		const { title, description, priority, category, status } = req.body;
+		logger.info(`Update includes status change to: ${status}`);
+
 		const ticket = await Ticket.findByIdAndUpdate(
 			req.params.id,
 			{
@@ -148,9 +151,10 @@ export const updateTicket = async (req, res) => {
 				description,
 				priority,
 				category,
+				status, // Add this field to allow status updates through PUT
 				updatedAt: Date.now(),
 			},
-			{ new: true }
+			{ new: true, runValidators: true }
 		);
 
 		if (!ticket) {
@@ -160,7 +164,9 @@ export const updateTicket = async (req, res) => {
 			return res.status(404).json(response);
 		}
 
-		logger.info(`Successfully updated ticket: ${ticket._id}`);
+		logger.info(
+			`Successfully updated ticket: ${ticket._id} with status: ${ticket.status}`
+		);
 		logger.response(200, { ticketId: ticket._id }, Date.now() - startTime);
 		res.status(200).json(ticket);
 	} catch (error) {

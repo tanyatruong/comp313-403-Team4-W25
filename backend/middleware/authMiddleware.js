@@ -55,12 +55,12 @@ export const protect = async (req, res, next) => {
 	}
 };
 
-// Middleware to check if user is an employee
+// Middleware to check if user is an employee or admin
 export const employeeOnly = (req, res, next) => {
 	logger.info(`Checking employee permission for user: ${req.user._id}`);
 
-	if (req.user && req.user.role === "Employee") {
-		logger.info("Employee permission granted");
+	if (req.user && (req.user.role === "Employee" || req.user.role === "Admin")) {
+		logger.info(`${req.user.role} permission granted for employee action`);
 		next();
 	} else {
 		logger.info(
@@ -83,11 +83,9 @@ export const hrOnly = (req, res, next) => {
 		logger.info(
 			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access HR-only resource`
 		);
-		res
-			.status(403)
-			.json({
-				message: "Access denied. Only HR personnel can access this resource.",
-			});
+		res.status(403).json({
+			message: "Access denied. Only HR personnel can access this resource.",
+		});
 	}
 };
 
@@ -102,11 +100,9 @@ export const adminOnly = (req, res, next) => {
 		logger.info(
 			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access admin-only resource`
 		);
-		res
-			.status(403)
-			.json({
-				message: "Access denied. Only admins can access this resource.",
-			});
+		res.status(403).json({
+			message: "Access denied. Only admins can access this resource.",
+		});
 	}
 };
 
@@ -121,10 +117,8 @@ export const hrOrAdminOnly = (req, res, next) => {
 		logger.info(
 			`Permission denied: User ${req.user._id} with role ${req.user.role} attempted to access HR/Admin-only resource`
 		);
-		res
-			.status(403)
-			.json({
-				message: "Access denied. Only HR or admin can access this resource.",
-			});
+		res.status(403).json({
+			message: "Access denied. Only HR or admin can access this resource.",
+		});
 	}
 };
