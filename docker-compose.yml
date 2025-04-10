@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  hopper-api:
+    build:
+      context: ./backend
+    container_name: hopper-api
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - hopper-net
+    env_file:
+      - ./backend/.env
+      
+
+  hopper-ui:
+    build:
+      context: ./frontend
+    container_name: hopper-ui
+    ports:
+      - "4200:80"
+    depends_on:
+      - hopper-api
+    networks:
+      - hopper-net
+
+networks:
+  hopper-net:
+    driver: bridge

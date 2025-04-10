@@ -5,12 +5,13 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -27,32 +28,38 @@ export class ApiService {
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.apiUrl}${endpoint}`, {
       headers: this.getAuthHeaders(),
+      withCredentials: true
     });
   }
-
+  
   post<T>(endpoint: string, data: any): Observable<T> {
     return this.http.post<T>(`${this.apiUrl}${endpoint}`, data, {
       headers: this.getAuthHeaders(),
+      withCredentials: true
     });
   }
-
+  
   put<T>(endpoint: string, data: any): Observable<T> {
     return this.http.put<T>(`${this.apiUrl}${endpoint}`, data, {
       headers: this.getAuthHeaders(),
+      withCredentials: true
     });
   }
-
+  
   patch<T>(endpoint: string, data: any): Observable<T> {
     return this.http.patch<T>(`${this.apiUrl}${endpoint}`, data, {
       headers: this.getAuthHeaders(),
+      withCredentials: true
     });
   }
-
+  
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.apiUrl}${endpoint}`, {
       headers: this.getAuthHeaders(),
+      withCredentials: true
     });
   }
+  
 
   // Auth-specific endpoints
   login(email: string, password: string): Observable<any> {

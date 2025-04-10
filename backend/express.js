@@ -9,7 +9,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:4200',
+    origin: ['http://localhost:4200', 'http://hopper-ui'],
     credentials: true
 }));
 app.use(express.json());

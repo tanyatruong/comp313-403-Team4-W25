@@ -65,6 +65,8 @@ export class HrDashboardComponent implements OnInit {
   recommendations: any[] = [];
   isLoadingRecommendations: boolean = false;
 
+  showChatbot = false;
+
   constructor(
     private ticketService: TicketService,
     private userService: UserService,

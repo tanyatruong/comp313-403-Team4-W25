@@ -38,6 +38,8 @@ export class HomeComponent implements OnInit {
 
   StatusEnum = StatusEnum;
 
+  showChatbot = false;
+
   constructor(private router: Router) {}
 
   ngOnInit(): void {
