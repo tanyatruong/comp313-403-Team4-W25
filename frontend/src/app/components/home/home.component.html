@@ -12,13 +12,18 @@
           font-size: 16px;
           border-radius: 5px;
           cursor: pointer;
-          margin-right: 10px;
+          margin-right: 5px;
         " (click)="navigateToHRDashboard()">
         <i class="pi pi-th-large" style="font-size: 20px; margin-right: 5px;"></i>
         HR Dashboard
       </button>
 
-      <!-- Settings Button -->
+      <div style="padding: 5px; font-size: 10px; align-content: center;" *ngIf="userService.getLoggedInUser()">
+        <p style="margin: 2px;">{{ userService.getLoggedInUser()?.name }}</p>
+        <p style="margin: 2px;">{{ userService.getLoggedInUser()?.role }}</p>
+      </div>
+
+      <!-- Profile Button -->
       <button style="
           background-color: rgb(59, 130, 246);
           color: white;
@@ -27,9 +32,10 @@
           font-size: 16px;
           border-radius: 5px;
           cursor: pointer;
-        " (click)="openSettings()">
+          margin-left: 5px;
+        " (click)="openUserEdit()">
         <i class="pi pi-cog" style="font-size: 20px; margin-right: 5px"></i>
-        Settings
+        Profile
       </button>
     </div>
   </div>

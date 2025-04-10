@@ -21,6 +21,15 @@ export const routes: Routes = [
   },
 
   {
+    path: 'user-edit',
+    loadComponent: () =>
+      import('./components/user-edit/user-edit.component').then(
+        (c) => c.UserEditComponent
+      ),
+    canActivate: [AuthGuard],
+  },
+
+  {
     path: 'ticketcreate',
     loadComponent: () =>
       import('./components/ticket-create/ticket-create.component').then(
