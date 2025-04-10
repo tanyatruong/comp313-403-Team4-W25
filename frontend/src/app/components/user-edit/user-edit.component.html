@@ -1,0 +1,42 @@
+<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
+    <h2>Edit User</h2>
+
+    <div *ngIf="errorMessage" class="p-message p-message-error mb-3">
+        <div class="p-message-text">{{ errorMessage }}</div>
+    </div>
+
+    <div *ngIf="!user" class="p-4 text-center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <p>Loading user details...</p>
+    </div>
+
+    <form *ngIf="user" #userForm="ngForm" (ngSubmit)="saveUser()">
+        <div class="field mb-4">
+            <label for="name" class="block font-medium mb-2">Name</label>
+            <input id="name" type="text" pInputText class="w-full" [(ngModel)]="user.name" name="name" required>
+        </div>
+
+      <div class="field mb-4">
+        <label for="email" class="block font-medium mb-2">Email</label>
+        <input id="email" type="text" pInputText class="w-full" [(ngModel)]="user.email" name="email" required>
+      </div>
+
+      <div class="field mb-4">
+        <label for="phone" class="block font-medium mb-2">Phone</label>
+        <input id="phone" type="text" pInputText class="w-full" [(ngModel)]="user.phone" name="phone" required>
+      </div>
+
+
+<!--        <div class="field mb-4">-->
+<!--            <label for="category" class="block font-medium mb-2">Category</label>-->
+<!--            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="ticket.category" name="category"-->
+<!--                [style]="{'width':'100%'}" required></p-dropdown>-->
+<!--        </div>-->
+
+        <div class="flex justify-content-end mt-4">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                class="p-button-outlined p-button-secondary mr-2" (click)="cancel()"></button>
+            <button pButton type="submit" label="Save" icon="pi pi-check" [disabled]="!userForm.valid"></button>
+        </div>
+    </form>
+</div>
