@@ -18,8 +18,12 @@ export class RouterService {
     this.router.navigate(['/home']);
   }
 
-  navigateToSettings() {
-    this.router.navigate(['/settings']);
+  // navigateToSettings() {
+  //   this.router.navigate(['/settings']);
+  // }
+
+  navigateToUserEdit() {
+    this.router.navigate(['/user-edit']);
   }
 
   navigateToTicketCreation() {
