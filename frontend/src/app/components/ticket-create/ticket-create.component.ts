@@ -31,6 +31,8 @@ export class TicketCreateComponent implements OnInit {
 
   errorMessage: string | null = null;
 
+  showChatbot = false;
+  
   constructor(
     private routerService: RouterService,
     private ticketService: TicketService,

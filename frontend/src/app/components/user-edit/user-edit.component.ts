@@ -23,6 +23,8 @@ export class UserEditComponent implements OnInit {
   categoryOptions = CATEGORY_OPTIONS;
   errorMessage: string = '';
 
+  showChatbot = false;
+  
   constructor(
     private userService: UserService,
     private routerService: RouterService

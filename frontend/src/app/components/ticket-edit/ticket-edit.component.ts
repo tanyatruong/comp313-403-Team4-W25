@@ -23,6 +23,8 @@ export class TicketEditComponent implements OnInit {
   categoryOptions = CATEGORY_OPTIONS;
   errorMessage: string = '';
 
+  showChatbot = false;
+  
   constructor(
     private ticketService: TicketService,
     private routerService: RouterService
