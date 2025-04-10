@@ -80,8 +80,8 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openSettings(): void {
-    this.routerService.navigateToSettings();
+  openUserEdit(): void {
+    this.routerService.navigateToUserEdit();
   }
 
   editTicket(ticket: Ticket): void {
