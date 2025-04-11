@@ -27,26 +27,6 @@ router.get('/history/:userId/:partnerId', protect, async (req, res) => {
     }
 });
 
-// Search chat messages
-router.get('/search/:userId/:searchTerm', protect, async (req, res) => {
-    try {
-        const { userId, searchTerm } = req.params;
-        
-        const messages = await ChatMessage.find({
-            $or: [{ sender: userId }, { recipient: userId }],
-            $text: { $search: searchTerm }
-        }).sort({ createdAt: -1 });
-        
-        res.status(200).json(messages);
-    } catch (error) {
-        logger.error("Error searching chat messages", error);
-        res.status(500).json({
-            message: "Error searching chat messages",
-            error: error.message
-        });
-    }
-});
-
 // Mark messages as read
 router.patch('/read/:userId/:senderId', protect, async (req, res) => {
     try {

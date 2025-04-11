@@ -25,7 +25,5 @@ const ChatMessageSchema = new mongoose.Schema({
     }
 });
 
-// Add text index for search functionality
-ChatMessageSchema.index({ message: 'text' });
 
 export default mongoose.model('ChatMessage', ChatMessageSchema);

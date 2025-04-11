@@ -186,27 +186,7 @@ selectUser(user: ActiveUser): void {
     this.newMessage = '';
     setTimeout(() => this.scrollToBottom(), 100);
   }
-  
-  // Search messages
-  searchMessages(): void {
-    if (!this.searchTerm.trim()) {
-      if (this.selectedUser) {
-        // Return to normal chat view
-        this.selectUser(this.selectedUser);
-      }
-      return;
-    }
-    
-    this.isSearching = true;
-    this.chatService.searchMessages(this.searchTerm).subscribe(
-      results => {
-        this.messages = results;
-        setTimeout(() => this.scrollToBottom(), 100);
-      },
-      error => console.error('Error searching messages:', error)
-    );
-  }
-  
+
   // Handle new incoming message
   private handleNewMessage(message: ChatMessage): void {
     console.log('New message received:', message);
