@@ -31,34 +31,6 @@ export const getChatHistory = async (req, res) => {
     }
 };
 
-// Search chat messages
-export const searchChatMessages = async (req, res) => {
-    const startTime = Date.now();
-    logger.request(req);
-    
-    try {
-        const { userId, searchTerm } = req.params;
-        logger.info(`Searching chat messages for user ${userId} with term "${searchTerm}"`);
-        
-        const messages = await ChatMessage.find({
-            $or: [{ sender: userId }, { recipient: userId }],
-            $text: { $search: searchTerm }
-        }).sort({ createdAt: -1 });
-        
-        logger.info(`Found ${messages.length} matching messages`);
-        logger.response(200, { count: messages.length }, Date.now() - startTime);
-        res.status(200).json(messages);
-    } catch (error) {
-        logger.error("Error searching chat messages", error);
-        const response = {
-            message: "Error searching chat messages",
-            error: error.message
-        };
-        logger.response(500, response, Date.now() - startTime);
-        res.status(500).json(response);
-    }
-};
-
 // Mark messages as read
 export const markMessagesAsRead = async (req, res) => {
     const startTime = Date.now();

@@ -50,21 +50,7 @@
     
     <!-- Chat view when a user is selected -->
     <div *ngIf="selectedUser" class="chat-main">
-      <!-- Search bar -->
-      <div class="search-container">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search"></i>
-          <input type="text" pInputText placeholder="Search messages..." 
-                 [(ngModel)]="searchTerm" 
-                 (keyup.enter)="searchMessages()">
-        </span>
-        <button *ngIf="isSearching" 
-                pButton type="button" 
-                icon="pi pi-times" 
-                class="p-button-text" 
-                (click)="searchTerm = ''; searchMessages()"></button>
-      </div>
-      
+
       <!-- Message container -->
       <div class="message-container" #messageContainer>
         <div *ngIf="messages.length === 0" class="empty-chat">

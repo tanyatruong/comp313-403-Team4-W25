@@ -181,20 +181,6 @@ this.socket.on('connect_error', (error: Error) => {
       });
   }
   
-  // Search chat messages
-  searchMessages(searchTerm: string): Observable<ChatMessage[]> {
-    const currentUser = this.userService.getLoggedInUser();
-    
-    if (!currentUser || !currentUser._id) {
-      return new Observable(subscriber => {
-        subscriber.error('User not authenticated');
-        subscriber.complete();
-      });
-    }
-    
-    return this.http.get<ChatMessage[]>(`${this.apiUrl}/chat/search/${currentUser._id}/${searchTerm}`);
-  }
-  
   connect(): void {
     // Initialize socket connection if in browser environment
     if (isPlatformBrowser(this.platformId)) {
