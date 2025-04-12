@@ -49,7 +49,7 @@ app.use((req, res, next) => {
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.DB_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => {
     logger.info("MongoDB connected successfully");
   })
