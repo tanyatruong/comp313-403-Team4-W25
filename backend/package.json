@@ -8,7 +8,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "nodemon server.js",
 		"build:frontend": "cd ../frontend && npm install && npm run build",
-		"copy:frontend": "rm -rf ./public && mkdir -p ./public && cp -r ../frontend/dist/hopper/. ./public/",
+		"copy:frontend": "rm -rf ./public && mkdir -p ./public && cp -r ../frontend/dist/hopper/* ./public/",
 		"start": "node server.js"
 	},
 	"keywords": [],

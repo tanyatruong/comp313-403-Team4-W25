@@ -22,6 +22,19 @@ const __dirname = path.dirname(__filename);
 // Serve frontend static files
 const frontendPath = path.join(__dirname, 'public');
 
+// Debug: Check if public directory exists
+import fs from 'fs';
+console.log('Public directory exists:', fs.existsSync(frontendPath));
+if (fs.existsSync(frontendPath)) {
+  try {
+    console.log('Files in public:', fs.readdirSync(frontendPath));
+  } catch (error) {
+    console.log('Error reading public directory:', error.message);
+  }
+} else {
+  console.log('Public directory does not exist!');
+}
+
 
 // Load environment variables
 config();
