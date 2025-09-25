@@ -1,4 +1,4 @@
-# HoppeR HR Ticketing System (Student README)
+# HoppeR HR Ticketing System
 
 A simple full‑stack app for HR ticket management with real‑time chat.
 
