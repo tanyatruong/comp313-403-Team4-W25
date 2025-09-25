@@ -9,7 +9,7 @@
 		"dev": "nodemon server.js",
 		"build:frontend": "cd ../frontend && npm install && npm run build",
 		"copy:frontend": "rm -rf ./public && mkdir -p ./public && cp -r ../frontend/dist/hopper/. ./public/",
-		"start": "npm run build:frontend && npm run copy:frontend && node server.js"
+		"start": "node server.js"
 	},
 	"keywords": [],
 	"author": "",
