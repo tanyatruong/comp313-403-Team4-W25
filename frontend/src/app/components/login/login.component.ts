@@ -18,8 +18,8 @@ import { User } from '../../data/models/user.model';
   imports: [PrimengModule, FormsModule],
 })
 export class LoginComponent {
-  @Input({ required: true }) email!: string;
-  @Input({ required: true }) password!: string;
+  @Input() email: string = '';
+  @Input() password: string = '';
 
   userService = inject(UserService);
   routerService = inject(RouterService);
@@ -60,5 +60,11 @@ export class LoginComponent {
   // Keeping this method as an alias to onLoginAttempt for any existing form bindings
   onSubmit(): void {
     this.onLoginAttempt();
+  }
+
+  // Method to fill demo credentials
+  fillCredentials(employeeNumber: string, password: string): void {
+    this.email = employeeNumber;
+    this.password = password;
   }
 }

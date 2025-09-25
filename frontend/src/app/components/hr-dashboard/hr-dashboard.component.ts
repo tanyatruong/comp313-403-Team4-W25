@@ -5,6 +5,7 @@ import { PrimengModule } from '../../../primeng.module';
 import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
 import { RouterService } from '../../services/router.service';
+import { AuthService } from '../../services/auth.service';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum, STATUS_OPTIONS } from '../../data/enums/StatusEnum';
@@ -72,7 +73,8 @@ export class HrDashboardComponent implements OnInit {
     private userService: UserService,
     private routerService: RouterService,
     private messageService: MessageService,
-    private recommendationService: RecommendationService
+    private recommendationService: RecommendationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -325,5 +327,16 @@ export class HrDashboardComponent implements OnInit {
         });
       }
     );
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: (response) => {
+        console.log('Logout successful:', response);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+      }
+    });
   }
 }

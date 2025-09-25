@@ -1,93 +1,174 @@
-<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
-    <h2>Edit Ticket</h2>
+<!-- Modern Edit Ticket Page -->
+<div class="ticket-edit-container">
+  <!-- Header Section -->
+  <header class="ticket-edit-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="back-btn" (click)="cancel()">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+        <div class="header-title">
+          <h1>Edit Ticket</h1>
+          <span>Update ticket details and status</span>
+        </div>
+      </div>
+    </div>
+  </header>
 
-    <div *ngIf="errorMessage" class="p-message p-message-error mb-3">
-        <div class="p-message-text">{{ errorMessage }}</div>
+  <!-- Main Content -->
+  <main class="ticket-edit-main">
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ errorMessage }}</span>
     </div>
 
-    <div *ngIf="!ticket" class="p-4 text-center">
-        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Loading ticket details...</p>
+    <!-- Loading State -->
+    <div *ngIf="!ticket" class="loading-state">
+      <div class="loading-spinner">
+        <i class="pi pi-spin pi-spinner"></i>
+      </div>
+      <p>Loading ticket details...</p>
     </div>
 
-    <form *ngIf="ticket" #ticketForm="ngForm" (ngSubmit)="saveTicket()">
-        <div class="field mb-4">
-            <label for="title" class="block font-medium mb-2">Title</label>
-            <input id="title" type="text" pInputText class="w-full" [(ngModel)]="ticket.title" name="title" required>
+    <!-- Edit Form -->
+    <div *ngIf="ticket" class="ticket-form-card">
+      <form #ticketForm="ngForm" (ngSubmit)="saveTicket()" class="ticket-form">
+        <div class="form-section">
+          <h3>Ticket Information</h3>
+
+          <div class="form-group">
+            <label for="title">
+              <i class="pi pi-bookmark"></i>
+              Title
+              <span class="required">*</span>
+            </label>
+            <input 
+              id="title" 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="ticket.title" 
+              name="title" 
+              required
+              placeholder="Enter ticket title"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="description">
+              <i class="pi pi-file-edit"></i>
+              Description
+              <span class="required">*</span>
+            </label>
+            <textarea 
+              id="description" 
+              class="form-textarea"
+              [(ngModel)]="ticket.description" 
+              name="description" 
+              required 
+              rows="5"
+              placeholder="Describe the issue in detail"
+            ></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="status">
+                <i class="pi pi-sync"></i>
+                Status
+                <span class="required">*</span>
+              </label>
+              <p-dropdown 
+                id="status" 
+                [options]="statusOptions" 
+                [(ngModel)]="ticket.status" 
+                optionLabel="label"
+                optionValue="value" 
+                name="status" 
+                class="form-dropdown" 
+                required>
+              </p-dropdown>
+            </div>
+
+            <div class="form-group">
+              <label for="priority">
+                <i class="pi pi-exclamation-triangle"></i>
+                Priority
+                <span class="required">*</span>
+              </label>
+              <p-dropdown 
+                id="priority" 
+                [options]="priorityOptions" 
+                [(ngModel)]="ticket.priority" 
+                name="priority"
+                class="form-dropdown" 
+                required>
+              </p-dropdown>
+            </div>
+
+            <div class="form-group">
+              <label for="category">
+                <i class="pi pi-tag"></i>
+                Category
+                <span class="required">*</span>
+              </label>
+              <p-dropdown 
+                id="category" 
+                [options]="categoryOptions" 
+                [(ngModel)]="ticket.category" 
+                name="category"
+                class="form-dropdown" 
+                required>
+              </p-dropdown>
+            </div>
+          </div>
         </div>
 
-        <div class="field mb-4">
-            <label for="description" class="block font-medium mb-2">Description</label>
-            <textarea id="description" pInputTextarea class="w-full" rows="5" [(ngModel)]="ticket.description"
-                name="description" required></textarea>
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="action-btn secondary"
+            (click)="cancel()">
+            <i class="pi pi-times"></i>
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="action-btn primary"
+            [disabled]="!ticketForm.valid">
+            <i class="pi pi-check"></i>
+            Save Changes
+          </button>
         </div>
+      </form>
+    </div>
+  </main>
 
-        <div class="field mb-4">
-            <label for="status" class="block font-medium mb-2">Status</label>
-            <p-dropdown id="status" [options]="statusOptions" [(ngModel)]="ticket.status" optionLabel="label"
-                optionValue="value" name="status" [style]="{'width':'100%'}" required></p-dropdown>
-        </div>
+  <!-- Floating Chat Button -->
+  <button class="chat-toggle" (click)="showChatbot = !showChatbot">
+    <i class="pi pi-comments"></i>
+    <span>Support</span>
+  </button>
 
-        <div class="field mb-4">
-            <label for="priority" class="block font-medium mb-2">Priority</label>
-            <p-dropdown id="priority" [options]="priorityOptions" [(ngModel)]="ticket.priority" name="priority"
-                [style]="{'width':'100%'}" required></p-dropdown>
-        </div>
+  <!-- Chat Panel -->
+  <div class="chat-panel" [class.open]="showChatbot">
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button class="chat-close" (click)="showChatbot = false">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="chat-content">
+      <iframe 
+        width="100%" 
+        height="100%" 
+        allow="microphone *" 
+        src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
 
-        <div class="field mb-4">
-            <label for="category" class="block font-medium mb-2">Category</label>
-            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="ticket.category" name="category"
-                [style]="{'width':'100%'}" required></p-dropdown>
-        </div>
-
-        <div class="flex justify-content-end mt-4">
-            <button pButton type="button" label="Cancel" icon="pi pi-times"
-                class="p-button-outlined p-button-secondary mr-2" (click)="cancel()"></button>
-            <button pButton type="submit" label="Save" icon="pi pi-check" [disabled]="!ticketForm.valid"></button>
-        </div>
-    </form>
-    <!-- Floating Chatbot Toggle Button -->
-<div 
-(click)="showChatbot = !showChatbot"
-style="
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 1000;
-  background-color: #6C63FF;
-  color: white;
-  border: none;
-  padding: 16px 20px;
-  font-size: 16px;
-  border-radius: 50px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-">
-💬 Chat
-</div>
-
-<!-- Floating Chatbot iframe -->
-<div 
-*ngIf="showChatbot" 
-style="
-  position: fixed;
-  bottom: 90px;
-  right: 25px;
-  width: 400px;
-  height: 600px;
-  z-index: 999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-">
-<iframe 
-  width="100%" 
-  height="100%" 
-  allow="microphone *" 
-  src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
-  style="border: none;"
-></iframe>
-</div>
-
+  <!-- Overlay -->
+  <div class="chat-overlay" [class.active]="showChatbot" (click)="showChatbot = false"></div>
 </div>

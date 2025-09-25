@@ -1,86 +1,152 @@
-<div class="surface-card shadow-2 border-round my-5 mx-6 p-4">
-    <h2>Edit User</h2>
+<!-- Modern Profile Edit Page -->
+<div class="profile-container">
+  <!-- Header Section -->
+  <header class="profile-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="back-btn" (click)="cancel()">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+        <div class="header-title">
+          <h1>Profile Settings</h1>
+          <span>Manage your account information</span>
+        </div>
+      </div>
+    </div>
+  </header>
 
-    <div *ngIf="errorMessage" class="p-message p-message-error mb-3">
-        <div class="p-message-text">{{ errorMessage }}</div>
+  <!-- Main Content -->
+  <main class="profile-main">
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ errorMessage }}</span>
     </div>
 
-    <div *ngIf="!user" class="p-4 text-center">
-        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Loading user details...</p>
+    <!-- Loading State -->
+    <div *ngIf="!user" class="loading-state">
+      <div class="loading-spinner">
+        <i class="pi pi-spin pi-spinner"></i>
+      </div>
+      <p>Loading profile information...</p>
     </div>
 
-    <form *ngIf="user" #userForm="ngForm" (ngSubmit)="saveUser()">
-        <div class="field mb-4">
-            <label for="name" class="block font-medium mb-2">Name</label>
-            <input id="name" type="text" pInputText class="w-full" [(ngModel)]="user.name" name="name" required>
+    <!-- Profile Form -->
+    <div *ngIf="user" class="profile-card">
+      <div class="profile-avatar-section">
+        <div class="avatar-container">
+          <div class="avatar">
+            <i class="pi pi-user"></i>
+          </div>
+          <div class="avatar-info">
+            <h3>{{user.name}}</h3>
+            <span class="role-badge" [ngClass]="'role-' + (user.role || 'employee').toLowerCase()">
+              {{user.role || 'Employee'}}
+            </span>
+            <span class="employee-number">{{user.employeeNumber}}</span>
+          </div>
         </div>
-
-      <div class="field mb-4">
-        <label for="email" class="block font-medium mb-2">Email</label>
-        <input id="email" type="text" pInputText class="w-full" [(ngModel)]="user.email" name="email" required>
       </div>
 
-      <div class="field mb-4">
-        <label for="phone" class="block font-medium mb-2">Phone</label>
-        <input id="phone" type="text" pInputText class="w-full" [(ngModel)]="user.phone" name="phone" required>
-      </div>
+      <form #userForm="ngForm" (ngSubmit)="saveUser()" class="profile-form">
+        <div class="form-section">
+          <h4>Personal Information</h4>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">
+                <i class="pi pi-user"></i>
+                Full Name
+              </label>
+              <input 
+                id="name" 
+                type="text" 
+                class="form-input"
+                [(ngModel)]="user.name" 
+                name="name" 
+                required
+                placeholder="Enter your full name"
+              >
+            </div>
 
+            <div class="form-group">
+              <label for="email">
+                <i class="pi pi-envelope"></i>
+                Email Address
+              </label>
+              <input 
+                id="email" 
+                type="email" 
+                class="form-input"
+                [(ngModel)]="user.email" 
+                name="email" 
+                required
+                placeholder="Enter your email address"
+              >
+            </div>
 
-<!--        <div class="field mb-4">-->
-<!--            <label for="category" class="block font-medium mb-2">Category</label>-->
-<!--            <p-dropdown id="category" [options]="categoryOptions" [(ngModel)]="ticket.category" name="category"-->
-<!--                [style]="{'width':'100%'}" required></p-dropdown>-->
-<!--        </div>-->
-
-        <div class="flex justify-content-end mt-4">
-            <button pButton type="button" label="Cancel" icon="pi pi-times"
-                class="p-button-outlined p-button-secondary mr-2" (click)="cancel()"></button>
-            <button pButton type="submit" label="Save" icon="pi pi-check" [disabled]="!userForm.valid"></button>
+            <div class="form-group">
+              <label for="phone">
+                <i class="pi pi-phone"></i>
+                Phone Number
+              </label>
+              <input 
+                id="phone" 
+                type="tel" 
+                class="form-input"
+                [(ngModel)]="user.phone" 
+                name="phone" 
+                required
+                placeholder="Enter your phone number"
+              >
+            </div>
+          </div>
         </div>
-    </form>
-    <!-- Floating Chatbot Toggle Button -->
-<div 
-(click)="showChatbot = !showChatbot"
-style="
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 1000;
-  background-color: #6C63FF;
-  color: white;
-  border: none;
-  padding: 16px 20px;
-  font-size: 16px;
-  border-radius: 50px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-">
-💬 Chat
-</div>
 
-<!-- Floating Chatbot iframe -->
-<div 
-*ngIf="showChatbot" 
-style="
-  position: fixed;
-  bottom: 90px;
-  right: 25px;
-  width: 400px;
-  height: 600px;
-  z-index: 999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-">
-<iframe 
-  width="100%" 
-  height="100%" 
-  allow="microphone *" 
-  src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
-  style="border: none;"
-></iframe>
-</div>
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="action-btn secondary"
+            (click)="cancel()">
+            <i class="pi pi-times"></i>
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="action-btn primary"
+            [disabled]="!userForm.valid">
+            <i class="pi pi-check"></i>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <!-- Floating Chat Button -->
+  <button class="chat-toggle" (click)="showChatbot = !showChatbot">
+    <i class="pi pi-comments"></i>
+    <span>Support</span>
+  </button>
 
+  <!-- Chat Panel -->
+  <div class="chat-panel" [class.open]="showChatbot">
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button class="chat-close" (click)="showChatbot = false">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="chat-content">
+      <iframe 
+        width="100%" 
+        height="100%" 
+        allow="microphone *" 
+        src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="chat-overlay" [class.active]="showChatbot" (click)="showChatbot = false"></div>
 </div>

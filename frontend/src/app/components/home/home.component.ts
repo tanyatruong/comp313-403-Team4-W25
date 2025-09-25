@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { RouterService } from '../../services/router.service';
 import { TicketService } from '../../services/ticket.service';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -21,6 +22,7 @@ export class HomeComponent implements OnInit {
   routerService = inject(RouterService);
   ticketService = inject(TicketService);
   userService = inject(UserService);
+  authService = inject(AuthService);
 
   tickets: Ticket[] = [];
   filteredTickets: Ticket[] = [];
@@ -134,5 +136,16 @@ export class HomeComponent implements OnInit {
 
   navigateToHRDashboard(): void {
     this.routerService.navigateToHRDashboard();
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: (response) => {
+        console.log('Logout successful:', response);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+      }
+    });
   }
 }

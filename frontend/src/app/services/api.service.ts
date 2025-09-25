@@ -5,12 +5,13 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Ticket } from '../data/models/ticket.model';
 import { User } from '../data/models/user.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = '/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

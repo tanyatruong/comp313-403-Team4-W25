@@ -1,291 +1,408 @@
-<div class="surface-card shadow-2 border-round my-5 mx-6 p-4" style="min-height: 92vh;">
-    <!-- Header -->
-    <div class="flex justify-content-between align-items-center mb-5">
-        <h2 class="m-0">HR Ticket Management Dashboard</h2>
-        <button pButton icon="pi pi-home" label="Home" (click)="goToHome()"></button>
+<!-- Modern HR Dashboard -->
+<div class="hr-dashboard-container">
+  <!-- Header Section -->
+  <header class="hr-dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo-section">
+          <img src="assets/images/icons/noun-bunny_purple.png" alt="HoppeR" class="header-logo">
+          <div class="header-title">
+            <h1>HoppeR</h1>
+            <span>HR Management Dashboard</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <!-- Stats Summary -->
+        <div class="header-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{openTickets.length + inProgressTickets.length}}</span>
+            <span class="stat-label">Active</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{resolvedTickets.length}}</span>
+            <span class="stat-label">Resolved</span>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="header-actions">
+          <button class="action-btn secondary" (click)="goToHome()">
+            <i class="pi pi-home"></i>
+            <span>Home</span>
+          </button>
+          <button class="action-btn danger" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="hr-dashboard-main">
+    <!-- Filters and Search Section -->
+    <div class="filters-section">
+      <div class="filters-card">
+        <div class="filters-grid">
+          <div class="search-group">
+            <div class="search-input-wrapper">
+              <i class="pi pi-search search-icon"></i>
+              <input 
+                type="text" 
+                placeholder="Search tickets..." 
+                class="search-input"
+                [(ngModel)]="filterText" 
+                (keyup.enter)="loadTickets()"
+              >
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <p-dropdown 
+              [options]="priorityOptions" 
+              [(ngModel)]="filterPriority" 
+              placeholder="Priority"
+              class="filter-dropdown" 
+              (onChange)="loadTickets()">
+            </p-dropdown>
+          </div>
+          
+          <div class="filter-group">
+            <p-dropdown 
+              [options]="categoryOptions" 
+              [(ngModel)]="filterCategory" 
+              placeholder="Category"
+              class="filter-dropdown" 
+              (onChange)="loadTickets()">
+            </p-dropdown>
+          </div>
+          
+          <div class="filter-group">
+            <p-dropdown 
+              [options]="[
+                {label: 'Date (Newest)', value: 'createdAt'},
+                {label: 'Title', value: 'title'},
+                {label: 'Priority', value: 'priority'}
+              ]" 
+              [(ngModel)]="sortBy" 
+              placeholder="Sort by"
+              class="filter-dropdown"
+              (onChange)="loadTickets()">
+            </p-dropdown>
+          </div>
+          
+          <div class="filter-actions">
+            <button 
+              class="action-btn-small secondary"
+              (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; loadTickets()"
+              title="Change sort order">
+              <i class="pi pi-sort-alt"></i>
+            </button>
+            <button 
+              class="action-btn-small outline"
+              (click)="resetFilters()">
+              <i class="pi pi-filter-slash"></i>
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Filters and Sorting -->
-    <div class="surface-card p-3 shadow-1 border-round mb-4">
-        <div class="grid align-items-center">
-            <div class="col-12 md:col-3">
-                <span class="p-input-icon-left w-full search-container">
-                    <i class="pi pi-search"></i>
-                    <input type="text" pInputText placeholder="Search tickets..." class="w-full search-input"
-                        [(ngModel)]="filterText" (keyup.enter)="loadTickets()">
+    <!-- Kanban Board Layout -->
+    <div class="kanban-layout">
+      <div class="kanban-columns">
+        <!-- Open Tickets Column -->
+        <div class="kanban-column">
+          <div class="column-header open">
+            <div class="column-title">
+              <i class="pi pi-circle"></i>
+              <span>Open</span>
+              <span class="count">{{openTickets.length}}</span>
+            </div>
+          </div>
+          <div class="column-content">
+            <div *ngFor="let ticket of openTickets" 
+                 class="kanban-ticket"
+                 [class.selected]="selectedTicket?.id === ticket.id" 
+                 (click)="selectTicket(ticket)">
+              <div class="ticket-header">
+                <span class="ticket-id">#{{ticket.id?.slice(-6) || 'NEW'}}</span>
+                <span class="priority-badge" [ngClass]="'priority-' + (ticket.priority || 'medium').toLowerCase()">
+                  {{ticket.priority || 'Medium'}}
                 </span>
+              </div>
+              <h4 class="ticket-title">{{ticket.title}}</h4>
+              <p class="ticket-description">{{ticket.description}}</p>
+              <div class="ticket-footer">
+                <span class="ticket-category">{{ticket.category || 'General'}}</span>
+                <button 
+                  class="move-btn" 
+                  (click)="updateStatus(ticket, StatusEnum.InProgress); $event.stopPropagation();"
+                  title="Move to In Progress">
+                  <i class="pi pi-arrow-right"></i>
+                </button>
+              </div>
             </div>
-            <div class="col-12 md:col-2">
-                <p-dropdown [options]="priorityOptions" [(ngModel)]="filterPriority" placeholder="Filter by priority"
-                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
+            <div *ngIf="openTickets.length === 0" class="empty-column">
+              <i class="pi pi-inbox"></i>
+              <span>No open tickets</span>
             </div>
-            <div class="col-12 md:col-2">
-                <p-dropdown [options]="categoryOptions" [(ngModel)]="filterCategory" placeholder="Filter by category"
-                    class="w-full" (onChange)="loadTickets()"></p-dropdown>
-            </div>
-            <div class="col-12 md:col-2">
-                <p-dropdown [options]="[
-                                {label: 'Date (Newest)', value: 'createdAt'},
-                                {label: 'Title', value: 'title'},
-                                {label: 'Priority', value: 'priority'}
-                             ]" [(ngModel)]="sortBy" placeholder="Sort by" class="w-full"
-                    (onChange)="loadTickets()"></p-dropdown>
-            </div>
-            <div class="col-12 md:col-1">
-                <button pButton icon="pi pi-sort-alt"
-                    (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; loadTickets()"
-                    pTooltip="Change sort order" class="w-full"></button>
-            </div>
-            <div class="col-12 md:col-2">
-                <button pButton icon="pi pi-filter-slash" label="Reset" (click)="resetFilters()"
-                    class="p-button-outlined w-full"></button>
-            </div>
+          </div>
         </div>
+
+        <!-- In Progress Tickets Column -->
+        <div class="kanban-column">
+          <div class="column-header progress">
+            <div class="column-title">
+              <i class="pi pi-clock"></i>
+              <span>In Progress</span>
+              <span class="count">{{inProgressTickets.length}}</span>
+            </div>
+          </div>
+          <div class="column-content">
+            <div *ngFor="let ticket of inProgressTickets" 
+                 class="kanban-ticket"
+                 [class.selected]="selectedTicket?.id === ticket.id" 
+                 (click)="selectTicket(ticket)">
+              <div class="ticket-header">
+                <span class="ticket-id">#{{ticket.id?.slice(-6) || 'NEW'}}</span>
+                <span class="priority-badge" [ngClass]="'priority-' + (ticket.priority || 'medium').toLowerCase()">
+                  {{ticket.priority || 'Medium'}}
+                </span>
+              </div>
+              <h4 class="ticket-title">{{ticket.title}}</h4>
+              <p class="ticket-description">{{ticket.description}}</p>
+              <div class="ticket-footer">
+                <span class="ticket-category">{{ticket.category || 'General'}}</span>
+                <button 
+                  class="move-btn" 
+                  (click)="updateStatus(ticket, StatusEnum.Resolved); $event.stopPropagation();"
+                  title="Move to Resolved">
+                  <i class="pi pi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="inProgressTickets.length === 0" class="empty-column">
+              <i class="pi pi-clock"></i>
+              <span>No tickets in progress</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resolved Tickets Column -->
+        <div class="kanban-column">
+          <div class="column-header resolved">
+            <div class="column-title">
+              <i class="pi pi-check-circle"></i>
+              <span>Resolved</span>
+              <span class="count">{{resolvedTickets.length}}</span>
+            </div>
+          </div>
+          <div class="column-content">
+            <div *ngFor="let ticket of resolvedTickets" 
+                 class="kanban-ticket"
+                 [class.selected]="selectedTicket?.id === ticket.id" 
+                 (click)="selectTicket(ticket)">
+              <div class="ticket-header">
+                <span class="ticket-id">#{{ticket.id?.slice(-6) || 'NEW'}}</span>
+                <span class="priority-badge" [ngClass]="'priority-' + (ticket.priority || 'medium').toLowerCase()">
+                  {{ticket.priority || 'Medium'}}
+                </span>
+              </div>
+              <h4 class="ticket-title">{{ticket.title}}</h4>
+              <p class="ticket-description">{{ticket.description}}</p>
+              <div class="ticket-footer">
+                <span class="ticket-category">{{ticket.category || 'General'}}</span>
+                <button 
+                  class="move-btn" 
+                  (click)="updateStatus(ticket, StatusEnum.Closed); $event.stopPropagation();"
+                  title="Close Ticket">
+                  <i class="pi pi-check"></i>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="resolvedTickets.length === 0" class="empty-column">
+              <i class="pi pi-check-circle"></i>
+              <span>No resolved tickets</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Closed Tickets Column -->
+        <div class="kanban-column">
+          <div class="column-header closed">
+            <div class="column-title">
+              <i class="pi pi-times-circle"></i>
+              <span>Closed</span>
+              <span class="count">{{closedTickets.length}}</span>
+            </div>
+          </div>
+          <div class="column-content">
+            <div *ngFor="let ticket of closedTickets" 
+                 class="kanban-ticket completed"
+                 [class.selected]="selectedTicket?.id === ticket.id" 
+                 (click)="selectTicket(ticket)">
+              <div class="ticket-header">
+                <span class="ticket-id">#{{ticket.id?.slice(-6) || 'NEW'}}</span>
+                <span class="priority-badge" [ngClass]="'priority-' + (ticket.priority || 'medium').toLowerCase()">
+                  {{ticket.priority || 'Medium'}}
+                </span>
+              </div>
+              <h4 class="ticket-title">{{ticket.title}}</h4>
+              <p class="ticket-description">{{ticket.description}}</p>
+              <div class="ticket-footer">
+                <span class="ticket-category">{{ticket.category || 'General'}}</span>
+                <i class="pi pi-check-circle completion-icon"></i>
+              </div>
+            </div>
+            <div *ngIf="closedTickets.length === 0" class="empty-column">
+              <i class="pi pi-times-circle"></i>
+              <span>No closed tickets</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Dashboard Layout -->
-    <div class="grid">
-        <!-- Ticket Columns -->
-        <div class="col-12 md:col-8">
-            <div class="grid">
-                <!-- Open Tickets -->
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="surface-card p-3 shadow-2 border-round">
-                        <h3 class="text-center text-primary">Open ({{openTickets.length}})</h3>
-                        <div class="ticket-list">
-                            <div *ngFor="let ticket of openTickets"
-                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
-                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
-                                <h4 class="m-0">{{ticket.title}}</h4>
-                                <div class="flex justify-content-between mt-2">
-                                    <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
-                                        {{ticket.priority}}
-                                    </span>
-                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
-                                        (click)="updateStatus(ticket, StatusEnum.InProgress); $event.stopPropagation();"
-                                        pTooltip="Move to In Progress"></button>
-                                </div>
-                            </div>
-                            <div *ngIf="openTickets.length === 0" class="text-center p-3 text-500">
-                                No open tickets
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Ticket Detail Panel -->
+    <div class="detail-panel">
+      <div class="detail-card">
+        <div *ngIf="selectedTicket; else noTicketSelected">
+          <div class="detail-header">
+            <h3>Ticket Details</h3>
+            <button class="close-btn" (click)="closeDetails()">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
 
-                <!-- In Progress Tickets -->
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="surface-card p-3 shadow-2 border-round">
-                        <h3 class="text-center text-primary">In Progress ({{inProgressTickets.length}})</h3>
-                        <div class="ticket-list">
-                            <div *ngFor="let ticket of inProgressTickets"
-                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
-                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
-                                <h4 class="m-0">{{ticket.title}}</h4>
-                                <div class="flex justify-content-between mt-2">
-                                    <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
-                                        {{ticket.priority}}
-                                    </span>
-                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
-                                        (click)="updateStatus(ticket, StatusEnum.Resolved); $event.stopPropagation();"
-                                        pTooltip="Move to Resolved"></button>
-                                </div>
-                            </div>
-                            <div *ngIf="inProgressTickets.length === 0" class="text-center p-3 text-500">
-                                No tickets in progress
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resolved Tickets -->
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="surface-card p-3 shadow-2 border-round">
-                        <h3 class="text-center text-primary">Resolved ({{resolvedTickets.length}})</h3>
-                        <div class="ticket-list">
-                            <div *ngFor="let ticket of resolvedTickets"
-                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
-                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
-                                <h4 class="m-0">{{ticket.title}}</h4>
-                                <div class="flex justify-content-between mt-2">
-                                    <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
-                                        {{ticket.priority}}
-                                    </span>
-                                    <button pButton icon="pi pi-arrow-right" class="p-button-sm p-button-outlined"
-                                        (click)="updateStatus(ticket, StatusEnum.Closed); $event.stopPropagation();"
-                                        pTooltip="Move to Closed"></button>
-                                </div>
-                            </div>
-                            <div *ngIf="resolvedTickets.length === 0" class="text-center p-3 text-500">
-                                No resolved tickets
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Closed Tickets -->
-                <div class="col-12 md:col-6 lg:col-3">
-                    <div class="surface-card p-3 shadow-2 border-round">
-                        <h3 class="text-center text-primary">Closed ({{closedTickets.length}})</h3>
-                        <div class="ticket-list">
-                            <div *ngFor="let ticket of closedTickets"
-                                class="ticket-card p-3 mb-2 border-round surface-50 cursor-pointer"
-                                [class.selected]="selectedTicket?.id === ticket.id" (click)="selectTicket(ticket)">
-                                <h4 class="m-0">{{ticket.title}}</h4>
-                                <div class="flex justify-content-between mt-2">
-                                    <span class="ticket-priority"
-                                        [ngClass]="'priority-' + ticket.priority.toLowerCase()">
-                                        {{ticket.priority}}
-                                    </span>
-                                </div>
-                            </div>
-                            <div *ngIf="closedTickets.length === 0" class="text-center p-3 text-500">
-                                No closed tickets
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          <div class="detail-content">
+            <div class="detail-field">
+              <label>Title</label>
+              <div class="field-value">{{selectedTicket.title}}</div>
             </div>
-        </div>
 
-        <!-- Ticket Detail Panel -->
-        <div class="col-12 md:col-4">
-            <div class="surface-card p-4 shadow-2 border-round">
-                <div *ngIf="selectedTicket; else noTicketSelected">
-                    <div class="flex justify-content-between align-items-center mb-3">
-                        <h3 class="m-0">Ticket Details</h3>
-                        <button pButton icon="pi pi-times" class="p-button-text" (click)="closeDetails()"></button>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Title</label>
-                        <div>{{selectedTicket.title}}</div>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Description</label>
-                        <div>{{selectedTicket.description}}</div>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Status</label>
-                        <p-dropdown [options]="statusOptions" [(ngModel)]="selectedTicket.status"
-                            (onChange)="updateStatus(selectedTicket, $event.value)" styleClass="w-full"></p-dropdown>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Priority</label>
-                        <p-dropdown [options]="priorityOptions" [(ngModel)]="selectedTicket.priority"
-                            (onChange)="updatePriority(selectedTicket, $event.value)" styleClass="w-full"></p-dropdown>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Category</label>
-                        <div>{{selectedTicket.category}}</div>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Assign To</label>
-
-                        <!-- AI Recommendations Section -->
-                        <div class="mb-2" *ngIf="recommendations && recommendations.length > 0">
-                            <p class="text-sm text-600 mb-2">
-                                <i class="pi pi-star text-yellow-500 mr-1"></i> AI Recommended Assignees:
-                            </p>
-                            <div class="grid">
-                                <div *ngFor="let rec of recommendations.slice(0, 2)" class="col-6">
-                                    <div class="surface-100 p-2 border-round mb-2">
-                                        <div class="flex align-items-center">
-                                            <button pButton pRipple [label]="rec.username"
-                                                [class]="rec.confidenceScore > 70 ? 'p-button-success' : 'p-button-secondary'"
-                                                [style.opacity]="0.4 + (rec.confidenceScore/100)*0.6" icon="pi pi-user"
-                                                class="p-button-sm p-button-text"
-                                                (click)="assignHrRep(selectedTicket, rec.userId)">
-                                            </button>
-                                            <span [pTooltip]="rec.reason" class="ml-auto text-sm text-600">
-                                                {{rec.confidenceScore}}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Loading indicator while getting recommendations -->
-                        <div *ngIf="isLoadingRecommendations" class="mb-2 text-center">
-                            <i class="pi pi-spin pi-spinner mr-2"></i> Getting recommendations...
-                        </div>
-
-                        <!-- Manual assignment dropdown (still available to override) -->
-                        <p-dropdown [options]="hrUsers" [(ngModel)]="selectedTicket.assignedTo" optionLabel="username"
-                            optionValue="id" placeholder="Select HR Representative" styleClass="w-full"
-                            (onChange)="assignHrRep(selectedTicket, $event.value)"></p-dropdown>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Created On</label>
-                        <div>{{selectedTicket.createdAt | date:'medium'}}</div>
-                    </div>
-
-                    <div class="field mb-3">
-                        <label class="font-bold block mb-1">Updated On</label>
-                        <div>{{selectedTicket.updatedAt | date:'medium'}}</div>
-                    </div>
-                </div>
-                <ng-template #noTicketSelected>
-                    <div class="text-center p-5">
-                        <i class="pi pi-ticket text-500" style="font-size: 3rem"></i>
-                        <h3 class="text-500 mt-3">Select a ticket to view details</h3>
-                    </div>
-                </ng-template>
+            <div class="detail-field">
+              <label>Description</label>
+              <div class="field-value description">{{selectedTicket.description}}</div>
             </div>
+
+            <div class="detail-field">
+              <label>Status</label>
+              <p-dropdown 
+                [options]="statusOptions" 
+                [(ngModel)]="selectedTicket.status"
+                (onChange)="updateStatus(selectedTicket, $event.value)" 
+                class="status-dropdown">
+              </p-dropdown>
+            </div>
+
+            <div class="detail-field">
+              <label>Priority</label>
+              <p-dropdown 
+                [options]="priorityOptions" 
+                [(ngModel)]="selectedTicket.priority"
+                (onChange)="updatePriority(selectedTicket, $event.value)" 
+                class="priority-dropdown">
+              </p-dropdown>
+            </div>
+
+            <div class="detail-field">
+              <label>Category</label>
+              <div class="field-value">{{selectedTicket.category}}</div>
+            </div>
+
+            <div class="detail-field">
+              <label>Assign To</label>
+              
+              <!-- AI Recommendations -->
+              <div class="recommendations" *ngIf="recommendations && recommendations.length > 0">
+                <p class="rec-title">
+                  <i class="pi pi-star"></i> AI Recommendations
+                </p>
+                <div class="rec-list">
+                  <div *ngFor="let rec of recommendations.slice(0, 2)" class="rec-item">
+                    <button 
+                      class="rec-btn"
+                      [class.high-confidence]="rec.confidenceScore > 70"
+                      (click)="assignHrRep(selectedTicket, rec.userId)"
+                      [title]="rec.reason">
+                      <i class="pi pi-user"></i>
+                      <span>{{rec.username}}</span>
+                      <span class="confidence">{{rec.confidenceScore}}%</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading -->
+              <div *ngIf="isLoadingRecommendations" class="loading-rec">
+                <i class="pi pi-spin pi-spinner"></i>
+                <span>Getting recommendations...</span>
+              </div>
+
+              <!-- Manual Assignment -->
+              <p-dropdown 
+                [options]="hrUsers" 
+                [(ngModel)]="selectedTicket.assignedTo" 
+                optionLabel="username"
+                optionValue="id" 
+                placeholder="Select HR Representative" 
+                class="assign-dropdown"
+                (onChange)="assignHrRep(selectedTicket, $event.value)">
+              </p-dropdown>
+            </div>
+
+            <div class="detail-field">
+              <label>Created</label>
+              <div class="field-value">{{selectedTicket.createdAt | date:'medium'}}</div>
+            </div>
+
+            <div class="detail-field">
+              <label>Updated</label>
+              <div class="field-value">{{selectedTicket.updatedAt | date:'medium'}}</div>
+            </div>
+          </div>
         </div>
+        
+        <ng-template #noTicketSelected>
+          <div class="no-selection">
+            <i class="pi pi-ticket"></i>
+            <h3>Select a ticket</h3>
+            <p>Click on any ticket to view its details and manage it.</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
-    <!-- Floating Chatbot Toggle Button -->
-<div 
-(click)="showChatbot = !showChatbot"
-style="
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 1000;
-  background-color: #6C63FF;
-  color: white;
-  border: none;
-  padding: 16px 20px;
-  font-size: 16px;
-  border-radius: 50px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-">
-💬 Chat
-</div>
+  </main>
+  <!-- Floating Chat Button -->
+  <button class="chat-toggle" (click)="showChatbot = !showChatbot">
+    <i class="pi pi-comments"></i>
+    <span>Support</span>
+  </button>
 
-<!-- Floating Chatbot iframe -->
-<div 
-*ngIf="showChatbot" 
-style="
-  position: fixed;
-  bottom: 90px;
-  right: 25px;
-  width: 400px;
-  height: 600px;
-  z-index: 999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-">
-<iframe 
-  width="100%" 
-  height="100%" 
-  allow="microphone *" 
-  src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
-  style="border: none;"
-></iframe>
-</div>
+  <!-- Chat Panel -->
+  <div class="chat-panel" [class.open]="showChatbot">
+    <div class="chat-header">
+      <span>HR Support Chat</span>
+      <button class="chat-close" (click)="showChatbot = false">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="chat-content">
+      <iframe 
+        width="100%" 
+        height="100%" 
+        allow="microphone *" 
+        src="https://www.gptbots.ai/widget/eeq5jnc8zz3glsfgnw7t8mq/chat.html"
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
 
+  <!-- Overlay -->
+  <div class="chat-overlay" [class.active]="showChatbot" (click)="showChatbot = false"></div>
 </div>
