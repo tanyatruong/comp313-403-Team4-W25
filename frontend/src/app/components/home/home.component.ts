@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { RouterService } from '../../services/router.service';
 import { TicketService } from '../../services/ticket.service';
@@ -10,6 +10,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Ticket } from '../../data/models/ticket.model';
 import { User } from '../../data/models/user.model';
 import { StatusEnum } from '../../data/enums/StatusEnum';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-home',
@@ -18,11 +19,12 @@ import { StatusEnum } from '../../data/enums/StatusEnum';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   routerService = inject(RouterService);
   ticketService = inject(TicketService);
   userService = inject(UserService);
   authService = inject(AuthService);
+  private chatService = inject(ChatService);
 
   tickets: Ticket[] = [];
   filteredTickets: Ticket[] = [];
@@ -47,6 +49,13 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadUser();
     this.loadTickets();
+    // Connect to socket for presence
+    this.chatService.connect();
+  }
+
+  ngOnDestroy(): void {
+    // Optional: keep connection if navigating around; disconnect if needed
+    // this.chatService.disconnect();
   }
 
   loadUser() {

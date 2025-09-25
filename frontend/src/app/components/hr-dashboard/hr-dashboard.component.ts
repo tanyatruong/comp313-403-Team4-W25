@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PrimengModule } from '../../../primeng.module';
@@ -16,6 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { RecommendationService } from '../../services/recommendation.service';
 import { TooltipModule } from 'primeng/tooltip';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-hr-dashboard',
@@ -30,7 +31,7 @@ import { TooltipModule } from 'primeng/tooltip';
   templateUrl: './hr-dashboard.component.html',
   styleUrls: ['./hr-dashboard.component.css'],
 })
-export class HrDashboardComponent implements OnInit {
+export class HrDashboardComponent implements OnInit, OnDestroy {
   // Add this line to expose StatusEnum to the template
   StatusEnum = StatusEnum;
 
@@ -74,12 +75,20 @@ export class HrDashboardComponent implements OnInit {
     private routerService: RouterService,
     private messageService: MessageService,
     private recommendationService: RecommendationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private chatService: ChatService
   ) {}
 
   ngOnInit(): void {
     this.loadTickets();
     this.loadHrUsers();
+    // Connect socket for presence
+    this.chatService.connect();
+  }
+
+  ngOnDestroy(): void {
+    // Optional disconnect if needed
+    // this.chatService.disconnect();
   }
 
   loadTickets(): void {

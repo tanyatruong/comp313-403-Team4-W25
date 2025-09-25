@@ -1,85 +1,79 @@
-# COMP-313-Group4
+# HoppeR HR Ticketing System (Student README)
 
-# Git Commands
+A simple full‑stack app for HR ticket management with real‑time chat.
 
-> [!WARNING]
-> Please do not develop features in main branch!<br />
-> Please install dependencies/library under client orserver folder you are working on.
+## Tech
+- Backend: Node.js, Express, MongoDB (Mongoose), Socket.IO
+- Frontend: Angular + PrimeNG
 
-## Setting Up
+## Project structure
+- `backend/` Express API, Socket.IO, serves built frontend from `backend/public/`
+- `frontend/` Angular app (built to `frontend/dist/hopper/browser`)
 
-1. **Clone a repository in your local folder (whereever you want)**
-   ```bash
-   git clone URL
-   ```
+## Environment (.env in backend)
+```
+DB_URI=mongodb://localhost:27017/hr-ticketing-system
+PORT=3000
+NODE_ENV=development
+JWT_SECRET=change-me
+JWT_EXPIRES_IN=24h
+```
+(Use your MongoDB Atlas URI for cloud.)
 
-## Development Cycle
+## First time setup
+```
+# Backend deps
+cd backend && npm install
+# Frontend deps
+cd ../frontend && npm install
+```
 
-1. **Check branches**
+## Seed demo data (users/tickets)
+```
+cd backend
+node utils/seed.js
+```
 
-   ```bash
-   git branch
-   ```
+## Run locally (two terminals)
+- API + static site (prod build):
+```
+cd backend
+npm run build:frontend && npm run copy:frontend
+npm start
+# opens http://localhost:3000
+```
+- Angular dev (hot reload):
+```
+cd frontend
+npm start
+# opens http://localhost:4200
+```
+Note: port 4200 is the dev server; port 3000 serves the built app.
 
-2. **Switch branch to "main"**
+## Real‑time chat
+- Works with Socket.IO after login.
+- Presence shows when both users have a page open.
+- Employee chat icon (bottom‑left) lists online HR; HR chat lists online employees.
 
-   ```bash
-   git checkout main
-   ```
+## Demo logins
+- HR: `EMP002 / 1234`
+- Employee: `EMP007 / 1234`
+(From seed script.)
 
-3. **Pull latest changes into your local "main" repository**
+## Build + copy (when UI changes)
+```
+cd backend
+npm run build:frontend && npm run copy:frontend
+```
 
-   ```bash
-   git pull origin main
-   ```
+## Deploy (Render)
+- Root has scripts Render can use:
+  - Build: `npm run build` (builds frontend, copies to backend/public)
+  - Start: `npm start` (runs backend/server.js)
+- Set env vars in Render: `DB_URI`, `JWT_SECRET`, `NODE_VERSION=18`.
 
-> [!NOTE]
-> you should install dependencies every time in case someone add a new dependency.<br>
-> Do "npm install" **under** frontend and backend folders.<br>
+## Troubleshooting
+- Port busy: `lsof -ti:3000 | xargs kill -9` (same for 4200)
+- If chat presence doesn’t show: make sure you are logged in on both sides and pages stay open.
 
-
-4. **Create a new branch**
-
-   ```bash
-   git checkout -b NEW_BRANCH_NAME
-   ```
-
-5. **Switch branches**
-
-   ```bash
-   git checkout BRANCH_NAME
-   ```
-
-6. **Development**
-
-   ```bash
-   Please develop the feature.
-   ```
-
-7. **Check status**
-
-   ```bash
-   git status
-   ```
-
-8. **Add changes**
-
-   ```bash
-   git add .
-   ```
-
-9. **Commit changes**
-
-   ```bash
-   git commit -m "Your descriptive commit message here"
-   ```
-
-10. **Push changes to the remote branch**
-    ```bash
-    git push origin BRANCH_NAME
-    ```
-11. **Go to the Github page -> Switch branch to your working branch -> Go to Pull Requests**
-
-12. **Make a pull request (by clicking "Compare & pull requests") -> Write descriptions and Click "Create pull request"**
-
-13. **Click "Merge pull request" -> Confirm merge -> Delete your branch**
+Enjoy! 🙂
