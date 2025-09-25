@@ -9,12 +9,12 @@ const router = express.Router();
 // 	res.json({ message: "User routes implemented" });
 // });
 
+// New route to get HR users (must come before /:id)
+router.get("/hr", protect, getHrUsers);
+
 // Get user by ID
 router.get("/:id", protect, getUser);
 // Update user
 router.put("/:id", updateUser);
-
-// New route to get HR users
-router.get("/hr", protect, getHrUsers);
 
 export default router;

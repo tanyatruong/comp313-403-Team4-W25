@@ -96,3 +96,34 @@ export const login = async (req, res) => {
 		res.status(500).json(response);
 	}
 };
+
+export const logout = async (req, res) => {
+	const startTime = Date.now();
+	logger.request(req);
+
+	try {
+		// Clear the JWT cookie
+		res.clearCookie("jwt", {
+			httpOnly: true,
+			secure: false,
+			sameSite: "lax"
+		});
+
+		logger.info("User logged out successfully");
+
+		const response = {
+			message: "Logout successful"
+		};
+
+		logger.response(200, response, Date.now() - startTime);
+		res.status(200).json(response);
+	} catch (error) {
+		logger.error("Error during logout process", error);
+		const response = {
+			message: "Error logging out",
+			error: error.message,
+		};
+		logger.response(500, response, Date.now() - startTime);
+		res.status(500).json(response);
+	}
+};
