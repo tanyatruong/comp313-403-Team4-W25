@@ -231,11 +231,7 @@ async function broadcastActiveUsers() {
 	}
   }
 
-// Basic route for testing
-app.get("/", (req, res) => {
-  logger.info("Base route accessed");
-  res.send("HR Ticketing System API is running");
-});
+// Basic route for testing - removed to allow frontend to be served
 
 
 
